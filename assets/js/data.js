@@ -53,11 +53,6 @@
       desc: "Sheet after sheet of thin pastry layered with spiced plant-based ground beef and onion, brushed with ghee and baked golden.",
       tags: ["Plant-Based", "Tray"], img: U + "1617806501736-fc7cab7c05bf" + Q },
 
-    { id: "crepe-beef", cat: "mains", name: "Crepe with Ground Beef & Mozzarella", ar: "كريب باللحمة والموتزاريلا",
-      price: 13,
-      desc: "A soft crepe rolled around seasoned ground beef and mozzarella, griddled until the cheese pulls.",
-      tags: [], img: U + "1776820620219-c5079240a997" + Q },
-
     { id: "kofta-tray", cat: "mains", name: "Plant-Based Kofta Tray with Salsa & Rice", ar: "صينية كفتة بالصلصة والأرز",
       price: 35,
       desc: "Hand-shaped plant-based kofta baked in a rich tomato salsa with onion and garlic, served over a bed of Egyptian rice. Feeds a table.",
@@ -84,16 +79,6 @@
       price: 11, featured: true,
       desc: "A palm-sized feteer with all its layers intact, finished with Nutella or pistachio sauce. Choose when you order.",
       tags: ["Vegetarian"], img: U + "1669630367800-b2c3ae70528e" + Q },
-
-    { id: "crepe-nutella", cat: "desserts", name: "Crepe with Nutella", ar: "كريب بالنوتيلا",
-      price: 9,
-      desc: "Warm crepe folded over Nutella until it melts through.",
-      tags: ["Vegetarian"], img: U + "1723029343498-b061d6594a42" + Q },
-
-    { id: "crepe-pistachio", cat: "desserts", name: "Crepe with Pistachio Sauce", ar: "كريب بالفستق",
-      price: 10,
-      desc: "The same warm crepe with a thick pistachio cream, dusted with crushed pistachio.",
-      tags: ["Vegetarian", "Contains Nuts"], img: U + "1777891258086-52a41e4477f6" + Q },
 
     { id: "round-cake", cat: "desserts", name: "Small Round Cake", ar: "كيكة صغيرة",
       price: 12,
@@ -148,7 +133,7 @@
     { cat: "Feteer",  title: "Layers, pulled apart hot",        img: U + "1759302307381-bdccf7b35e5d" + QL },
     { cat: "Kitchen", title: "Stretching the dough",            img: U + "1754394483922-4d3a10cc6187" + QL },
     { cat: "Sweet",   title: "Goulash with nuts",               img: U + "1640040520679-2ace58742f22" + QL },
-    { cat: "Sweet",   title: "Crepes, folded warm",             img: U + "1710024893493-1f2bd381f47c" + QL },
+    { cat: "Sweet",   title: "Mini feteer, Nutella or pistachio", img: U + "1669630367800-b2c3ae70528e" + QL },
     { cat: "Trays",   title: "Macarona béchamel",               img: U + "1620041631703-45ddcef3dae0" + QL },
     { cat: "Kitchen", title: "Hands that know the dough",       img: U + "1777315387799-eba7be5422b2" + QL },
     { cat: "Kitchen", title: "Out of the oven",                 img: U + "1777315388484-f999eb67d74c" + QL },
