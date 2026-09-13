@@ -332,33 +332,93 @@
       "</div>";
   }
 
-  function openAddons(item) {
-    var box = $("[data-addon]");
-    if (!box) return;
-    var list = $("[data-addon-list]", box);
-    var lead = $("[data-addon-lead]", box);
-    var cat = D.CATEGORIES.filter(function (c) { return c.id === item.suggest; })[0];
-    var extras = D.MENU.filter(function (m) { return m.cat === item.suggest && m.id !== item.id; });
-    if (!extras.length) return;
+  /* opts: { category, exclude, eyebrow, title, lead, skip, done, onContinue }
+     "skip" and "done" are the two button labels; both close the dialog and
+     run onContinue (if any). The ✕, backdrop and Escape close without it. */
+  var addonContinue = null;
 
-    lead.textContent = item.name + " is best torn open and eaten with these. Add any you like, or skip — it is entirely up to you.";
+  function showAddons(opts) {
+    var box = $("[data-addon]");
+    if (!box) return false;
+    var extras = D.MENU.filter(function (m) { return m.cat === opts.category && m.id !== opts.exclude; });
+    if (!extras.length) return false;
+
+    $("[data-addon-eyebrow]", box).textContent = opts.eyebrow;
+    $("[data-addon-title]", box).textContent = opts.title;
+    $("[data-addon-lead]", box).textContent = opts.lead;
+    $("[data-addon-skip]", box).textContent = opts.skip;
+    $("[data-addon-done]", box).textContent = opts.done;
+    var list = $("[data-addon-list]", box);
     list.innerHTML = extras.map(addonRow).join("");
     hydrateImages(list);
+    addonContinue = opts.onContinue || null;
 
-    addonLastFocus = document.activeElement;
-    box.classList.add("is-open");
-    box.setAttribute("aria-hidden", "false");
-    document.body.classList.add("nav-open");
+    if (!box.classList.contains("is-open")) {
+      addonLastFocus = document.activeElement;
+      box.classList.add("is-open");
+      box.setAttribute("aria-hidden", "false");
+      document.body.classList.add("nav-open");
+    }
+    $(".addon__panel", box).scrollTop = 0;
     $(".addon__close", box).focus();
+    return true;
   }
 
-  function closeAddons() {
+  function openAddons(item) {
+    showAddons({
+      category: item.suggest, exclude: item.id,
+      eyebrow: "Optional",
+      title: "Anything on the side?",
+      lead: item.name + " is best torn open and eaten with these. Add any you like, or skip — it is entirely up to you.",
+      skip: "No thanks", done: "Done"
+    });
+  }
+
+  function closeAddons(proceed) {
     var box = $("[data-addon]");
     if (!box || !box.classList.contains("is-open")) return;
+    var next = addonContinue;
+    addonContinue = null;
     box.classList.remove("is-open");
     box.setAttribute("aria-hidden", "true");
     document.body.classList.remove("nav-open");
     if (addonLastFocus && addonLastFocus.focus) addonLastFocus.focus();
+    if (proceed && next) next();
+  }
+
+  /* Before the order is sent: a last nudge for each category the customer
+     skipped. Each step only appears when nothing from that category is in
+     the basket, and either button carries on to the next step. */
+  var CHECKOUT_NUDGES = [
+    { category: "sides",
+      eyebrow: "Before you send",
+      title: "Sure you don’t want any sides?",
+      lead: "Egyptians never eat feteer without something next to it. Are you sure you don’t want to add one of these delicious sides?" },
+    { category: "desserts",
+      eyebrow: "One last thing",
+      title: "Nothing sweet to finish?",
+      lead: "Are you sure you don’t want to add one of our desserts? They travel well and are cut to order." }
+  ];
+
+  function basketHasCategory(cat) {
+    return Object.keys(basket).some(function (id) {
+      var item = D.MENU.filter(function (m) { return m.id === id; })[0];
+      return item && item.cat === cat;
+    });
+  }
+
+  function runCheckoutNudges(then) {
+    var pending = CHECKOUT_NUDGES.filter(function (n) { return !basketHasCategory(n.category); });
+    (function step() {
+      var nudge = pending.shift();
+      if (!nudge) { then(); return; }
+      var shown = showAddons({
+        category: nudge.category, eyebrow: nudge.eyebrow, title: nudge.title, lead: nudge.lead,
+        skip: "No thanks", done: "Continue to WhatsApp",
+        onContinue: step
+      });
+      if (!shown) step();
+    })();
   }
 
   /* Keep the open prompt's quantities in step with the basket. */
@@ -377,10 +437,11 @@
     var box = $("[data-addon]");
     if (!box) return;
     box.addEventListener("click", function (e) {
-      if (e.target === box || e.target.closest("[data-addon-close]")) closeAddons();
+      if (e.target.closest("[data-addon-continue]")) closeAddons(true);
+      else if (e.target === box || e.target.closest("[data-addon-close]")) closeAddons(false);
     });
     document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") closeAddons();
+      if (e.key === "Escape") closeAddons(false);
     });
   }
 
@@ -696,7 +757,7 @@
       if (checkout) { submitOrder(checkout); return; }
 
       var retry = e.target.closest("[data-checkout-retry]");
-      if (retry) { var b = $("[data-checkout]"); if (b) submitOrder(b); }
+      if (retry) { var b = $("[data-checkout]"); if (b) submitOrder(b, true); }
     });
   }
 
@@ -881,11 +942,10 @@
     if (box) box.hidden = !msg;
   }
 
-  function submitOrder(btn) {
+  function submitOrder(btn, skipNudges) {
     if (submitting) return;                    /* double-click guard */
     if (!Object.keys(basket).length) return;
-    var order = buildOrder();
-    if (!customerComplete(order.customer)) {
+    if (!customerComplete(readCustomer())) {
       toast("Please fill in your name, phone and delivery address first.");
       updateCheckoutState();
       return;
@@ -893,6 +953,11 @@
     var number = C.orderWhatsappNumber || C.whatsappNumber;
     if (!number) { toast("Ordering is not connected yet — please call us."); return; }
     showCheckoutError("");
+
+    /* Last chance to add sides / desserts. The basket is rebuilt afterwards
+       so anything added in the dialog is part of the order. */
+    if (!skipNudges) { runCheckoutNudges(function () { submitOrder(btn, true); }); return; }
+    var order = buildOrder();
 
     /* No finance endpoint configured: WhatsApp only (previous behaviour). */
     if (!C.financeOrderEndpoint) { openWhatsApp(order, number); return; }

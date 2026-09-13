@@ -104,22 +104,22 @@
 
     /* ---------------- ON THE SIDE ---------------- */
     { id: "white-cheese", cat: "sides", name: "Egyptian White Cheese", ar: "جبنة بيضاء",
-      price: 5, special: true, featured: true,
+      price: 2.99, special: true, featured: true,
       desc: "Salty, crumbling domiati — the thing every Egyptian reaches for the moment the feteer is torn open.",
       tags: ["House Special", "Vegetarian"], img: U + "1559561853-08451507cbe7" + Q },
 
     { id: "black-honey", cat: "sides", name: "Black Honey", ar: "عسل أسود",
-      price: 5,
+      price: 2.49,
       desc: "Sugarcane molasses, dark and mineral. The oldest sweet in the country, and the right partner for plain feteer.",
       tags: ["Vegan"], img: U + "1779120708355-7a41581b4584" + Q },
 
     { id: "white-honey", cat: "sides", name: "White Honey", ar: "عسل أبيض",
-      price: 5,
+      price: 2.49,
       desc: "Clear wildflower honey, poured cold over hot layers so it runs straight through.",
       tags: ["Vegetarian"], img: U + "1558642452-9d2a7deb7f62" + Q },
 
     { id: "tahini", cat: "sides", name: "Tahini", ar: "طحينة",
-      price: 5,
+      price: 2.49,
       desc: "Stone-ground sesame, loosened with lemon. Best stirred into the black honey until the two go pale.",
       tags: ["Vegan"], img: U + "1747932984398-dd52d84886d6" + Q },
 
