@@ -623,7 +623,7 @@
     var address = [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
     var count = order.items.reduce(function (n, l) { return n + l.qty; }, 0);
 
-    var head = ["🔔👑✨ *NEW PHARAOH’S BITES ORDER* ✨👑🔔", "🇪🇬🥐 *طلب جديد من فرعونز بايتس* 🥐🇪🇬"];
+    var head = ["🔔👑✨ *NEW PHARAOH’S BITES ORDER* ✨👑🔔"];
     if (order.orderNumber) head.push("", "🔖 Order No: *" + order.orderNumber + "* 🆕");
     head.push("🕒 Placed: " + formatRequested(order.placedAt) + " ⏰");
 
@@ -663,10 +663,7 @@
       waSection("🛒", "ORDER ITEMS  |  الأصناف"), "",
       items.join(nl + WA_THIN + nl), "",
       totals.join(nl), "",
-      WA_RULE,
-      "💳 *Payment:* Zelle 💜 or Venmo 💙 — arranged after the delivery fee and final total are confirmed.",
-      "🙏 Please confirm my order and delivery fee. Thank you! 😊🍴",
-      "🙏 من فضلكم أكدوا الطلب ورسوم التوصيل. شكراً 😊🍴"
+      WA_RULE
     ].join(nl);
   }
 
