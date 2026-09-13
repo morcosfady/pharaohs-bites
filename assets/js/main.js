@@ -590,7 +590,7 @@
     var lines = Object.keys(basket).map(function (id) {
       var item = D.MENU.filter(function (m) { return m.id === id; })[0];
       if (!item) return null;
-      return { id: id, name: item.name, qty: basket[id], options: "", unitPrice: item.price, lineTotal: item.price * basket[id] };
+      return { id: id, name: item.name, ar: item.ar || "", qty: basket[id], options: "", unitPrice: item.price, lineTotal: item.price * basket[id] };
     }).filter(Boolean);
 
     var subtotal = lines.reduce(function (sum, l) { return sum + l.lineTotal; }, 0);
@@ -605,39 +605,68 @@
   }
 
   /* The WhatsApp message. Delivery is confirmed by the kitchen from the
-     address, so only the subtotal is quoted here. */
+     address, so only the subtotal is quoted here.
+
+     WhatsApp has no colours, so coloured circle emoji do that job; *text*
+     is bold and _text_ is italic once it lands in the chat. Every item is
+     listed in English and Arabic. */
+  var WA_RULE  = "━━━━━━━━━━━━━━━━━━━━";
+  var WA_THIN  = "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈";
+  var WA_DOTS  = ["🟢", "🟡", "🔵", "🟣", "🟠", "🔴", "🟤", "⚪"];
+  function waSection(icon, title) {
+    return [WA_RULE, icon + " *" + title + "*", WA_RULE].join("\n");
+  }
+
   function orderAsText(order) {
     var nl = "\n";
     var c = order.customer || {};
     var address = [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
+    var count = order.items.reduce(function (n, l) { return n + l.qty; }, 0);
 
-    var head = ["👑✨ NEW PHARAOH’S BITES ORDER ✨👑"];
-    if (order.orderNumber) head.push("🔖 Order Number: " + order.orderNumber);
+    var head = ["👑✨ *NEW PHARAOH’S BITES ORDER* ✨👑", "🇪🇬 *طلب جديد من فرعونز بايتس* 🇪🇬"];
+    if (order.orderNumber) head.push("", "🔖 Order No: *" + order.orderNumber + "*");
+    head.push("🕒 Placed: " + formatRequested(order.placedAt));
 
-    var cust = ["👤 CUSTOMER", "🖊️ Name: " + c.name];
-    if (c.phone) cust.push("📞 Phone: " + c.phone);
-    cust.push("📍 Address: " + address);
-    if (c.instructions) cust.push("📝 Delivery Instructions: " + c.instructions);
+    var cust = [waSection("👤", "CUSTOMER DETAILS  |  بيانات العميل"), "", "1️⃣ 🖊️ *Name:* " + c.name];
+    if (c.phone) cust.push("2️⃣ 📞 *Phone:* " + c.phone);
+    cust.push("3️⃣ 📍 *Address:* " + address);
+    if (c.instructions) cust.push("4️⃣ 📝 *Instructions:* _" + c.instructions + "_");
+    if (c.requested_at) cust.push("🗓️ *Requested for:* " + formatRequested(c.requested_at));
 
     var items = order.items.map(function (l, i) {
-      var rows = ["🍽️ " + (i + 1) + ". " + l.name, "🔢 Quantity: " + l.qty];
-      if (l.options) rows.push("⚙️ Options: " + l.options);
-      rows.push("💵 Unit Price: " + money(l.unitPrice), "🧾 Line Total: " + money(l.lineTotal));
+      var dot = WA_DOTS[i % WA_DOTS.length];
+      var rows = [
+        dot + " *" + (i + 1) + ". " + l.name + "*",
+        "     🇪🇬 " + l.ar,
+        "     🔢 Qty: *× " + l.qty + "*"
+      ];
+      if (l.options) rows.push("     ⚙️ Options: _" + l.options + "_");
+      rows.push(
+        "     💵 Unit: " + money(l.unitPrice),
+        "     🧾 Line Total: *" + money(l.lineTotal) + "*"
+      );
       return rows.join(nl);
     });
 
     var totals = [
-      "💰 Merchandise Subtotal: " + money(order.subtotal),
-      "🚗 Delivery Fee: To be determined",
-      "🧮 Estimated Tax: To be confirmed",
-      "✅ Final Total: To be confirmed"
+      waSection("💰", "ORDER SUMMARY  |  ملخص الطلب"), "",
+      "🧺 Dishes: *" + order.items.length + "*   ·   Total Qty: *" + count + "*",
+      "🧮 Subtotal: *" + money(order.subtotal) + "*",
+      "🚗 Delivery Fee: _To be determined_",
+      "🏛️ Tax: _To be confirmed_",
+      "✅ *FINAL TOTAL:* _To be confirmed_"
     ];
-    if (c.requested_at) totals.push("🗓️ Requested Date/Time: " + formatRequested(c.requested_at));
 
     return [
-      head.join(nl), "", cust.join(nl), "", "🛒 ORDER", "", items.join(nl + nl), "", totals.join(nl), "",
-      "💳 Payment method will be arranged through Zelle or Venmo after the delivery fee and final total are confirmed.",
-      "🙏 Please confirm my order and delivery fee. Thank you! 😊"
+      head.join(nl), "",
+      cust.join(nl), "",
+      waSection("🛒", "ORDER ITEMS  |  الأصناف"), "",
+      items.join(nl + WA_THIN + nl), "",
+      totals.join(nl), "",
+      WA_RULE,
+      "💳 *Payment:* Zelle or Venmo, arranged after the delivery fee and final total are confirmed.",
+      "🙏 Please confirm my order and delivery fee. Thank you! 😊",
+      "🙏 من فضلكم أكدوا الطلب ورسوم التوصيل. شكراً 😊"
     ].join(nl);
   }
 
