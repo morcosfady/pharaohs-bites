@@ -125,7 +125,12 @@
     { id: "protein-shake", cat: "drinks", name: "House Special Protein Shake", ar: "مشروب البروتين",
       price: 9, special: true, featured: true,
       desc: "Twenty-five grams of protein, blended thick and cold. Our own recipe — nothing about it tastes like a supplement.",
-      tags: ["House Special", "25g Protein"], img: U + "1542444592-0d5997f202eb" + Q }
+      tags: ["House Special", "25g Protein"], img: U + "1542444592-0d5997f202eb" + Q },
+
+    { id: "avocado-drink", cat: "drinks", name: "Avocado Shake with Nuts", ar: "عصير أفوكادو بالمكسرات",
+      price: 8,
+      desc: "Ripe avocado blended with cold milk until it's thick and smooth, topped with crushed nuts.",
+      tags: ["Vegetarian", "Contains Nuts"], img: U + "1693042442021-41423615ce89" + Q }
   ];
 
   /* Gallery ----------------------------------------------------------- */
