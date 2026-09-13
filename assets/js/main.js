@@ -614,7 +614,7 @@
   var WA_THIN  = "┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈┈";
   var WA_DOTS  = ["🟢", "🟡", "🔵", "🟣", "🟠", "🔴", "🟤", "⚪"];
   function waSection(icon, title) {
-    return [WA_RULE, icon + " *" + title + "*", WA_RULE].join("\n");
+    return [WA_RULE, icon + " *" + title + "* " + icon, WA_RULE].join("\n");
   }
 
   function orderAsText(order) {
@@ -623,38 +623,38 @@
     var address = [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
     var count = order.items.reduce(function (n, l) { return n + l.qty; }, 0);
 
-    var head = ["👑✨ *NEW PHARAOH’S BITES ORDER* ✨👑", "🇪🇬 *طلب جديد من فرعونز بايتس* 🇪🇬"];
-    if (order.orderNumber) head.push("", "🔖 Order No: *" + order.orderNumber + "*");
-    head.push("🕒 Placed: " + formatRequested(order.placedAt));
+    var head = ["🔔👑✨ *NEW PHARAOH’S BITES ORDER* ✨👑🔔", "🇪🇬🥐 *طلب جديد من فرعونز بايتس* 🥐🇪🇬"];
+    if (order.orderNumber) head.push("", "🔖 Order No: *" + order.orderNumber + "* 🆕");
+    head.push("🕒 Placed: " + formatRequested(order.placedAt) + " ⏰");
 
-    var cust = [waSection("👤", "CUSTOMER DETAILS  |  بيانات العميل"), "", "1️⃣ 🖊️ *Name:* " + c.name];
-    if (c.phone) cust.push("2️⃣ 📞 *Phone:* " + c.phone);
-    cust.push("3️⃣ 📍 *Address:* " + address);
+    var cust = [waSection("👤", "CUSTOMER DETAILS  |  بيانات العميل"), "", "1️⃣ 🙋 *Name:* " + c.name];
+    if (c.phone) cust.push("2️⃣ 📱 *Phone:* " + c.phone);
+    cust.push("3️⃣ 🏠 *Address:* " + address);
     if (c.instructions) cust.push("4️⃣ 📝 *Instructions:* _" + c.instructions + "_");
-    if (c.requested_at) cust.push("🗓️ *Requested for:* " + formatRequested(c.requested_at));
+    if (c.requested_at) cust.push("5️⃣ 🗓️ *Requested for:* " + formatRequested(c.requested_at));
 
     var items = order.items.map(function (l, i) {
       var dot = WA_DOTS[i % WA_DOTS.length];
       var rows = [
-        dot + " *" + (i + 1) + ". " + l.name + "*",
-        "     🇪🇬 " + l.ar,
+        dot + " 🍽️ *" + (i + 1) + ". " + l.name + "*",
+        "‎     🇪🇬 " + l.ar,                       /* LRM keeps the Arabic line indented on the left */
         "     🔢 Qty: *× " + l.qty + "*"
       ];
       if (l.options) rows.push("     ⚙️ Options: _" + l.options + "_");
       rows.push(
         "     💵 Unit: " + money(l.unitPrice),
-        "     🧾 Line Total: *" + money(l.lineTotal) + "*"
+        "     🧾 Line Total: *" + money(l.lineTotal) + "* 💲"
       );
       return rows.join(nl);
     });
 
     var totals = [
       waSection("💰", "ORDER SUMMARY  |  ملخص الطلب"), "",
-      "🧺 Dishes: *" + order.items.length + "*   ·   Total Qty: *" + count + "*",
-      "🧮 Subtotal: *" + money(order.subtotal) + "*",
-      "🚗 Delivery Fee: _To be determined_",
-      "🏛️ Tax: _To be confirmed_",
-      "✅ *FINAL TOTAL:* _To be confirmed_"
+      "🧺 Dishes: *" + order.items.length + "*   🔢 Total Qty: *" + count + "*",
+      "🧮 Subtotal: *" + money(order.subtotal) + "* 💵",
+      "🚗 Delivery Fee: _To be determined_ ⏳",
+      "🏛️ Tax: _To be confirmed_ ⏳",
+      "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
     ];
 
     return [
@@ -664,9 +664,9 @@
       items.join(nl + WA_THIN + nl), "",
       totals.join(nl), "",
       WA_RULE,
-      "💳 *Payment:* Zelle or Venmo, arranged after the delivery fee and final total are confirmed.",
-      "🙏 Please confirm my order and delivery fee. Thank you! 😊",
-      "🙏 من فضلكم أكدوا الطلب ورسوم التوصيل. شكراً 😊"
+      "💳 *Payment:* Zelle 💜 or Venmo 💙 — arranged after the delivery fee and final total are confirmed.",
+      "🙏 Please confirm my order and delivery fee. Thank you! 😊🍴",
+      "🙏 من فضلكم أكدوا الطلب ورسوم التوصيل. شكراً 😊🍴"
     ].join(nl);
   }
 
@@ -733,8 +733,19 @@
 
   var submitting = false;
 
+  /* Phones go through wa.me, which opens the WhatsApp app. Desktop browsers
+     go straight to WhatsApp Web: wa.me would hand the text to the Windows
+     desktop app, which corrupts every emoji into "�" before sending. */
+  function whatsappUrl(number, text) {
+    var mobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    var encoded = encodeURIComponent(text);
+    return mobile
+      ? "https://wa.me/" + number + "?text=" + encoded
+      : "https://web.whatsapp.com/send?phone=" + number + "&text=" + encoded;
+  }
+
   function openWhatsApp(order, number) {
-    var url = "https://wa.me/" + number + "?text=" + encodeURIComponent(orderAsText(order));
+    var url = whatsappUrl(number, orderAsText(order));
     var win = window.open(url, "_blank", "noopener");
     if (!win) window.location.href = url;   /* popup blocked: same tab */
     toast("Opening WhatsApp with your order…");
