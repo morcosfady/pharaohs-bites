@@ -12,6 +12,8 @@
      desc     one or two sentences
      tags     rendered as pills; vegan/vegetarian turn green, special turns gold
      img      PLACEHOLDER photography. Swap these for the real photos.
+     suggest  optional category id. Adding this dish on the order page opens
+              a prompt offering everything in that category as an add-on.
    ========================================================================== */
 (function (global) {
   "use strict";
@@ -34,7 +36,7 @@
 
     /* ---------------- THE MAIN TABLE ---------------- */
     { id: "feteer-meshaltet", cat: "mains", name: "Feteer Meshaltet", ar: "فطير مشلتت",
-      price: 25, special: true, featured: true,
+      price: 25, special: true, featured: true, suggest: "sides",
       desc: "The original. Paper-thin dough stretched by hand, folded again and again with ghee between every layer, then baked until the top shatters.",
       tags: ["House Special", "Vegetarian"], img: U + "1787690376659-e5e7cd2ae452" + Q },
 

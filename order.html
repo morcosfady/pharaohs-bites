@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/main.css?v=28">
-<link rel="stylesheet" href="assets/css/pages.css?v=28">
-<link rel="stylesheet" href="assets/css/pharaonic.css?v=28">
+<link rel="stylesheet" href="assets/css/main.css?v=29">
+<link rel="stylesheet" href="assets/css/pages.css?v=29">
+<link rel="stylesheet" href="assets/css/pharaonic.css?v=29">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -233,6 +233,28 @@
   </section>
 </main>
 
+<!-- Floating basket: appears once something is added and the review panel has scrolled out of view -->
+<a class="basket-fab basket-fab--order" href="#basket" data-basket-fab data-basket-jump hidden>
+  <svg class="basket-fab__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9h18l-1.6 9.2a2 2 0 0 1-2 1.8H6.6a2 2 0 0 1-2-1.8L3 9zm4.5 0L10 3.5M16.5 9L14 3.5M9 13v3M12 13v3M15 13v3"/></svg>
+  <span class="basket-fab__n" data-basket-count>0</span>
+  <b>Review your order</b>
+</a>
+
+<!-- Optional add-ons prompt, opened by dishes that carry a `suggest` category -->
+<div class="addon" data-addon role="dialog" aria-modal="true" aria-labelledby="addon-title" aria-hidden="true">
+  <div class="addon__panel">
+    <button class="lb-btn addon__close" type="button" data-addon-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <p class="eyebrow">Optional</p>
+    <h2 id="addon-title" class="addon__title">Anything on the side?</h2>
+    <p class="addon__lead" data-addon-lead></p>
+    <div class="addon__list" data-addon-list></div>
+    <div class="addon__actions">
+      <button class="btn btn--ghost btn--sm" type="button" data-addon-close>No thanks</button>
+      <button class="btn btn--gold btn--sm" type="button" data-addon-close>Done</button>
+    </div>
+  </div>
+</div>
+
 <button class="to-top" type="button" aria-label="Back to top"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
 
 <footer class="site-footer">
@@ -282,8 +304,8 @@
   </div>
 </footer>
 
-<script src="assets/js/config.js?v=28"></script>
-<script src="assets/js/data.js?v=28"></script>
-<script src="assets/js/main.js?v=28" defer></script>
+<script src="assets/js/config.js?v=29"></script>
+<script src="assets/js/data.js?v=29"></script>
+<script src="assets/js/main.js?v=29" defer></script>
 </body>
 </html>

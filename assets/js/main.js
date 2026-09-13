@@ -255,6 +255,9 @@
     toast(name + " added to your order");
     renderBasket();
     syncBasketBadge();
+    /* First time this dish goes in: offer its add-ons (e.g. sides for feteer). */
+    var item = D.MENU.filter(function (m) { return m.id === id; })[0];
+    if (item && item.suggest && basket[id] === 1) openAddons(item);
   }
   function setQty(id, qty) {
     if (qty <= 0) delete basket[id]; else basket[id] = qty;
@@ -262,10 +265,123 @@
     renderBasket();
     syncBasketBadge();
   }
+
+  /* The floating pill on the order page only shows while the review panel
+     itself is off screen — on wide screens the panel is sticky and always
+     visible, so the pill never appears there. */
+  var basketPanelInView = false;
+  var lastBadgeCount = -1;
   function syncBasketBadge() {
     var n = basketCount();
+    var changed = lastBadgeCount !== -1 && n !== lastBadgeCount;
+    lastBadgeCount = n;
     $$("[data-basket-count]").forEach(function (el) { el.textContent = n ? String(n) : "0"; });
-    $$("[data-basket-fab]").forEach(function (el) { el.hidden = n === 0; });
+    $$("[data-basket-fab]").forEach(function (el) {
+      var jump = el.hasAttribute("data-basket-jump");
+      el.hidden = n === 0 || (jump && basketPanelInView);
+      if (jump && changed && !el.hidden) {
+        el.classList.remove("is-bump");
+        void el.offsetWidth;                       /* restart the animation */
+        el.classList.add("is-bump");
+      }
+    });
+  }
+
+  function initBasketFab() {
+    var fab = $("[data-basket-jump]");
+    var panel = $("#basket");
+    if (!fab || !panel) return;
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (entries) {
+        basketPanelInView = entries[0].isIntersecting;
+        syncBasketBadge();
+      }, { threshold: 0.15 }).observe(panel);
+    }
+
+    fab.addEventListener("click", function (e) {
+      e.preventDefault();
+      panel.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      var first = $("[data-basket-list] button", panel) || $("[data-checkout-form] input", panel);
+      if (first) setTimeout(function () { first.focus({ preventScroll: true }); }, reduceMotion ? 0 : 500);
+    });
+  }
+
+  /* --- Add-ons prompt ---------------------------------------------------
+     Opened by addToBasket() for dishes with a `suggest` category. Rows use
+     the same [data-add] / [data-qty] buttons as the rest of the page, so the
+     global click handler does the work; renderBasket() keeps the rows in
+     step with the basket. */
+  var addonLastFocus = null;
+
+  function addonRow(item) {
+    var qty = basket[item.id] || 0;
+    return '' +
+      '<div class="addon-item' + (qty ? " is-added" : "") + '" data-addon-item="' + esc(item.id) + '">' +
+        '<div class="media"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="58" height="58"></div>' +
+        '<div><div class="addon-item__name">' + esc(item.name) + ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></div>" +
+          '<span class="addon-item__price">' + money(item.price) + "</span></div>" +
+        '<div class="addon-item__side">' +
+          '<div class="qty" aria-label="Quantity">' +
+            '<button type="button" data-qty="-1" data-id="' + esc(item.id) + '" aria-label="Reduce quantity of ' + esc(item.name) + '">&minus;</button>' +
+            "<output>" + qty + "</output>" +
+            '<button type="button" data-qty="1" data-id="' + esc(item.id) + '" aria-label="Increase quantity of ' + esc(item.name) + '">+</button>' +
+          "</div>" +
+          '<button class="btn btn--sm btn--gold" type="button" data-add="' + esc(item.id) + '" data-name="' + esc(item.name) + '">Add</button>' +
+        "</div>" +
+      "</div>";
+  }
+
+  function openAddons(item) {
+    var box = $("[data-addon]");
+    if (!box) return;
+    var list = $("[data-addon-list]", box);
+    var lead = $("[data-addon-lead]", box);
+    var cat = D.CATEGORIES.filter(function (c) { return c.id === item.suggest; })[0];
+    var extras = D.MENU.filter(function (m) { return m.cat === item.suggest && m.id !== item.id; });
+    if (!extras.length) return;
+
+    lead.textContent = item.name + " is best torn open and eaten with these. Add any you like, or skip — it is entirely up to you.";
+    list.innerHTML = extras.map(addonRow).join("");
+    hydrateImages(list);
+
+    addonLastFocus = document.activeElement;
+    box.classList.add("is-open");
+    box.setAttribute("aria-hidden", "false");
+    document.body.classList.add("nav-open");
+    $(".addon__close", box).focus();
+  }
+
+  function closeAddons() {
+    var box = $("[data-addon]");
+    if (!box || !box.classList.contains("is-open")) return;
+    box.classList.remove("is-open");
+    box.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("nav-open");
+    if (addonLastFocus && addonLastFocus.focus) addonLastFocus.focus();
+  }
+
+  /* Keep the open prompt's quantities in step with the basket. */
+  function syncAddons() {
+    var box = $("[data-addon]");
+    if (!box || !box.classList.contains("is-open")) return;
+    $$("[data-addon-item]", box).forEach(function (row) {
+      var qty = basket[row.getAttribute("data-addon-item")] || 0;
+      row.classList.toggle("is-added", qty > 0);
+      var out = $("output", row);
+      if (out) out.textContent = qty;
+    });
+  }
+
+  function initAddons() {
+    var box = $("[data-addon]");
+    if (!box) return;
+    box.addEventListener("click", function (e) {
+      if (e.target === box || e.target.closest("[data-addon-close]")) closeAddons();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeAddons();
+    });
   }
 
   /* Pharaoh mark for house specials. `label` renders an accessible name once
@@ -490,6 +606,7 @@
     set("[data-subtotal]", subtotal);
 
     updateCheckoutState(subtotal);
+    syncAddons();
   }
 
   /* --- Customer details ------------------------------------------------ */
@@ -1017,6 +1134,8 @@
     renderBasket();
 
     initOrderInteractions();
+    initBasketFab();
+    initAddons();
 
     initCheckoutForm();
     initHours();
