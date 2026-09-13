@@ -493,16 +493,18 @@
   }
 
   /* --- Customer details ------------------------------------------------ */
-  var REQUIRED_FIELDS = ["name", "phone", "street", "city", "state", "zip"];
+  var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "street", "city", "state", "zip"];
 
   function readCustomer() {
     var form = $("[data-checkout-form]");
     if (!form) return null;
     var c = {};
-    ["name", "phone", "street", "apt", "city", "state", "zip", "instructions", "requested_at"].forEach(function (k) {
+    ["first_name", "last_name", "phone", "street", "apt", "city", "state", "zip", "instructions", "requested_at"].forEach(function (k) {
       var el = form.elements[k];
       c[k] = el ? el.value.trim() : "";
     });
+    /* Everything downstream (WhatsApp message, finance system) takes one name. */
+    c.name = [c.first_name, c.last_name].filter(Boolean).join(" ");
     return c;
   }
 

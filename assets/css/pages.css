@@ -819,6 +819,7 @@
 .checkout-form .field label span { color: var(--gold); }
 .checkout-form .field input { padding: .8rem .95rem; font-size: var(--step--1); }
 .field-row { display: grid; grid-template-columns: minmax(0, 1fr) 4.2rem 6.2rem; gap: .7rem; }
+.field-row--halves { grid-template-columns: 1fr 1fr; }
 @media (max-width: 420px) { .field-row { grid-template-columns: 1fr 1fr; } .field-row .field--grow { grid-column: 1 / -1; } }
 
 /* WhatsApp checkout button — official brand green, big enough to tap */

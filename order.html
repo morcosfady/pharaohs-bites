@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap">
-<link rel="stylesheet" href="assets/css/main.css?v=27">
-<link rel="stylesheet" href="assets/css/pages.css?v=27">
-<link rel="stylesheet" href="assets/css/pharaonic.css?v=27">
+<link rel="stylesheet" href="assets/css/main.css?v=28">
+<link rel="stylesheet" href="assets/css/pages.css?v=28">
+<link rel="stylesheet" href="assets/css/pharaonic.css?v=28">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -117,9 +117,15 @@
 
           <form class="checkout-form" data-checkout-form novalidate>
             <h3 class="checkout-form__title">Your details</h3>
-            <div class="field">
-              <label for="co-name">Full name <span aria-hidden="true">*</span></label>
-              <input id="co-name" name="name" type="text" autocomplete="name" required>
+            <div class="field-row field-row--halves">
+              <div class="field">
+                <label for="co-first-name">First name <span aria-hidden="true">*</span></label>
+                <input id="co-first-name" name="first_name" type="text" autocomplete="given-name" required>
+              </div>
+              <div class="field">
+                <label for="co-last-name">Last name <span aria-hidden="true">*</span></label>
+                <input id="co-last-name" name="last_name" type="text" autocomplete="family-name" required>
+              </div>
             </div>
             <div class="field">
               <label for="co-phone">Phone number <span aria-hidden="true">*</span></label>
@@ -276,8 +282,8 @@
   </div>
 </footer>
 
-<script src="assets/js/config.js?v=27"></script>
-<script src="assets/js/data.js?v=27"></script>
-<script src="assets/js/main.js?v=27" defer></script>
+<script src="assets/js/config.js?v=28"></script>
+<script src="assets/js/data.js?v=28"></script>
+<script src="assets/js/main.js?v=28" defer></script>
 </body>
 </html>
