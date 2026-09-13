@@ -34,32 +34,32 @@
 
     /* ---------------- THE MAIN TABLE ---------------- */
     { id: "feteer-meshaltet", cat: "mains", name: "Feteer Meshaltet", ar: "فطير مشلتت",
-      price: 14, special: true, featured: true,
+      price: 25, special: true, featured: true,
       desc: "The original. Paper-thin dough stretched by hand, folded again and again with ghee between every layer, then baked until the top shatters.",
       tags: ["House Special", "Vegetarian"], img: U + "1787690376659-e5e7cd2ae452" + Q },
 
     { id: "feteer-beef", cat: "mains", name: "Feteer with Plant-Based Beef & Mozzarella", ar: "فطير محشي لحمة",
-      price: 18, special: true, featured: true,
+      price: 40, special: true, featured: true,
       desc: "The same hand-stretched layers, stuffed with seasoned plant-based ground beef and melted mozzarella, sealed and returned to the oven.",
       tags: ["House Special", "Plant-Based"], img: U + "1631875962715-e36c2d5189ca" + Q },
 
     { id: "macarona-bechamel", cat: "mains", name: "Macarona Béchamel Tray", ar: "صينية مكرونة بشاميل",
-      price: 16, featured: true,
+      price: 30, featured: true,
       desc: "Penne baked under a thick blanket of béchamel with plant-based ground beef through the middle, browned on top and cut into squares.",
       tags: ["Plant-Based", "Tray"], img: U + "1620041631703-45ddcef3dae0" + Q },
 
     { id: "goulash-beef", cat: "mains", name: "Goulash Tray with Plant-Based Beef", ar: "صينية جلاش باللحمة",
-      price: 16,
+      price: 35,
       desc: "Sheet after sheet of thin pastry layered with spiced plant-based ground beef and onion, brushed with ghee and baked golden.",
       tags: ["Plant-Based", "Tray"], img: U + "1617806501736-fc7cab7c05bf" + Q },
 
     { id: "kofta-tray", cat: "mains", name: "Plant-Based Kofta Tray with Salsa & Rice", ar: "صينية كفتة بالصلصة والأرز",
-      price: 35,
+      price: 40,
       desc: "Hand-shaped plant-based kofta baked in a rich tomato salsa with onion and garlic, served over a bed of Egyptian rice. Feeds a table.",
       tags: ["Plant-Based", "Tray"], img: U + "1763647818263-62a9256f097c" + Q },
 
     { id: "meatballs-spaghetti", cat: "mains", name: "Plant-Based Meatballs & Spaghetti", ar: "كرات لحم نباتية بالمكرونة",
-      price: 25,
+      price: 30,
       desc: "Plant-based meatballs simmered in tomato sauce and tossed through spaghetti, finished with a little parmesan.",
       tags: ["Plant-Based"], img: U + "1622973536968-3ead9e780960" + Q },
 
@@ -71,7 +71,7 @@
 
     /* ---------------- SWEET ---------------- */
     { id: "goulash-nuts", cat: "desserts", name: "Goulash Tray with Nuts", ar: "صينية جلاش بالمكسرات",
-      price: 15, special: true, featured: true,
+      price: 25, special: true, featured: true,
       desc: "Layered pastry packed with walnut, almond and pistachio, baked crisp and soaked in syrup the moment it leaves the oven.",
       tags: ["House Special", "Contains Nuts"], img: U + "1594981449006-3bb015dd305a" + Q },
 
@@ -81,7 +81,7 @@
       tags: ["Vegetarian"], img: U + "1669630367800-b2c3ae70528e" + Q },
 
     { id: "round-cake", cat: "desserts", name: "Small Round Cake", ar: "كيكة صغيرة",
-      price: 12,
+      price: 13,
       desc: "A small home-style cake, baked fresh and iced simply. Ask what today's is.",
       tags: ["Vegetarian"], img: U + "1602351447937-745cb720612f" + Q },
 
@@ -102,7 +102,7 @@
 
     /* ---------------- ON THE SIDE ---------------- */
     { id: "white-cheese", cat: "sides", name: "Egyptian White Cheese", ar: "جبنة بيضاء",
-      price: 6, special: true, featured: true,
+      price: 5, special: true, featured: true,
       desc: "Salty, crumbling domiati — the thing every Egyptian reaches for the moment the feteer is torn open.",
       tags: ["House Special", "Vegetarian"], img: U + "1559561853-08451507cbe7" + Q },
 
@@ -123,7 +123,7 @@
 
     /* ---------------- DRINKS ---------------- */
     { id: "protein-shake", cat: "drinks", name: "House Special Protein Shake", ar: "مشروب البروتين",
-      price: 9, special: true, featured: true,
+      price: 12, special: true, featured: true,
       desc: "Twenty-five grams of protein, blended thick and cold. Our own recipe — nothing about it tastes like a supplement.",
       tags: ["House Special", "25g Protein"], img: U + "1542444592-0d5997f202eb" + Q },
 
