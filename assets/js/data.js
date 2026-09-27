@@ -57,8 +57,8 @@
 
     { id: "kofta-tray", cat: "mains", name: "Plant-Based Kofta Tray with Salsa & Rice", ar: "صينية كفتة بالصلصة والأرز",
       price: 40,
-      desc: "Hand-shaped plant-based kofta baked in a rich tomato salsa with onion and garlic, served over a bed of Egyptian rice. Feeds a table.",
-      tags: ["Plant-Based", "Tray"], img: U + "1763647818263-62a9256f097c" + Q },
+      desc: "Seasoned plant-based kofta baked in a rich Egyptian tomato salsa and served in a half-size foil tray, with a separate tray of Egyptian rice with toasted vermicelli.",
+      tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/kofta-tray.webp" },
 
     { id: "meatballs-spaghetti", cat: "mains", name: "Plant-Based Meatballs & Spaghetti", ar: "كرات لحم نباتية بالمكرونة",
       price: 30,
