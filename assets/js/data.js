@@ -114,19 +114,19 @@
       tags: ["House Special", "Vegetarian"], img: "assets/img/menu-real/white-cheese.webp" },
 
     { id: "black-honey", cat: "sides", name: "Black Honey", ar: "عسل أسود",
-      price: 2.49,
-      desc: "Sugarcane molasses, dark and mineral. The oldest sweet in the country, and the right partner for plain feteer.",
-      tags: ["Vegan"], img: U + "1779120708355-7a41581b4584" + Q },
+      price: 5,
+      desc: "Rich Egyptian sugarcane molasses with a deep, bold sweetness.",
+      tags: ["Vegan"], img: "assets/img/menu-real/black-honey.webp" },
 
     { id: "white-honey", cat: "sides", name: "White Honey", ar: "عسل أبيض",
-      price: 2.49,
-      desc: "Clear wildflower honey, poured cold over hot layers so it runs straight through.",
-      tags: ["Vegetarian"], img: U + "1558642452-9d2a7deb7f62" + Q },
+      price: 5,
+      desc: "Golden bee honey with a smooth, natural sweetness.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/white-honey.webp" },
 
     { id: "tahini", cat: "sides", name: "Tahini", ar: "طحينة",
-      price: 2.49,
-      desc: "Stone-ground sesame, loosened with lemon. Best stirred into the black honey until the two go pale.",
-      tags: ["Vegan"], img: U + "1747932984398-dd52d84886d6" + Q },
+      price: 5,
+      desc: "Smooth, creamy sesame paste with a rich, nutty flavor.",
+      tags: ["Vegan"], img: "assets/img/menu-real/tahini.webp" },
 
     { id: "baba-ganoush", cat: "sides", name: "Baba Ganoush", ar: "بابا غنوج",
       price: 5,
@@ -161,7 +161,7 @@
     { cat: "Sides",   title: "White cheese and honey",          img: U + "1777891257739-5d0f6531a508" + QL },
     { cat: "Sweet",   title: "Something cold to finish",        img: "assets/img/menu-real/creme-caramel.webp" },
     { cat: "Feteer",  title: "Golden, straight from the stone", img: U + "1787690376659-e5e7cd2ae452" + QL },
-    { cat: "Sides",   title: "Honey, poured cold",              img: U + "1558642452-9d2a7deb7f62" + QL },
+    { cat: "Sides",   title: "Honey, poured cold",              img: "assets/img/menu-real/white-honey.webp" },
     { cat: "Trays",   title: "Cut into squares",                img: "assets/img/menu-real/goulash-nuts.webp" }
   ];
 
