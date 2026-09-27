@@ -144,10 +144,10 @@
       desc: "Twenty-five grams of protein, blended thick and cold. Our own recipe — nothing about it tastes like a supplement.",
       tags: ["House Special", "25g Protein"], img: U + "1542444592-0d5997f202eb" + Q },
 
-    { id: "avocado-drink", cat: "drinks", name: "Avocado Shake with Nuts", ar: "عصير أفوكادو بالمكسرات",
+    { id: "avocado-drink", cat: "drinks", name: "Avocado Drink", ar: "عصير أفوكادو",
       price: 8,
-      desc: "Ripe avocado blended with cold milk until it's thick and smooth, topped with crushed nuts.",
-      tags: ["Vegetarian", "Contains Nuts"], img: U + "1693042442021-41423615ce89" + Q }
+      desc: "Creamy avocado blended with milk and white honey for a smooth, naturally sweet drink.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/avocado-drink.webp" }
   ];
 
   /* Gallery ----------------------------------------------------------- */
