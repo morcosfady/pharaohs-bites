@@ -27,7 +27,7 @@
     { id: "mains",    name: "The Main Table", blurb: "Feteer stretched by hand, and the baked trays an Egyptian table is built around. Everything here is made to order." },
     { id: "soups",    name: "Soups",          blurb: "Simmered slowly and sent out hot in a sealed container." },
     { id: "desserts", name: "Sweet",          blurb: "Syrup, nuts, cream and chocolate. Cut to order and boxed while still warm." },
-    { id: "sides",    name: "On the Side",    blurb: "What Egyptians actually put next to feteer — cheese, honey and tahini, nothing more complicated than that." },
+    { id: "sides",    name: "On the Side",    blurb: "What Egyptians actually put next to feteer — cheese, honey, tahini, baba ganoush and hummus." },
     { id: "drinks",   name: "Drinks",         blurb: "Made to order and sealed for the journey." }
   ];
 
@@ -122,6 +122,16 @@
       price: 2.49,
       desc: "Stone-ground sesame, loosened with lemon. Best stirred into the black honey until the two go pale.",
       tags: ["Vegan"], img: U + "1747932984398-dd52d84886d6" + Q },
+
+    { id: "baba-ganoush", cat: "sides", name: "Baba Ganoush", ar: "بابا غنوج",
+      price: 5,
+      desc: "Smoky roasted eggplant, blended smooth with tahini, garlic and lemon.",
+      tags: ["Vegan"], img: "https://images.pexels.com/photos/14774982/pexels-photo-14774982.jpeg?auto=compress&cs=tinysrgb&w=900" },
+
+    { id: "hummus", cat: "sides", name: "Hummus", ar: "حمص",
+      price: 2,
+      desc: "Chickpeas blended smooth with tahini, lemon and garlic, finished with olive oil.",
+      tags: ["Vegan"], img: "https://images.pexels.com/photos/6327663/pexels-photo-6327663.jpeg?auto=compress&cs=tinysrgb&w=900" },
 
     /* ---------------- DRINKS ---------------- */
     { id: "protein-shake", cat: "drinks", name: "House Special Protein Shake", ar: "مشروب البروتين",
