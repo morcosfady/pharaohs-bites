@@ -110,8 +110,8 @@
     /* ---------------- ON THE SIDE ---------------- */
     { id: "white-cheese", cat: "sides", name: "Egyptian White Cheese", ar: "جبنة بيضاء",
       price: 2.99, special: true, featured: true,
-      desc: "Salty, crumbling domiati — the thing every Egyptian reaches for the moment the feteer is torn open.",
-      tags: ["House Special", "Vegetarian"], img: U + "1559561853-08451507cbe7" + Q },
+      desc: "Homemade Egyptian white cheese.",
+      tags: ["House Special", "Vegetarian"], img: "assets/img/menu-real/white-cheese.webp" },
 
     { id: "black-honey", cat: "sides", name: "Black Honey", ar: "عسل أسود",
       price: 2.49,
