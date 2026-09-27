@@ -99,8 +99,8 @@
 
     { id: "creme-caramel", cat: "desserts", name: "Crème Caramel Flan", ar: "كريم كراميل",
       price: 8,
-      desc: "Baked custard turned out under its own caramel. Cold, wobbling, and gone in a minute.",
-      tags: ["Vegetarian"], img: U + "1653988354010-39637252a2db" + Q },
+      desc: "Silky crème caramel custard topped with golden caramel sauce, served chilled in a small dessert cup.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/creme-caramel.webp" },
 
     { id: "om-ali", cat: "desserts", name: "Om Ali", ar: "أم علي",
       price: 25,
@@ -159,7 +159,7 @@
     { cat: "Kitchen", title: "Hands that know the dough",       img: U + "1777315387799-eba7be5422b2" + QL },
     { cat: "Kitchen", title: "Out of the oven",                 img: U + "1777315388484-f999eb67d74c" + QL },
     { cat: "Sides",   title: "White cheese and honey",          img: U + "1777891257739-5d0f6531a508" + QL },
-    { cat: "Sweet",   title: "Something cold to finish",        img: U + "1653988354010-39637252a2db" + QL },
+    { cat: "Sweet",   title: "Something cold to finish",        img: "assets/img/menu-real/creme-caramel.webp" },
     { cat: "Feteer",  title: "Golden, straight from the stone", img: U + "1787690376659-e5e7cd2ae452" + QL },
     { cat: "Sides",   title: "Honey, poured cold",              img: U + "1558642452-9d2a7deb7f62" + QL },
     { cat: "Trays",   title: "Cut into squares",                img: "assets/img/menu-real/goulash-nuts.webp" }
