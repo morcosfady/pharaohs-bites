@@ -135,8 +135,8 @@
 
     { id: "hummus", cat: "sides", name: "Hummus", ar: "حمص",
       price: 2,
-      desc: "Chickpeas blended smooth with tahini, lemon and garlic, finished with olive oil.",
-      tags: ["Vegan"], img: "https://images.pexels.com/photos/6327663/pexels-photo-6327663.jpeg?auto=compress&cs=tinysrgb&w=900" },
+      desc: "Creamy hummus, a blend of chickpeas and tahini, served in a small cup.",
+      tags: ["Vegan"], img: "assets/img/menu-real/hummus.webp" },
 
     /* ---------------- DRINKS ---------------- */
     { id: "protein-shake", cat: "drinks", name: "House Special Protein Shake", ar: "مشروب البروتين",
