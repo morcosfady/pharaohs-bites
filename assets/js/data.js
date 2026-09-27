@@ -154,15 +154,10 @@
   var GALLERY = [
     { cat: "Feteer",  title: "Layers, pulled apart hot",        img: "assets/img/menu-real/feteer-meshaltet-square.jpg" },
     { cat: "Kitchen", title: "Stretching the dough",            img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
-    { cat: "Sweet",   title: "Goulash with nuts",               img: U + "1640040520679-2ace58742f22" + QL },
+    { cat: "Sweet",   title: "Goulash with nuts",               img: "assets/img/menu-real/goulash-nuts.webp" },
     { cat: "Trays",   title: "Macarona béchamel",               img: "assets/img/menu-real/macarona-bechamel.webp" },
-    { cat: "Kitchen", title: "Hands that know the dough",       img: U + "1777315387799-eba7be5422b2" + QL },
-    { cat: "Kitchen", title: "Out of the oven",                 img: U + "1777315388484-f999eb67d74c" + QL },
-    { cat: "Sides",   title: "White cheese and honey",          img: U + "1777891257739-5d0f6531a508" + QL },
     { cat: "Sweet",   title: "Something cold to finish",        img: "assets/img/menu-real/creme-caramel.webp" },
-    { cat: "Feteer",  title: "Golden, straight from the stone", img: U + "1787690376659-e5e7cd2ae452" + QL },
-    { cat: "Sides",   title: "Honey, poured cold",              img: "assets/img/menu-real/white-honey.webp" },
-    { cat: "Trays",   title: "Cut into squares",                img: "assets/img/menu-real/goulash-nuts.webp" }
+    { cat: "Sides",   title: "Honey, poured cold",              img: "assets/img/menu-real/white-honey.webp" }
   ];
 
   /* PLACEHOLDER reviews - invented, not real customers. Replace before launch. */
