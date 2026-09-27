@@ -102,6 +102,11 @@
       desc: "Baked custard turned out under its own caramel. Cold, wobbling, and gone in a minute.",
       tags: ["Vegetarian"], img: U + "1653988354010-39637252a2db" + Q },
 
+    { id: "om-ali", cat: "desserts", name: "Om Ali", ar: "أم علي",
+      price: 25,
+      desc: "Warm Egyptian Om Ali with flaky pastry baked in sweet, creamy milk, finished with a golden top and mixed nuts. Served in a half-size foil tray.",
+      tags: ["Vegetarian", "Contains Nuts", "Tray"], img: "assets/img/menu-real/om-ali.webp" },
+
     /* ---------------- ON THE SIDE ---------------- */
     { id: "white-cheese", cat: "sides", name: "Egyptian White Cheese", ar: "جبنة بيضاء",
       price: 2.99, special: true, featured: true,
