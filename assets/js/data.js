@@ -62,8 +62,8 @@
 
     { id: "meatballs-spaghetti", cat: "mains", name: "Plant-Based Meatballs & Spaghetti", ar: "كرات لحم نباتية بالمكرونة",
       price: 30,
-      desc: "Plant-based meatballs simmered in tomato sauce and tossed through spaghetti, finished with a little parmesan.",
-      tags: ["Plant-Based"], img: U + "1622973536968-3ead9e780960" + Q },
+      desc: "Tender spaghetti tossed in a rich tomato sauce and topped with seasoned plant-based meatballs. Served in a half-size foil tray.",
+      tags: ["Plant-Based"], img: "assets/img/menu-real/meatballs-spaghetti.webp" },
 
     /* ---------------- SOUPS ---------------- */
     { id: "lentil-soup", cat: "soups", name: "Lentil Soup", ar: "شوربة عدس",
