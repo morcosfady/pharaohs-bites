@@ -37,7 +37,7 @@
     /* ---------------- THE MAIN TABLE ---------------- */
     { id: "feteer-meshaltet", cat: "mains", name: "Feteer Meshaltet", ar: "فطير مشلتت",
       price: 25, special: true, featured: true, suggest: "sides",
-      desc: "The original. Paper-thin dough stretched by hand, folded again and again with ghee between every layer, then baked until the top shatters.",
+      desc: "Flaky, buttery, pull-apart layers. Paper-thin dough stretched by hand, folded again and again with homemade butter between every layer, then baked until the top shatters.",
       tags: ["House Special", "Vegetarian"], img: U + "1787690376659-e5e7cd2ae452" + Q },
 
     { id: "feteer-beef", cat: "mains", name: "Feteer with Plant-Based Beef & Mozzarella", ar: "فطير محشي لحمة",
@@ -52,7 +52,7 @@
 
     { id: "goulash-beef", cat: "mains", name: "Goulash Tray with Plant-Based Beef", ar: "صينية جلاش باللحمة",
       price: 35,
-      desc: "Sheet after sheet of thin pastry layered with spiced plant-based ground beef and onion, brushed with ghee and baked golden.",
+      desc: "Sheet after sheet of thin pastry layered with spiced plant-based ground beef and onion, brushed with homemade butter and baked golden.",
       tags: ["Plant-Based", "Tray"], img: U + "1617806501736-fc7cab7c05bf" + Q },
 
     { id: "kofta-tray", cat: "mains", name: "Plant-Based Kofta Tray with Salsa & Rice", ar: "صينية كفتة بالصلصة والأرز",
@@ -154,7 +154,7 @@
   /* PLACEHOLDER reviews - invented, not real customers. Replace before launch. */
   var REVIEWS = [
     { name: "Yasmine F.", role: "Plano", stars: 5,
-      text: "I have eaten feteer my whole life and I was not expecting this in Texas. It arrived still hot enough that the ghee ran when we pulled it apart. My mother asked who made it." },
+      text: "I have eaten feteer my whole life and I was not expecting this in Texas. It arrived still hot enough that the butter ran when we pulled it apart. My mother asked who made it." },
     { name: "Mark Whitfield", role: "Uptown", stars: 5,
       text: "Ordered the béchamel tray for a Sunday lunch and there was nothing left twenty minutes later. It travels well and reheats even better." },
     { name: "Nour El-Deeb", role: "Ordered for a church event", stars: 5,
@@ -162,7 +162,7 @@
     { name: "Dina M.", role: "Frisco", stars: 5,
       text: "The goulash with nuts is dangerous. I ordered one tray to try and put in a second order before we had finished the first." },
     { name: "Omar Sabry", role: "Deep Ellum", stars: 5,
-      text: "Proper ghee, proper layers, none of the shortcuts. First time since I moved here that feteer has tasted like home rather than an imitation of it." },
+      text: "Proper butter, proper layers, none of the shortcuts. First time since I moved here that feteer has tasted like home rather than an imitation of it." },
     { name: "Claire Bennett", role: "Irving", stars: 5,
       text: "Easy to order, they confirmed everything on WhatsApp, and it arrived exactly when they said. The reheating notes in the box were a nice touch." }
   ];
