@@ -89,8 +89,8 @@
 
     { id: "banana-pudding", cat: "desserts", name: "Banana Pudding", ar: "بودينج موز",
       price: 7,
-      desc: "Layers of vanilla cream, banana and biscuit, left to soften overnight.",
-      tags: ["Vegetarian"], img: U + "1639330842151-8a92eb332b2d" + Q },
+      desc: "Smooth, creamy banana pudding served chilled in a small dessert cup.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/banana-pudding.webp" },
 
     { id: "creme-caramel", cat: "desserts", name: "Crème Caramel Flan", ar: "كريم كراميل",
       price: 8,
