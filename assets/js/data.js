@@ -74,8 +74,8 @@
     /* ---------------- SWEET ---------------- */
     { id: "goulash-nuts", cat: "desserts", name: "Goulash Tray with Nuts", ar: "صينية جلاش بالمكسرات",
       price: 25, special: true, featured: true,
-      desc: "Layered pastry packed with walnut, almond and pistachio, baked crisp and soaked in syrup the moment it leaves the oven.",
-      tags: ["House Special", "Contains Nuts"], img: U + "1594981449006-3bb015dd305a" + Q },
+      desc: "Crisp, golden layers of sweet Egyptian goulash filled with mixed nuts and finished with a light syrup glaze. Cut into squares and served in a half-size foil tray.",
+      tags: ["House Special", "Contains Nuts"], img: "assets/img/menu-real/goulash-nuts.webp" },
 
     { id: "mini-feteer-sweet", cat: "desserts", name: "Mini Feteer, Nutella or Pistachio", ar: "فطير صغير حلو",
       price: 11, featured: true,
@@ -158,7 +158,7 @@
     { cat: "Sweet",   title: "Something cold to finish",        img: U + "1653988354010-39637252a2db" + QL },
     { cat: "Feteer",  title: "Golden, straight from the stone", img: U + "1787690376659-e5e7cd2ae452" + QL },
     { cat: "Sides",   title: "Honey, poured cold",              img: U + "1558642452-9d2a7deb7f62" + QL },
-    { cat: "Trays",   title: "Cut into squares",                img: U + "1594981449006-3bb015dd305a" + QL }
+    { cat: "Trays",   title: "Cut into squares",                img: "assets/img/menu-real/goulash-nuts.webp" }
   ];
 
   /* PLACEHOLDER reviews - invented, not real customers. Replace before launch. */
