@@ -77,11 +77,6 @@
       desc: "Crisp, golden layers of sweet Egyptian goulash filled with mixed nuts and finished with a light syrup glaze. Cut into squares and served in a half-size foil tray.",
       tags: ["House Special", "Contains Nuts"], img: "assets/img/menu-real/goulash-nuts.webp" },
 
-    { id: "mini-feteer-sweet", cat: "desserts", name: "Mini Feteer, Nutella or Pistachio", ar: "فطير صغير حلو",
-      price: 11, featured: true,
-      desc: "A palm-sized feteer with all its layers intact, finished with Nutella or pistachio sauce. Choose when you order.",
-      tags: ["Vegetarian"], img: U + "1669630367800-b2c3ae70528e" + Q },
-
     { id: "round-cake", cat: "desserts", name: "Small Round Cake", ar: "كيكة صغيرة",
       price: 13,
       desc: "A small home-style cake, baked fresh and iced simply. Ask what today's is.",
@@ -150,7 +145,6 @@
     { cat: "Feteer",  title: "Layers, pulled apart hot",        img: "assets/img/menu-real/feteer-meshaltet-square.jpg" },
     { cat: "Kitchen", title: "Stretching the dough",            img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
     { cat: "Sweet",   title: "Goulash with nuts",               img: U + "1640040520679-2ace58742f22" + QL },
-    { cat: "Sweet",   title: "Mini feteer, Nutella or pistachio", img: U + "1669630367800-b2c3ae70528e" + QL },
     { cat: "Trays",   title: "Macarona béchamel",               img: "assets/img/menu-real/macarona-bechamel.webp" },
     { cat: "Kitchen", title: "Hands that know the dough",       img: U + "1777315387799-eba7be5422b2" + QL },
     { cat: "Kitchen", title: "Out of the oven",                 img: U + "1777315388484-f999eb67d74c" + QL },
