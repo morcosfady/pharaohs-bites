@@ -130,8 +130,8 @@
 
     { id: "baba-ganoush", cat: "sides", name: "Baba Ganoush", ar: "بابا غنوج",
       price: 5,
-      desc: "Smoky roasted eggplant, blended smooth with tahini, garlic and lemon.",
-      tags: ["Vegan"], img: "https://images.pexels.com/photos/14774982/pexels-photo-14774982.jpeg?auto=compress&cs=tinysrgb&w=900" },
+      desc: "Smoky Egyptian baba ganoush made with roasted eggplant and tahini, served in a small cup.",
+      tags: ["Vegan"], img: "assets/img/menu-real/baba-ganoush.webp" },
 
     { id: "hummus", cat: "sides", name: "Hummus", ar: "حمص",
       price: 2,
