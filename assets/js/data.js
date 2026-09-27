@@ -79,8 +79,8 @@
 
     { id: "round-cake", cat: "desserts", name: "Small Round Cake", ar: "كيكة صغيرة",
       price: 13,
-      desc: "A small home-style cake, baked fresh and iced simply. Ask what today's is.",
-      tags: ["Vegetarian"], img: U + "1602351447937-745cb720612f" + Q },
+      desc: "A small, freshly baked plain cake with a golden crust and soft, fluffy crumb.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/round-cake.webp" },
 
     { id: "chocolate-pudding", cat: "desserts", name: "Chocolate Pudding", ar: "بودينج شوكولاتة",
       price: 7,
