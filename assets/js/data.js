@@ -36,9 +36,9 @@
 
     /* ---------------- THE MAIN TABLE ---------------- */
     { id: "feteer-meshaltet", cat: "mains", name: "Feteer Meshaltet", ar: "فطير مشلتت",
-      price: 25, special: true, featured: true, suggest: "sides",
+      price: 25, special: true, suggest: "sides",
       desc: "Flaky, buttery, pull-apart layers. Paper-thin dough stretched by hand, folded again and again with homemade butter between every layer, then baked until the top shatters.",
-      tags: ["House Special", "Vegetarian"], img: U + "1787690376659-e5e7cd2ae452" + Q },
+      tags: ["House Special", "Vegetarian"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
 
     { id: "feteer-beef", cat: "mains", name: "Feteer with Plant-Based Beef & Mozzarella", ar: "فطير محشي لحمة",
       price: 40, special: true, featured: true,
