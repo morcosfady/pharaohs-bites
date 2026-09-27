@@ -47,8 +47,8 @@
 
     { id: "macarona-bechamel", cat: "mains", name: "Macarona Béchamel Tray", ar: "صينية مكرونة بشاميل",
       price: 30, featured: true,
-      desc: "Penne baked under a thick blanket of béchamel with plant-based ground beef through the middle, browned on top and cut into squares.",
-      tags: ["Plant-Based", "Tray"], img: U + "1620041631703-45ddcef3dae0" + Q },
+      desc: "Tender penne layered with savory plant-based beef and creamy béchamel, baked until golden and served in hearty squares. Comes in a half-size foil tray.",
+      tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/macarona-bechamel.webp" },
 
     { id: "goulash-beef", cat: "mains", name: "Goulash Tray with Plant-Based Beef", ar: "صينية جلاش باللحمة",
       price: 35,
@@ -147,11 +147,11 @@
 
   /* Gallery ----------------------------------------------------------- */
   var GALLERY = [
-    { cat: "Feteer",  title: "Layers, pulled apart hot",        img: U + "1759302307381-bdccf7b35e5d" + QL },
-    { cat: "Kitchen", title: "Stretching the dough",            img: U + "1754394483922-4d3a10cc6187" + QL },
+    { cat: "Feteer",  title: "Layers, pulled apart hot",        img: "assets/img/menu-real/feteer-meshaltet-square.jpg" },
+    { cat: "Kitchen", title: "Stretching the dough",            img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
     { cat: "Sweet",   title: "Goulash with nuts",               img: U + "1640040520679-2ace58742f22" + QL },
     { cat: "Sweet",   title: "Mini feteer, Nutella or pistachio", img: U + "1669630367800-b2c3ae70528e" + QL },
-    { cat: "Trays",   title: "Macarona béchamel",               img: U + "1620041631703-45ddcef3dae0" + QL },
+    { cat: "Trays",   title: "Macarona béchamel",               img: "assets/img/menu-real/macarona-bechamel.webp" },
     { cat: "Kitchen", title: "Hands that know the dough",       img: U + "1777315387799-eba7be5422b2" + QL },
     { cat: "Kitchen", title: "Out of the oven",                 img: U + "1777315388484-f999eb67d74c" + QL },
     { cat: "Sides",   title: "White cheese and honey",          img: U + "1777891257739-5d0f6531a508" + QL },
