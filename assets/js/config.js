@@ -24,13 +24,12 @@
     hasPublicAddress: false,
 
     /* --- Contact --- */
-    // TODO: replace with the real WhatsApp Business number.
     // Digits only, country code first, no symbols.
-    whatsappNumber: "12145550100",
-    // TODO: same number, formatted for display.
-    phoneDisplay: "+1 (214) 555-0100",
-    phoneHref: "tel:+12145550100",
-    email: "hello@pharaohsbites.com",
+    whatsappNumber: "17879684078",
+    // Same number, formatted for display.
+    phoneDisplay: "+1 (727) 710-2284",
+    phoneHref: "tel:+17277102284",
+    email: "pharaohsbites.dallas@gmail.com",
 
     /* --- When --- */
     // TODO: confirm real hours.
