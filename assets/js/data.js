@@ -84,8 +84,8 @@
 
     { id: "chocolate-pudding", cat: "desserts", name: "Chocolate Pudding", ar: "بودينج شوكولاتة",
       price: 7,
-      desc: "Set dark chocolate pudding, chilled, with cream folded through the top.",
-      tags: ["Vegetarian"], img: U + "1673551494277-92204546b504" + Q },
+      desc: "Smooth, rich chocolate pudding served chilled in a small dessert cup.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/chocolate-pudding.webp" },
 
     { id: "banana-pudding", cat: "desserts", name: "Banana Pudding", ar: "بودينج موز",
       price: 7,
