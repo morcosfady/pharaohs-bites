@@ -68,8 +68,8 @@
     /* ---------------- SOUPS ---------------- */
     { id: "lentil-soup", cat: "soups", name: "Lentil Soup", ar: "شوربة عدس",
       price: 7,
-      desc: "Red lentils cooked down with onion, carrot and cumin until smooth, finished with lemon. Comes with bread on the side.",
-      tags: ["Vegan"], img: U + "1642497394078-4794e837019c" + Q },
+      desc: "Warm, velvety Egyptian creamy lentil soup, gently seasoned and served in a generous paper bowl.",
+      tags: ["Vegan"], img: "assets/img/menu-real/lentil-soup.webp" },
 
     /* ---------------- SWEET ---------------- */
     { id: "goulash-nuts", cat: "desserts", name: "Goulash Tray with Nuts", ar: "صينية جلاش بالمكسرات",
