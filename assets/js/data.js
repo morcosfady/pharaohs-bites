@@ -109,32 +109,32 @@
 
     /* ---------------- ON THE SIDE ---------------- */
     { id: "white-cheese", cat: "sides", name: "Egyptian White Cheese", ar: "جبنة بيضاء",
-      price: 2.99, special: true, featured: true,
+      price: 4, special: true, featured: true,
       desc: "Homemade Egyptian white cheese.",
       tags: ["House Special", "Vegetarian"], img: "assets/img/menu-real/white-cheese.webp" },
 
     { id: "black-honey", cat: "sides", name: "Black Honey", ar: "عسل أسود",
-      price: 5,
+      price: 3.5,
       desc: "Rich Egyptian sugarcane molasses with a deep, bold sweetness.",
       tags: ["Vegan"], img: "assets/img/menu-real/black-honey.webp" },
 
     { id: "white-honey", cat: "sides", name: "White Honey", ar: "عسل أبيض",
-      price: 5,
+      price: 4,
       desc: "Golden bee honey with a smooth, natural sweetness.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/white-honey.webp" },
 
     { id: "tahini", cat: "sides", name: "Tahini", ar: "طحينة",
-      price: 5,
+      price: 3,
       desc: "Smooth, creamy sesame paste with a rich, nutty flavor.",
       tags: ["Vegan"], img: "assets/img/menu-real/tahini.webp" },
 
     { id: "baba-ganoush", cat: "sides", name: "Baba Ganoush", ar: "بابا غنوج",
-      price: 5,
+      price: 4,
       desc: "Smoky Egyptian baba ganoush made with roasted eggplant and tahini, served in a small cup.",
       tags: ["Vegan"], img: "assets/img/menu-real/baba-ganoush.webp" },
 
     { id: "hummus", cat: "sides", name: "Hummus", ar: "حمص",
-      price: 2,
+      price: 3,
       desc: "Creamy hummus, a blend of chickpeas and tahini, served in a small cup.",
       tags: ["Vegan"], img: "assets/img/menu-real/hummus.webp" },
 
