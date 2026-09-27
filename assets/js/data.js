@@ -139,10 +139,10 @@
       tags: ["Vegan"], img: "assets/img/menu-real/hummus.webp" },
 
     /* ---------------- DRINKS ---------------- */
-    { id: "protein-shake", cat: "drinks", name: "House Special Protein Shake", ar: "مشروب البروتين",
+    { id: "protein-shake", cat: "drinks", name: "Special Chocolate Protein Shake", ar: "مشروب البروتين بالشوكولاتة",
       price: 12, special: true, featured: true,
-      desc: "Twenty-five grams of protein, blended thick and cold. Our own recipe — nothing about it tastes like a supplement.",
-      tags: ["House Special", "25g Protein"], img: U + "1542444592-0d5997f202eb" + Q },
+      desc: "A rich, creamy chocolate 22g protein shake blended smooth and served chilled.",
+      tags: ["House Special", "22g Protein"], img: "assets/img/menu-real/protein-shake.webp" },
 
     { id: "avocado-drink", cat: "drinks", name: "Avocado Drink", ar: "عصير أفوكادو",
       price: 8,
