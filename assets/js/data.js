@@ -92,6 +92,11 @@
       desc: "Smooth, creamy banana pudding served chilled in a small dessert cup.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/banana-pudding.webp" },
 
+    { id: "rice-pudding", cat: "desserts", name: "Rice Pudding", ar: "رز باللبن",
+      price: 7,
+      desc: "Creamy Egyptian rice pudding with tender rice in a rich, milky base, served chilled in a small dessert cup.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/rice-pudding.webp" },
+
     { id: "creme-caramel", cat: "desserts", name: "Crème Caramel Flan", ar: "كريم كراميل",
       price: 8,
       desc: "Baked custard turned out under its own caramel. Cold, wobbling, and gone in a minute.",
