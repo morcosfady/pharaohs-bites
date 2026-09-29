@@ -31,7 +31,7 @@
     phoneHref: "https://wa.me/17879684078",
     email: "pharaohsbites.dallas@gmail.com",
     // Contact + catering forms post here; the relay emails them to the address above.
-    enquiryEndpoint: "",
+    enquiryEndpoint: "https://script.google.com/macros/s/AKfycbwbD7emDtCvFR25_xc2PYOnRzKN9FgsMs-bQPEsqFMgYFJQ0wEHDADAoJPoHQWc8Nb1/exec",
     enquiryToken: "948d233dd65a28a88dab5ab0d5df1e34",
 
     /* --- When --- */

@@ -1414,7 +1414,7 @@
       fields["Time needed"] = f("time");
       fields["How many people"] = f("party") ? f("party") + " people" : "";
       fields["Notes"] = f("notes");
-      subject = "Catering request: " + [occasion, f("party") && f("party") + " people", f("date")].filter(Boolean).join(" · ") + " (" + f("name") + ")";
+      subject = "Catering request: " + [occasion, f("party") && f("party") + " people", f("date") && formatDeliveryDate(f("date"))].filter(Boolean).join(" · ") + " (" + f("name") + ")";
     }
 
     var out = {};
