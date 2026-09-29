@@ -27,8 +27,8 @@
     // Digits only, country code first, no symbols.
     whatsappNumber: "17879684078",
     // Same number, formatted for display.
-    phoneDisplay: "+1 (727) 710-2284",
-    phoneHref: "tel:+17277102284",
+    phoneDisplay: "+1 (787) 968-4078",
+    phoneHref: "https://wa.me/17879684078",
     email: "pharaohsbites.dallas@gmail.com",
 
     /* --- When --- */
