@@ -276,6 +276,7 @@
     var changed = lastBadgeCount !== -1 && n !== lastBadgeCount;
     lastBadgeCount = n;
     $$("[data-basket-count]").forEach(function (el) { el.textContent = n ? String(n) : "0"; });
+    $$("[data-basket-noun]").forEach(function (el) { el.textContent = n === 1 ? "item" : "items"; });
     $$("[data-basket-fab]").forEach(function (el) {
       var jump = el.hasAttribute("data-basket-jump");
       el.hidden = n === 0 || (jump && basketPanelInView);
@@ -716,12 +717,24 @@
   }
   function scheduleComplete(c) { return !!c && validDeliveryDate(c.requested_date) && !!windowById(c.requested_window); }
 
-  function detailsFilled(c) {
-    if (!c) return false;
-    return REQUIRED_FIELDS.every(function (k) { return c[k].length > 0; }) &&
-           /^\d{5}(-\d{4})?$/.test(c.zip) &&
-           c.phone.replace(/\D/g, "").length >= 7;
+  /* One rule per field: used for the button state, the note under the button
+     and the inline messages, so they can never disagree. */
+  var FIELD_RULES = {
+    first_name: { ok: function (v) { return v.length > 0; }, msg: "Enter your first name." },
+    last_name:  { ok: function (v) { return v.length > 0; }, msg: "Enter your last name." },
+    phone:      { ok: function (v) { var n = v.replace(/\D/g, "").length; return n >= 10 && n <= 15; }, msg: "Enter a phone number with area code, like (555) 123-4567." },
+    street:     { ok: function (v) { return v.length > 0; }, msg: "Enter your street address." },
+    city:       { ok: function (v) { return v.length > 0; }, msg: "Enter your city." },
+    state:      { ok: function (v) { return /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX." },
+    zip:        { ok: function (v) { return /^\d{5}(-\d{4})?$/.test(v); }, msg: "Enter a 5-digit ZIP code." }
+  };
+  function firstProblem(c) {
+    if (!c) return null;
+    var keys = Object.keys(FIELD_RULES);
+    for (var i = 0; i < keys.length; i++) if (!FIELD_RULES[keys[i]].ok(c[keys[i]] || "")) return { field: keys[i], msg: FIELD_RULES[keys[i]].msg };
+    return null;
   }
+  function detailsFilled(c) { return !!c && !firstProblem(c); }
 
   function customerComplete(c) { return detailsFilled(c) && scheduleComplete(c); }
 
@@ -746,13 +759,40 @@
     if (note) {
       var min = C.minimumOrder || 0;
       if (!hasItems) note.textContent = "Add a dish and fill in your details to continue.";
-      else if (!detailsFilled(customer)) note.textContent = "Fill in your name, phone number and delivery address to continue.";
+      else if (!detailsFilled(customer)) note.textContent = "Almost there. " + firstProblem(customer).msg;
       else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
       else if (min > 0 && subtotal < min) note.textContent = "Heads up: our usual minimum is " + money(min) + ". Send it anyway and we will confirm.";
       else note.textContent = "WhatsApp opens with your order ready to send. We confirm the delivery fee before payment.";
     }
   }
 
+
+
+  /* Inline messages: shown when a field loses focus with a problem, cleared as soon as it is fixed */
+  function initFieldValidation(form) {
+    function show(name) {
+      var input = form.elements[name], rule = FIELD_RULES[name];
+      if (!input || !rule) return;
+      var bad = !rule.ok(input.value.trim());
+      var box = input.closest(".field");
+      var msg = box && box.querySelector(".field__error");
+      input.setAttribute("aria-invalid", bad ? "true" : "false");
+      if (bad && !msg && box) {
+        msg = document.createElement("small");
+        msg.className = "field__error";
+        msg.id = "err-" + name;
+        msg.setAttribute("role", "alert");
+        box.appendChild(msg);
+        input.setAttribute("aria-describedby", msg.id);
+      }
+      if (msg) { msg.textContent = bad ? rule.msg : ""; msg.hidden = !bad; }
+    }
+    form.addEventListener("focusout", function (e) { if (e.target && FIELD_RULES[e.target.name]) show(e.target.name); });
+    form.addEventListener("input", function (e) {
+      var n = e.target && e.target.name;
+      if (n && FIELD_RULES[n] && e.target.getAttribute("aria-invalid") === "true") show(n);
+    });
+  }
 
   /* --- Calendar + window picker UI ------------------------------------- */
   function initSchedule(form) {
@@ -885,6 +925,7 @@
     });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
     initSchedule(form);
+    initFieldValidation(form);
     updateCheckoutState();
   }
 
@@ -1124,7 +1165,7 @@
     if (submitting) return;                    /* double-click guard */
     if (!Object.keys(basket).length) return;
     if (!customerComplete(readCustomer())) {
-      toast(detailsFilled(readCustomer()) ? "Please choose a delivery date (from tomorrow) and a time window." : "Please fill in your name, phone and delivery address first.");
+      toast(detailsFilled(readCustomer()) ? "Please choose a delivery date (from tomorrow) and a time window." : firstProblem(readCustomer()).msg);
       updateCheckoutState();
       return;
     }
@@ -1290,7 +1331,7 @@
         if (b && !$(".today-flag", li)) {
           var flag = document.createElement("span");
           flag.className = "today-flag";
-          flag.style.cssText = "font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;margin-left:.5rem;opacity:.75";
+          flag.style.cssText = "font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;margin-left:.5rem;opacity:.75";
           flag.textContent = "Today";
           b.appendChild(flag);
         }

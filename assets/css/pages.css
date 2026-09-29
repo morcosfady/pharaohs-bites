@@ -1229,3 +1229,52 @@
   .win__card { padding-inline: .8rem; gap: .6rem; }
   .win__card small { font-size: .58rem; letter-spacing: .12em; }
 }
+
+/* MOBILE QA FIXES ------------------------------------------------------- */
+/* Scroll-reveal elements start shifted sideways; never let that widen the page */
+html, body { overflow-x: clip; }
+
+@media (max-width: 760px) {
+  /* Comfortable tap targets */
+  .footer-list li + li { margin-top: 0; }
+  .footer-list a, .footer-contact a:not(.footer-wa) { display: inline-flex; align-items: center; min-height: 44px; }
+  .footer-list a:hover { padding-left: 0; }
+  .crumbs a { display: inline-flex; align-items: center; min-height: 40px; }
+  .link-arrow { display: inline-flex; align-items: center; min-height: 44px; }
+  .qty button { width: 2.5rem; height: 2.5rem; font-size: 1.1rem; }
+  .qty { gap: .45rem; }
+  .basket-item .remove { min-height: 2.5rem; padding-inline: .2rem; font-size: var(--step--1); }
+  .basket-fab, .fav, .chip { min-height: 44px; }
+
+  /* Small labels: never below ~11px on a phone */
+  .brand__sub { font-size: max(.68rem, 10.5px); }
+  .basket__count { font-size: .7rem; }
+  .checkout-form .field label small, .field label small { font-size: .72rem; }
+  .date-trigger small, .basket__delivery small, .win__card small { font-size: .7rem; letter-spacing: .12em; }
+  .tag { font-size: max(.68rem, 11px); }
+  .footer-wa em { font-size: .72rem; }
+}
+
+@media (max-width: 760px) {
+  .today-flag, .hero__scroll span, .card small { font-size: .7rem; }
+  .info-tile a { display: inline-block; padding-block: .55rem; }
+}
+
+/* Inline field messages */
+.field__error { display: block; margin-top: .35rem; font-size: .8rem; line-height: 1.4; color: #f3a39a; }
+.field__error[hidden] { display: none; }
+.checkout-form .field input[aria-invalid="true"] { border-color: #e08a82; box-shadow: 0 0 0 3px rgba(224, 138, 130, .14); }
+
+/* Selectable calendar days get a faint ring so they read as tappable */
+.cal-day:not(:disabled):not(.is-selected) { border-color: rgba(212, 175, 55, .35); }
+
+/* The back-to-top button sits on top of the order form fields on phones */
+@media (max-width: 760px) {
+  body:has(.order-layout) .to-top { display: none; }
+}
+
+@media (max-width: 760px) {
+  .masonry__cap small { font-size: .7rem; letter-spacing: .16em; }
+  .footer-bottom nav a { display: inline-flex; align-items: center; min-height: 44px; }
+  .footer-bottom nav { gap: 1.2rem; }
+}

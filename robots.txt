@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.pharaohsbites.com/sitemap.xml
+Sitemap: https://pharaohsbites.com/sitemap.xml
