@@ -1285,3 +1285,58 @@ html, body { overflow-x: clip; }
   .hero__wordmark__sub { font-size: 11px; letter-spacing: .1em; }
 }
 @media (max-width: 760px) { .hero__wordmark__sub i { display: none; } }
+
+/* MOBILE MENU + HERO POLISH --------------------------------------------- */
+/* A backdrop-filter on the header makes it the containing block of the fixed
+   full-screen menu, so once the header turned "stuck" (after scrolling) the
+   menu shrank to the header's height and the page showed through. While the
+   menu is open the header drops its blur, and the menu covers the viewport. */
+body.nav-open .site-header,
+body.nav-open .site-header.is-stuck {
+  -webkit-backdrop-filter: none;
+          backdrop-filter: none;
+  background: transparent;
+  border-bottom-color: transparent;
+  box-shadow: none;
+  height: var(--header-h);
+}
+@media (max-width: 1080px) {
+  .nav { height: 100vh; height: 100dvh; overflow-y: auto; overscroll-behavior: contain; }
+  .site-header .brand, .site-header .header-actions { position: relative; z-index: 2; }
+}
+
+@media (max-width: 760px) {
+  /* room below the trust pills for the "Discover" scroll cue */
+  .hero { padding-bottom: 8.5rem; }
+
+  .hero__meta {
+    margin-top: 2rem;
+    gap: .6rem;
+    flex-direction: column;
+    align-items: center;
+    letter-spacing: .1em;
+    font-size: .72rem;
+  }
+  .hero__meta span {
+    justify-content: center;
+    text-align: center;
+    max-width: 100%;
+    padding: .6rem 1.1rem;
+    color: var(--sand);
+    line-height: 1.35;
+    border: 1px solid rgba(212, 175, 55, .28);
+    border-radius: 999px;
+    background: rgba(10, 10, 10, .42);
+    -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+  }
+  .hero__meta span::before { flex: none; width: 6px; height: 6px; box-shadow: 0 0 10px rgba(212, 175, 55, .6); }
+
+  .hero__scroll { bottom: 1.2rem; gap: .5rem; }
+  .hero__scroll i { height: 34px; }
+}
+@media (max-width: 360px) {
+  .hero__meta { letter-spacing: .06em; font-size: .7rem; }
+  .hero__meta span { padding: .55rem .9rem; border-radius: 18px; }
+}
+@media (max-width: 760px) { .hero__scroll { color: var(--sand); opacity: .85; } }
