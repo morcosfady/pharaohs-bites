@@ -448,10 +448,13 @@
 
   /* Pharaoh mark for house specials. `label` renders an accessible name once
      per item; repeat marks elsewhere on the same card are decorative. */
+  /* The ankh, the ancient Egyptian symbol of life: the mark for our signature dishes. */
+  var ANKH_SVG = '<svg viewBox="0 0 24 34" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="9.2" rx="5.6" ry="7.2"/><path d="M12 16.4V32M4.2 20h15.6"/></svg>';
+  function ankh(cls, label) {
+    return '<span class="' + cls + '"' + (label ? ' role="img" aria-label="' + label + '"' : ' aria-hidden="true"') + '>' + ANKH_SVG + '</span>';
+  }
   function pharaoh(label) {
-    return '<img class="pharaoh-mark" src="assets/img/pharaoh-mark.svg" ' +
-           (label ? 'alt="House special"' : 'alt="" aria-hidden="true"') +
-           ' width="52" height="60" loading="lazy">';
+    return ankh("pharaoh-mark", label ? "House special" : "");
   }
 
   var SVG_HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.6S3.8 15.3 3.8 9.6a4.6 4.6 0 0 1 8.2-2.8 4.6 4.6 0 0 1 8.2 2.8c0 5.7-8.2 11-8.2 11z"/></svg>';
@@ -602,7 +605,7 @@
         return '' +
           '<article class="order-item order-item--hero" data-cat="' + esc(item.cat) + '" data-reveal>' +
             '<div class="hero-item__media media media--4x3">' +
-              '<span class="hero-item__ribbon"><img src="assets/img/pharaoh-mark.svg" alt="" aria-hidden="true" width="26" height="30">The House Signature</span>' +
+              '<span class="hero-item__ribbon">' + ankh("ankh-icon") + 'The House Signature</span>' +
               '<img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + ' — ' + esc(item.desc.slice(0, 60)) + '" loading="lazy" decoding="async" width="1052" height="787">' +
             "</div>" +
             '<div class="hero-item__body">' +
@@ -627,7 +630,7 @@
         '<article class="order-item' + (item.signature ? " order-item--sig" : "") + '" data-cat="' + esc(item.cat) + '" data-reveal>' +
           '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
           "<div>" +
-            (item.signature ? '<span class="sig-badge"><img src="assets/img/pharaoh-mark.svg" alt="" aria-hidden="true" width="18" height="21">The House Signature</span>' : "") +
+            (item.signature ? '<span class="sig-badge">' + ankh("ankh-icon") + 'The House Signature</span>' : "") +
             "<h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
             ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3><p>" + esc(item.desc.slice(0, 96)) + "…</p></div>" +
           '<div class="order-item__side">' +

@@ -1496,3 +1496,14 @@ body.nav-open .site-header.is-stuck {
 .sig-badge img { width: 15px !important; height: 18px !important; object-fit: contain; filter: brightness(0); flex: none; }
 .order-item--sig { border-color: rgba(212, 175, 55, .38); background: linear-gradient(165deg, rgba(212, 175, 55, .07), rgba(255, 255, 255, .022)); }
 @media (max-width: 480px) { .sig-badge { font-size: .68rem; letter-spacing: .12em; } }
+
+/* Ankh mark (replaces the old figure) */
+.pharaoh-mark { display: inline-flex; align-items: center; height: 1.15em; margin-right: .45em; vertical-align: -.16em; color: var(--gold); filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .55)); }
+.pharaoh-mark svg { height: 100%; width: auto; display: block; }
+.tag--special .pharaoh-mark { height: 1.4em; }
+.dish__name .pharaoh-mark, .order-item h3 .pharaoh-mark { height: 1em; }
+.hero-item__ribbon .ankh-icon, .sig-badge .ankh-icon { display: inline-flex; flex: none; color: var(--black); filter: none; margin: 0; }
+.hero-item__ribbon .ankh-icon svg { height: 20px; width: auto; display: block; stroke-width: 2.8; }
+.sig-badge .ankh-icon svg { height: 15px; width: auto; display: block; stroke-width: 3; }
+.sig-badge .ankh-icon svg { height: 18px; }
+.hero-item__ribbon .ankh-icon svg { height: 24px; }
