@@ -1058,6 +1058,24 @@
     ].join(nl);
   }
 
+  /* Plain, short version used only when the full message would make an
+     extremely long link (huge orders). No emoji or Arabic, so it stays small.
+     The complete order is already saved in the finance system under the order number. */
+  function orderAsCompactText(order) {
+    var c = order.customer || {};
+    var win = windowById(c.requested_window);
+    var address = [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
+    var out = ["*NEW PHARAOH'S BITES ORDER*"];
+    if (order.orderNumber) out.push("Order No: *" + order.orderNumber + "*");
+    out.push("", "*Name:* " + c.name, "*Phone:* " + c.phone, "*Address:* " + address);
+    if (c.instructions) out.push("*Instructions:* " + c.instructions.slice(0, 200));
+    if (validDeliveryDate(c.requested_date) && win) out.push("*Delivery:* " + formatDeliveryDate(c.requested_date, true) + ", " + win.label);
+    out.push("", "*Items*");
+    order.items.forEach(function (l) { out.push(l.qty + " x " + l.name + " - " + money(l.lineTotal)); });
+    out.push("", "*Subtotal:* " + money(order.subtotal), "Delivery fee, tax and final total: to be confirmed");
+    return out.join("\n");
+  }
+
   function formatRequested(v) {
     var d = new Date(v);
     if (isNaN(d.getTime())) return v;
@@ -1142,6 +1160,8 @@
 
   function openWhatsApp(order, number) {
     var url = whatsappUrl(number, orderAsText(order));
+    /* Links this long are unproven on some phones; fall back to the compact text. */
+    if (url.length > 12000) url = whatsappUrl(number, orderAsCompactText(order));
     var win = window.open(url, "_blank", "noopener");
     if (!win) window.location.href = url;   /* popup blocked: same tab */
     toast("Opening WhatsApp with your order…");

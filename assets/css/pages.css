@@ -1278,3 +1278,10 @@ html, body { overflow-x: clip; }
   .footer-bottom nav a { display: inline-flex; align-items: center; min-height: 44px; }
   .footer-bottom nav { gap: 1.2rem; }
 }
+
+/* Taglines: never below 11px on phones (letter-spacing tightened so they still fit) */
+@media (max-width: 760px) {
+  .brand__sub { font-size: 11px; letter-spacing: .1em; }
+  .hero__wordmark__sub { font-size: 11px; letter-spacing: .1em; }
+}
+@media (max-width: 760px) { .hero__wordmark__sub i { display: none; } }
