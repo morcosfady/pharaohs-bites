@@ -1385,6 +1385,71 @@
     });
   }
 
+  /* --- Enquiry forms: email them to the kitchen -------------------------
+     The site has no server of its own, so the forms post to a small relay that
+     runs inside the business Google account (Apps Script). It emails the message
+     to the business inbox in a branded layout, with the customer's address as
+     Reply-To. Address and key live in assets/js/config.js. */
+  function formVal(form, name) {
+    var el = form.elements[name];
+    if (!el) return "";
+    if (el.length && el[0] && el[0].type === "radio") { var on = [].filter.call(el, function (r) { return r.checked; })[0]; return on ? on.value : ""; }
+    return (el.value || "").trim();
+  }
+
+  function enquiryPayload(form) {
+    var isContact = !!form.elements.subject;
+    var f = function (n) { return formVal(form, n); };
+    var fields = { "Name": f("name"), "Email": f("email"), "Phone": f("phone") };
+    var subject;
+
+    if (isContact) {
+      fields["Topic"] = f("subject");
+      fields["Message"] = f("message");
+      subject = "Website message: " + (f("subject") || "General enquiry") + " (" + f("name") + ")";
+    } else {
+      var occasion = f("occasion") === "Other" ? (f("occasion_other") || "Other") : f("occasion");
+      fields["Occasion"] = occasion;
+      fields["Date needed"] = f("date") ? formatDeliveryDate(f("date"), true) : "";
+      fields["Time needed"] = f("time");
+      fields["How many people"] = f("party") ? f("party") + " people" : "";
+      fields["Notes"] = f("notes");
+      subject = "Catering request: " + [occasion, f("party") && f("party") + " people", f("date")].filter(Boolean).join(" · ") + " (" + f("name") + ")";
+    }
+
+    var out = {};
+    Object.keys(fields).forEach(function (k) { if (fields[k]) out[k] = fields[k]; });
+    return {
+      token: C.enquiryToken,
+      kind: isContact ? "contact" : "catering",
+      subject: subject,
+      page: "pharaohsbites.com " + (isContact ? "contact page" : "catering page"),
+      honey: f("_honey"),
+      fields: out
+    };
+  }
+
+  function sendEnquiry(form) {
+    if (!C.enquiryEndpoint) return Promise.reject(new Error("email is not connected yet"));
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 25000) : null;
+    /* A plain-text body keeps this a "simple" request, so no CORS preflight is needed. */
+    return fetch(C.enquiryEndpoint, {
+      method: "POST",
+      body: JSON.stringify(enquiryPayload(form)),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (res) {
+      if (timer) clearTimeout(timer);
+      return res.json().catch(function () { return {}; }).then(function (j) {
+        if (!res.ok || !j || j.ok !== true) throw new Error((j && j.error) || ("status " + res.status));
+        return j;
+      });
+    }, function (err) {
+      if (timer) clearTimeout(timer);
+      throw new Error(err && err.name === "AbortError" ? "timed out" : "network error");
+    });
+  }
+
   /* --- Forms ----------------------------------------------------------- */
   function initForms() {
     $$("form[data-validate]").forEach(function (form) {
@@ -1403,7 +1468,10 @@
 
         if (field.required && !value) return setError(field, label + " is required.");
         if (field.type === "email" && value && !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(value)) return setError(field, "Enter a valid email address.");
-        if (field.type === "tel" && value && !/^[+\d][\d\s()-]{6,}$/.test(value)) return setError(field, "Enter a valid phone number.");
+        if (field.type === "tel" && value) {
+          var digits = value.replace(/\D/g, "").length;
+          if (!/^[+(\d][\d\s().-]*$/.test(value) || digits < 10 || digits > 15) return setError(field, "Enter a phone number with area code, like (214) 555-0100.");
+        }
         if (field.type === "date" && value) {
           var picked = new Date(value + "T00:00:00");
           var today = new Date(); today.setHours(0, 0, 0, 0);
@@ -1434,14 +1502,35 @@
           return;
         }
 
-        if (status) {
-          status.textContent = form.getAttribute("data-success") || "Thank you — we have received your message.";
-          status.classList.add("is-visible");
-        }
-        toast(form.getAttribute("data-toast") || "Sent successfully");
-        form.reset();
-        $$("[aria-invalid]", form).forEach(function (f) { f.setAttribute("aria-invalid", "false"); });
-        $$(".error-text", form).forEach(function (s) { s.textContent = ""; });
+        var btn = $("button[type='submit']", form);
+        var label = btn ? btn.textContent : "";
+        if (form.getAttribute("data-sending") === "1") return;          /* double-tap guard */
+        form.setAttribute("data-sending", "1");
+        if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
+        if (status) { status.textContent = "Sending your message…"; status.classList.add("is-visible"); }
+
+        sendEnquiry(form).then(function () {
+          if (status) {
+            status.textContent = form.getAttribute("data-success") || "Thank you — we have received your message.";
+            status.classList.add("is-visible");
+          }
+          toast(form.getAttribute("data-toast") || "Sent successfully");
+          form.reset();
+          $$("[aria-invalid]", form).forEach(function (f) { f.setAttribute("aria-invalid", "false"); });
+          $$(".error-text", form).forEach(function (s) { s.textContent = ""; });
+        }).catch(function (err) {
+          if (status) {
+            status.textContent = "We could not send that just now (" + err.message + "). Nothing is lost — please try again, or message us on WhatsApp: ";
+            var a = document.createElement("a");
+            a.href = "https://wa.me/" + (C.whatsappNumber || "17879684078");
+            a.target = "_blank"; a.rel = "noopener"; a.textContent = "+1 (787) 968-4078";
+            status.appendChild(a);
+            status.classList.add("is-visible");
+          }
+        }).then(function () {
+          form.removeAttribute("data-sending");
+          if (btn) { btn.disabled = false; btn.textContent = label; }
+        });
       });
     });
 

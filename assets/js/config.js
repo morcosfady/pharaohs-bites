@@ -19,7 +19,7 @@
     region: "TX",
     country: "US",
     // TODO: confirm your real pickup/delivery zones.
-    deliveryAreas: "Uptown, Deep Ellum, Plano, Frisco and Irving",
+    deliveryAreas: "All over the Dallas–Fort Worth (DFW) area",
     // Cloud kitchen — no public street address. Pickup point is arranged per order.
     hasPublicAddress: false,
 
@@ -30,6 +30,9 @@
     phoneDisplay: "+1 (787) 968-4078",
     phoneHref: "https://wa.me/17879684078",
     email: "pharaohsbites.dallas@gmail.com",
+    // Contact + catering forms post here; the relay emails them to the address above.
+    enquiryEndpoint: "",
+    enquiryToken: "948d233dd65a28a88dab5ab0d5df1e34",
 
     /* --- When --- */
     // TODO: confirm real hours.
