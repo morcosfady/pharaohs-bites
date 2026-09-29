@@ -45,12 +45,12 @@
       desc: "The same hand-stretched layers, stuffed with seasoned plant-based ground beef, melted mozzarella and a mix of vegetables — green pepper, olives and onions — then sealed and returned to the oven.",
       tags: ["House Special", "Plant-Based"], img: "assets/img/menu-real/feteer-beef-mozzarella.webp" },
 
-    { id: "macarona-bechamel", cat: "mains", name: "Macarona Béchamel Tray", ar: "صينية مكرونة بشاميل",
+    { id: "macarona-bechamel", cat: "mains", signature: true, name: "Macarona Béchamel Tray", ar: "صينية مكرونة بشاميل",
       price: 30, featured: true,
       desc: "Tender penne layered with savory plant-based beef and creamy béchamel, baked until golden and served in hearty squares. Comes in a half-size foil tray.",
       tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/macarona-bechamel.webp" },
 
-    { id: "goulash-beef", cat: "mains", name: "Goulash Tray with Plant-Based Beef", ar: "صينية جلاش باللحمة",
+    { id: "goulash-beef", cat: "mains", signature: true, name: "Goulash Tray with Plant-Based Beef", ar: "صينية جلاش باللحمة",
       price: 35,
       desc: "Crisp, golden layers of Egyptian goulash filled with seasoned plant-based ground beef, green peppers, onions, and olives. Cut into squares and served in a half-size foil tray.",
       tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/goulash-beef.webp?v=2" },
@@ -72,12 +72,12 @@
       tags: ["Vegan"], img: "assets/img/menu-real/lentil-soup.webp" },
 
     /* ---------------- SWEET ---------------- */
-    { id: "om-ali", cat: "desserts", name: "Om Ali", ar: "أم علي",
+    { id: "om-ali", cat: "desserts", signature: true, name: "Om Ali", ar: "أم علي",
       price: 25, special: true, featured: true,
       desc: "Warm Egyptian Om Ali with flaky pastry baked in sweet, creamy milk, finished with a golden top and mixed nuts. Served in a half-size foil tray.",
       tags: ["House Special", "Contains Nuts", "Tray"], img: "assets/img/menu-real/om-ali.webp" },
 
-    { id: "goulash-nuts", cat: "desserts", name: "Goulash Tray with Nuts", ar: "صينية جلاش بالمكسرات",
+    { id: "goulash-nuts", cat: "desserts", signature: true, name: "Goulash Tray with Nuts", ar: "صينية جلاش بالمكسرات",
       price: 25, special: true, featured: true,
       desc: "Crisp, golden layers of sweet Egyptian goulash filled with mixed nuts and finished with a light syrup glaze. Cut into squares and served in a half-size foil tray.",
       tags: ["House Special", "Contains Nuts"], img: "assets/img/menu-real/goulash-nuts.webp" },
@@ -97,7 +97,7 @@
       desc: "Smooth, creamy banana pudding served chilled in a small dessert cup.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/banana-pudding.webp" },
 
-    { id: "rice-pudding", cat: "desserts", name: "Rice Pudding", ar: "رز باللبن",
+    { id: "rice-pudding", cat: "desserts", signature: true, name: "Rice Pudding", ar: "رز باللبن",
       price: 5.5,
       desc: "Creamy Egyptian rice pudding topped with mixed nuts (optional), served chilled in a small dessert cup.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/rice-pudding.webp" },

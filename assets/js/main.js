@@ -624,9 +624,11 @@
           "</article>";
       }
       return '' +
-        '<article class="order-item" data-cat="' + esc(item.cat) + '" data-reveal>' +
+        '<article class="order-item' + (item.signature ? " order-item--sig" : "") + '" data-cat="' + esc(item.cat) + '" data-reveal>' +
           '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
-          "<div><h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
+          "<div>" +
+            (item.signature ? '<span class="sig-badge"><img src="assets/img/pharaoh-mark.svg" alt="" aria-hidden="true" width="18" height="21">The House Signature</span>' : "") +
+            "<h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
             ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3><p>" + esc(item.desc.slice(0, 96)) + "…</p></div>" +
           '<div class="order-item__side">' +
             '<span class="order-item__price">' + money(item.price) + "</span>" +

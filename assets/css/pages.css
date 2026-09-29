@@ -1449,3 +1449,50 @@ body.nav-open .site-header.is-stuck {
   -webkit-text-fill-color: currentColor; color: var(--gold-light);
   text-shadow: 0 0 34px rgba(212, 175, 55, .4), 0 2px 12px rgba(0, 0, 0, .6);
 }
+
+/* MENU SIZING: signature card a touch smaller, every other dish gets a bigger photo ---- */
+.order-item { grid-template-columns: 132px 1fr auto; gap: 1.2rem; padding: 1rem; }
+.order-item .media--1x1 { border-radius: 14px; }
+@media (max-width: 980px) { .order-item { grid-template-columns: 112px 1fr; } }
+@media (max-width: 480px) { .order-item { grid-template-columns: 96px 1fr; gap: .9rem; padding: .85rem; } }
+
+/* signature card: smaller than before, still the biggest thing on the menu */
+@media (min-width: 720px) {
+  .order-item--hero { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); }
+  .order-item--hero .hero-item__body { padding: 1.25rem 1.5rem; gap: .6rem; }
+  .order-item--hero .hero-item__title { font-size: clamp(1.9rem, 1.3rem + 1.4vw, 2.35rem); }
+  .order-item--hero .hero-item__title .dish__ar { margin-top: .25rem; }
+  .order-item--hero .hero-item__desc { font-size: var(--step--1); line-height: 1.55; }
+  .order-item--hero .hero-item__facts li { padding: .3rem .7rem; font-size: .7rem; }
+  .order-item--hero .hero-item__foot { margin-top: .3rem; padding-top: .8rem; }
+  .order-item--hero .hero-item__price { font-size: 2.2rem; }
+  .order-item--hero .hero-item__add { min-height: 3rem; padding-inline: 1.3rem; }
+}
+@media (max-width: 719px) {
+  .order-item--hero .hero-item__media { aspect-ratio: 16 / 11; }
+}
+
+/* Medium screens: the menu column sits beside the basket and is narrow, so stack the signature photo on top */
+@media (min-width: 981px) and (max-width: 1279px) {
+  .order-item--hero { grid-template-columns: 1fr; }
+  .order-item--hero .hero-item__media { aspect-ratio: 16 / 9; min-height: 0; }
+  .order-item--hero .hero-item__media img:not(.hero-item__ribbon img) { position: static; }
+  .order-item--hero .hero-item__body { padding: 1.2rem 1.4rem 1.3rem; }
+}
+
+/* keep the signature card's own layout on phones (the shared photo-size rules must not squeeze it) */
+@media (max-width: 719px) {
+  .order-item.order-item--hero { grid-template-columns: 1fr; padding: 0; gap: 0; }
+}
+
+/* Gold "The House Signature" badge on the signature dishes */
+.sig-badge {
+  display: inline-flex; align-items: center; gap: .45rem;
+  margin-bottom: .5rem; padding: .25rem .8rem .25rem .4rem;
+  font-size: .7rem; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; line-height: 1.2; color: var(--black);
+  background: linear-gradient(180deg, var(--gold-light), var(--gold) 55%, var(--gold-deep));
+  border-radius: 999px; box-shadow: 0 6px 18px rgba(0, 0, 0, .4), inset 0 1px 0 rgba(255, 255, 255, .5);
+}
+.sig-badge img { width: 15px !important; height: 18px !important; object-fit: contain; filter: brightness(0); flex: none; }
+.order-item--sig { border-color: rgba(212, 175, 55, .38); background: linear-gradient(165deg, rgba(212, 175, 55, .07), rgba(255, 255, 255, .022)); }
+@media (max-width: 480px) { .sig-badge { font-size: .68rem; letter-spacing: .12em; } }
