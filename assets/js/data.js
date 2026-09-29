@@ -40,7 +40,7 @@
       desc: "Flaky, buttery, pull-apart layers. Paper-thin dough stretched by hand, folded again and again with homemade butter between every layer, then baked until the top shatters.",
       tags: ["House Special", "Vegetarian"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
 
-    { id: "feteer-beef", cat: "mains", name: "Feteer with Plant-Based Beef & Mozzarella", ar: "فطير محشي لحمة",
+    { id: "feteer-beef", cat: "mains", signature: true, name: "Feteer with Plant-Based Beef & Mozzarella", ar: "فطير محشي لحمة",
       price: 40, special: true, featured: true,
       desc: "The same hand-stretched layers, stuffed with seasoned plant-based ground beef, melted mozzarella and a mix of vegetables — green pepper, olives and onions — then sealed and returned to the oven.",
       tags: ["House Special", "Plant-Based"], img: "assets/img/menu-real/feteer-beef-mozzarella.webp" },
