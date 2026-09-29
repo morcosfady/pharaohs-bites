@@ -677,7 +677,7 @@
     var form = $("[data-checkout-form]");
     if (!form) return null;
     var c = {};
-    ["first_name", "last_name", "phone", "street", "apt", "city", "state", "zip", "instructions", "requested_at"].forEach(function (k) {
+    ["first_name", "last_name", "phone", "street", "apt", "city", "state", "zip", "instructions", "requested_date", "requested_window", "requested_at"].forEach(function (k) {
       var el = form.elements[k];
       c[k] = el ? el.value.trim() : "";
     });
@@ -686,12 +686,44 @@
     return c;
   }
 
-  function customerComplete(c) {
+  /* --- Delivery date + time window -------------------------------------
+     The earliest date is tomorrow in the customer's own time zone. The same
+     rule drives the calendar, the button state, the submit guard and the
+     order builder, so a bad date cannot slip through any of them. */
+  var WINDOWS = [
+    { id: "w1", label: "9:00 AM–12:00 PM", sub: "Morning",   hour: 9 },
+    { id: "w2", label: "12:00 PM–3:00 PM", sub: "Midday",    hour: 12 },
+    { id: "w3", label: "3:00 PM–6:00 PM",  sub: "Afternoon", hour: 15 },
+    { id: "w4", label: "6:00 PM–9:00 PM",  sub: "Evening",   hour: 18 }
+  ];
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function toYmd(d) { return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
+  function parseYmd(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || "");
+    if (!m) return null;
+    var d = new Date(+m[1], +m[2] - 1, +m[3]);
+    return (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) ? d : null;
+  }
+  function earliestDate() { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1); }
+  function validDeliveryDate(v) { var d = parseYmd(v); return !!d && d.getTime() >= earliestDate().getTime(); }
+  function windowById(id) { return WINDOWS.filter(function (w) { return w.id === id; })[0] || null; }
+  function formatDeliveryDate(v, long) {
+    var d = parseYmd(v);
+    if (!d) return v || "";
+    return d.toLocaleDateString("en-US", long
+      ? { weekday: "long", month: "long", day: "numeric", year: "numeric" }
+      : { weekday: "short", month: "short", day: "numeric" });
+  }
+  function scheduleComplete(c) { return !!c && validDeliveryDate(c.requested_date) && !!windowById(c.requested_window); }
+
+  function detailsFilled(c) {
     if (!c) return false;
     return REQUIRED_FIELDS.every(function (k) { return c[k].length > 0; }) &&
            /^\d{5}(-\d{4})?$/.test(c.zip) &&
            c.phone.replace(/\D/g, "").length >= 7;
   }
+
+  function customerComplete(c) { return detailsFilled(c) && scheduleComplete(c); }
 
   function updateCheckoutState(subtotal) {
     var checkout = $("[data-checkout]");
@@ -705,6 +737,7 @@
     var customer = readCustomer();
     var hasItems = subtotal > 0;
     var detailsOk = customerComplete(customer);
+    var scheduleOk = scheduleComplete(customer);
     var number = C.orderWhatsappNumber || C.whatsappNumber;
 
     checkout.disabled = !(hasItems && detailsOk && number);
@@ -713,10 +746,129 @@
     if (note) {
       var min = C.minimumOrder || 0;
       if (!hasItems) note.textContent = "Add a dish and fill in your details to continue.";
-      else if (!detailsOk) note.textContent = "Fill in your name, phone number and delivery address to continue.";
+      else if (!detailsFilled(customer)) note.textContent = "Fill in your name, phone number and delivery address to continue.";
+      else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
       else if (min > 0 && subtotal < min) note.textContent = "Heads up: our usual minimum is " + money(min) + ". Send it anyway and we will confirm.";
       else note.textContent = "WhatsApp opens with your order ready to send. We confirm the delivery fee before payment.";
     }
+  }
+
+
+  /* --- Calendar + window picker UI ------------------------------------- */
+  function initSchedule(form) {
+    var root = $("[data-schedule]");
+    if (!root) return;
+    var fDate = form.elements.requested_date, fAt = form.elements.requested_at;
+    var trigger = $("[data-date-trigger]", root), label = $("[data-date-label]", root);
+    var cal = $("[data-calendar]", root), title = $("[data-cal-title]", root), grid = $("[data-cal-grid]", root);
+    var prev = $("[data-cal-prev]", root), next = $("[data-cal-next]", root), note = $("[data-cal-note]", root);
+    var winBox = $("[data-windows]", root), winList = $("[data-windows-list]", root), hint = $("[data-schedule-hint]", root);
+    var summary = $("[data-delivery-summary]"), summaryText = $("[data-delivery-text]");
+    var view = null;
+
+    var savedCust = Store.read("customer", null);
+    var savedWinId = (savedCust && savedCust.requested_window) || "";
+    winList.innerHTML = WINDOWS.map(function (w) {
+      return '<label class="win"><input type="radio" name="requested_window" value="' + w.id + '"' + (w.id === savedWinId ? " checked" : "") + '>' +
+        '<span class="win__card"><b>' + w.label + '</b><small>' + w.sub + '</small></span></label>';
+    }).join("");
+    var radios = $$("input[name=requested_window]", winList);
+
+    function chosenWindow() { var r = radios.filter(function (x) { return x.checked; })[0]; return r ? windowById(r.value) : null; }
+    function monthStart(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+
+    function renderCalendar() {
+      var min = earliestDate(), first = view, y = first.getFullYear(), m = first.getMonth();
+      title.textContent = first.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      var offset = first.getDay(), days = new Date(y, m + 1, 0).getDate(), html = "", todayKey = toYmd(new Date());
+      for (var i = 0; i < offset; i++) html += '<span class="cal-blank"></span>';
+      for (var day = 1; day <= days; day++) {
+        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < min.getTime(), sel = key === fDate.value;
+        html += '<button type="button" class="cal-day' + (off ? " is-off" : "") + (sel ? " is-selected" : "") + (key === todayKey ? " is-today" : "") +
+          '" data-date="' + key + '"' + (off ? " disabled" : "") + ' aria-label="' + formatDeliveryDate(key, true) + (off ? " (unavailable)" : "") +
+          '" aria-pressed="' + sel + '" tabindex="-1">' + day + "</button>";
+      }
+      grid.innerHTML = html;
+      var minMonth = monthStart(min);
+      prev.disabled = first.getTime() <= minMonth.getTime();
+      next.disabled = first.getTime() >= new Date(minMonth.getFullYear(), minMonth.getMonth() + 12, 1).getTime();
+      var tab = $(".cal-day.is-selected", grid) || $(".cal-day:not(.is-off)", grid);
+      if (tab) tab.tabIndex = 0;
+    }
+
+    function openCal() {
+      view = monthStart(validDeliveryDate(fDate.value) ? parseYmd(fDate.value) : earliestDate());
+      renderCalendar();
+      cal.hidden = false;
+      trigger.setAttribute("aria-expanded", "true");
+      var f = $(".cal-day[tabindex='0']", grid);
+      if (f) f.focus({ preventScroll: true });
+      cal.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+    function closeCal(refocus) {
+      cal.hidden = true;
+      trigger.setAttribute("aria-expanded", "false");
+      if (refocus) trigger.focus({ preventScroll: true });
+    }
+
+    function refresh() {
+      var okDate = validDeliveryDate(fDate.value);
+      if (!okDate) fDate.value = "";
+      var win = chosenWindow();
+      fAt.value = okDate && win ? fDate.value + "T" + pad2(win.hour) + ":00" : "";
+      label.textContent = okDate ? formatDeliveryDate(fDate.value, true) : "Select a date";
+      trigger.classList.toggle("is-set", okDate);
+      winBox.hidden = !okDate;
+      note.textContent = "Earliest delivery: " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable.";
+      if (!okDate) hint.textContent = "Pick a delivery date, from tomorrow onward.";
+      else if (!win) hint.textContent = "Now choose one delivery window.";
+      else hint.textContent = "";
+      if (summary) {
+        summary.classList.toggle("is-set", !!(okDate && win));
+        summaryText.textContent = okDate && win ? formatDeliveryDate(fDate.value) + " · " + win.label
+          : okDate ? formatDeliveryDate(fDate.value) + " · choose a window" : "Choose a date & time window";
+      }
+    }
+    function changed() { refresh(); form.dispatchEvent(new Event("input", { bubbles: true })); }
+
+    /* Drop anything restored from an earlier visit that is no longer valid */
+    if (!validDeliveryDate(fDate.value)) { fDate.value = ""; radios.forEach(function (x) { x.checked = false; }); }
+    refresh();
+
+    trigger.addEventListener("click", function () { if (cal.hidden) openCal(); else closeCal(false); });
+    prev.addEventListener("click", function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderCalendar(); });
+    next.addEventListener("click", function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderCalendar(); });
+
+    grid.addEventListener("click", function (e) {
+      var b = e.target.closest(".cal-day");
+      if (!b || b.disabled) return;
+      var needWindow = !chosenWindow();
+      fDate.value = b.getAttribute("data-date");
+      closeCal(true);
+      changed();
+      if (needWindow) winBox.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+
+    /* keyboard: arrows move by day / week, Esc closes */
+    cal.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") { e.preventDefault(); closeCal(true); return; }
+      var b = e.target.closest(".cal-day");
+      var step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[e.key];
+      if (!b || !step) return;
+      e.preventDefault();
+      var d = parseYmd(b.getAttribute("data-date"));
+      var t = new Date(d.getFullYear(), d.getMonth(), d.getDate() + step);
+      if (t.getTime() < earliestDate().getTime()) return;
+      if (t.getMonth() !== view.getMonth() || t.getFullYear() !== view.getFullYear()) { view = monthStart(t); renderCalendar(); }
+      var target = $('.cal-day[data-date="' + toYmd(t) + '"]', grid);
+      if (target) { $$(".cal-day", grid).forEach(function (x) { x.tabIndex = -1; }); target.tabIndex = 0; target.focus(); }
+    });
+
+    winList.addEventListener("change", changed);
+
+    /* tap outside closes the calendar; re-check if the page stayed open past midnight */
+    document.addEventListener("click", function (e) { if (!cal.hidden && !root.contains(e.target)) closeCal(false); });
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) changed(); });
   }
 
   function initCheckoutForm() {
@@ -732,6 +884,7 @@
       updateCheckoutState();
     });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
+    initSchedule(form);
     updateCheckoutState();
   }
 
@@ -823,7 +976,11 @@
     if (c.phone) cust.push("2️⃣ 📱 *Phone:* " + c.phone);
     cust.push("3️⃣ 🏠 *Address:* " + address);
     if (c.instructions) cust.push("4️⃣ 📝 *Instructions:* _" + c.instructions + "_");
-    if (c.requested_at) cust.push("5️⃣ 🗓️ *Requested for:* " + formatRequested(c.requested_at));
+    var win = windowById(c.requested_window);
+    if (validDeliveryDate(c.requested_date) && win) {
+      cust.push("5️⃣ 🗓️ *Delivery Date:* " + formatDeliveryDate(c.requested_date, true));
+      cust.push("6️⃣ ⏰ *Delivery Window:* " + win.label);
+    }
 
     var items = order.items.map(function (l, i) {
       var dot = WA_DOTS[i % WA_DOTS.length];
@@ -844,6 +1001,7 @@
       waSection("💰", "ORDER SUMMARY  |  ملخص الطلب"), "",
       "🧺 Dishes: *" + order.items.length + "*   🔢 Total Qty: *" + count + "*",
       "🧮 Subtotal: *" + money(order.subtotal) + "* 💵",
+      "🗓️ Delivery: *" + formatDeliveryDate(c.requested_date) + " · " + (win ? win.label : "") + "*",
       "🚗 Delivery Fee: _To be determined_ ⏳",
       "🏛️ Tax: _To be confirmed_ ⏳",
       "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
@@ -883,13 +1041,21 @@
   /* Record the order in the finance system. Resolves with the order number
      or rejects with a readable error. Never trusts client totals: only
      product ids, quantities and customer details are sent. */
+  /* The finance system stores one requested time, so the chosen window is
+     also written into the delivery instructions where the kitchen will see it. */
+  function deliveryInstructions(c) {
+    var win = windowById(c.requested_window);
+    var tag = win ? "Delivery window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
+    return [tag, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
+  }
+
   function recordOrder(order, token) {
     var payload = {
       checkout_token: token,
       customer: {
         name: order.customer.name, phone: order.customer.phone, street: order.customer.street, apt: order.customer.apt,
         city: order.customer.city, state: order.customer.state, zip: order.customer.zip,
-        instructions: order.customer.instructions || "",
+        instructions: deliveryInstructions(order.customer),
         requested_at: order.customer.requested_at ? new Date(order.customer.requested_at).toISOString() : ""
       },
       items: order.items.map(function (l) { return { slug: l.id, quantity: l.qty, options: l.options || "" }; })
@@ -958,7 +1124,7 @@
     if (submitting) return;                    /* double-click guard */
     if (!Object.keys(basket).length) return;
     if (!customerComplete(readCustomer())) {
-      toast("Please fill in your name, phone and delivery address first.");
+      toast(detailsFilled(readCustomer()) ? "Please choose a delivery date (from tomorrow) and a time window." : "Please fill in your name, phone and delivery address first.");
       updateCheckoutState();
       return;
     }

@@ -24,7 +24,7 @@
 <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="assets/css/main.css?v=63">
-<link rel="stylesheet" href="assets/css/pages.css?v=73">
+<link rel="stylesheet" href="assets/css/pages.css?v=81">
 <link rel="stylesheet" href="assets/css/pharaonic.css?v=61">
 <script type="application/ld+json">
 {
@@ -153,14 +153,42 @@
               <label for="co-instructions">Delivery instructions <small>(optional)</small></label>
               <input id="co-instructions" name="instructions" type="text" maxlength="500" placeholder="Gate code, leave at door, call on arrival…">
             </div>
-            <div class="field">
-              <label for="co-requested">Requested date &amp; time <small>(optional)</small></label>
-              <input id="co-requested" name="requested_at" type="datetime-local">
-            </div>
+            <fieldset class="schedule" data-schedule>
+              <legend>Delivery date &amp; time <span aria-hidden="true">*</span></legend>
+              <input type="hidden" name="requested_date">
+              <input type="hidden" name="requested_at">
+
+              <button class="date-trigger" type="button" data-date-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="co-calendar">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+                <span class="date-trigger__text"><small>Delivery date</small><strong data-date-label>Select a date</strong></span>
+                <svg class="date-trigger__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </button>
+
+              <div class="calendar" id="co-calendar" data-calendar role="dialog" aria-label="Choose a delivery date" hidden>
+                <div class="calendar__head">
+                  <button class="calendar__nav" type="button" data-cal-prev aria-label="Previous month"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+                  <div class="calendar__title" data-cal-title aria-live="polite"></div>
+                  <button class="calendar__nav" type="button" data-cal-next aria-label="Next month"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+                </div>
+                <div class="calendar__dow" aria-hidden="true"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+                <div class="calendar__grid" data-cal-grid></div>
+                <p class="calendar__note" data-cal-note></p>
+              </div>
+
+              <div class="windows" data-windows hidden>
+                <p class="windows__title" id="windows-title">Choose one delivery window</p>
+                <div class="windows__list" role="radiogroup" aria-labelledby="windows-title" data-windows-list></div>
+              </div>
+              <p class="schedule__hint" data-schedule-hint role="status"></p>
+            </fieldset>
           </form>
           </div>
 
           <div class="basket__foot">
+          <div class="basket__delivery" data-delivery-summary>
+            <span class="basket__delivery-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span>
+            <div><small>Requested delivery</small><strong data-delivery-text>Choose a date &amp; time window</strong></div>
+          </div>
           <div class="basket__totals">
             <div class="basket__row basket__row--total"><span>Order subtotal</span><span data-subtotal>$0</span></div>
           </div>
@@ -299,8 +327,8 @@
   </div>
 </footer>
 
-<script src="assets/js/config.js?v=61"></script>
-<script src="assets/js/data.js?v=61"></script>
-<script src="assets/js/main.js?v=61" defer></script>
+<script src="assets/js/config.js?v=70"></script>
+<script src="assets/js/data.js?v=70"></script>
+<script src="assets/js/main.js?v=70" defer></script>
 </body>
 </html>

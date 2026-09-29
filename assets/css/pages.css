@@ -1107,3 +1107,125 @@
 @media (min-width: 1200px) {
   .order-layout { grid-template-columns: minmax(0, 1fr) 25rem; }
 }
+
+/* DELIVERY DATE + TIME WINDOW ------------------------------------------- */
+.schedule { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: .7rem; }
+.schedule legend { padding: 0; margin-bottom: .55rem; font-size: var(--step--2); letter-spacing: .16em; text-transform: uppercase; color: var(--text-muted); }
+.schedule legend span { color: var(--gold); }
+.schedule svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+.date-trigger {
+  display: flex; align-items: center; gap: .85rem; width: 100%; min-height: 3.6rem;
+  padding: .7rem 1rem; text-align: left; cursor: pointer;
+  color: var(--ivory); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  transition: border-color .25s var(--ease), background .25s var(--ease), box-shadow .25s var(--ease);
+}
+.date-trigger > svg:first-child { width: 22px; height: 22px; flex: none; color: var(--gold); }
+.date-trigger__text { display: grid; gap: .1rem; flex: 1; min-width: 0; }
+.date-trigger small { font-size: .62rem; letter-spacing: .2em; text-transform: uppercase; color: var(--text-dim); }
+.date-trigger strong { font-weight: 400; font-size: var(--step--1); color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.date-trigger.is-set strong { color: var(--ivory); }
+.date-trigger__chev { width: 18px; height: 18px; flex: none; color: var(--text-muted); transition: transform .3s var(--ease); }
+.date-trigger[aria-expanded="true"] .date-trigger__chev { transform: rotate(180deg); }
+.date-trigger:hover, .date-trigger:focus-visible, .date-trigger[aria-expanded="true"] { border-color: var(--gold); background: var(--surface-2); box-shadow: 0 0 0 3px rgba(212, 175, 55, .12); outline: none; }
+
+.calendar {
+  padding: 1rem .9rem .8rem; border: 1px solid rgba(212, 175, 55, .35); border-radius: var(--r-lg);
+  background: linear-gradient(165deg, rgba(38, 34, 28, .98), rgba(20, 18, 16, .99));
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .06);
+  animation: calIn .28s var(--ease-out) both;
+}
+.calendar[hidden] { display: none; }
+@keyframes calIn { from { opacity: 0; transform: translateY(-6px) scale(.98); } to { opacity: 1; transform: none; } }
+.calendar__head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: .7rem; }
+.calendar__title { font-family: var(--font-display); font-size: var(--step-1); color: var(--ivory); text-align: center; flex: 1; }
+.calendar__nav {
+  display: grid; place-items: center; width: 2.75rem; height: 2.75rem; flex: none; cursor: pointer;
+  color: var(--gold); background: transparent; border: 1px solid var(--line); border-radius: 50%;
+  transition: background .2s, border-color .2s, opacity .2s;
+}
+.calendar__nav svg { width: 18px; height: 18px; }
+.calendar__nav:hover:not(:disabled), .calendar__nav:focus-visible { background: rgba(212, 175, 55, .14); border-color: var(--gold); outline: none; }
+.calendar__nav:disabled { opacity: .3; cursor: not-allowed; }
+.calendar__dow, .calendar__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: .25rem; }
+.calendar__dow span { text-align: center; font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-dim); padding-bottom: .4rem; }
+.cal-blank { display: block; }
+.cal-day {
+  aspect-ratio: 1; min-height: 2.75rem; display: grid; place-items: center; cursor: pointer;
+  font: inherit; font-size: var(--step--1); color: var(--ivory);
+  background: transparent; border: 1px solid transparent; border-radius: 50%;
+  transition: background .2s var(--ease), border-color .2s var(--ease), transform .2s var(--ease);
+}
+.cal-day:hover:not(:disabled), .cal-day:focus-visible { background: rgba(212, 175, 55, .16); border-color: var(--gold); outline: none; transform: scale(1.06); }
+.cal-day.is-off, .cal-day:disabled {
+  color: rgba(168, 159, 143, .32); cursor: not-allowed; text-decoration: line-through; text-decoration-color: rgba(168, 159, 143, .22);
+  background: transparent;
+}
+.cal-day.is-today:disabled { border-color: rgba(168, 159, 143, .25); border-style: dashed; }
+.cal-day.is-selected, .cal-day.is-selected:hover {
+  color: var(--black); font-weight: 500; border-color: transparent; transform: none;
+  background: linear-gradient(180deg, var(--gold-light), var(--gold) 55%, var(--gold-deep));
+  box-shadow: 0 6px 18px rgba(212, 175, 55, .35);
+}
+.calendar__note { margin: .8rem .2rem 0; font-size: var(--step--2); line-height: 1.5; color: var(--text-dim); text-align: center; }
+
+.windows { display: grid; gap: .6rem; animation: calIn .35s var(--ease-out) both; }
+.windows[hidden] { display: none; }
+.windows__title { margin: 0; font-family: var(--font-display); font-size: var(--step-0); color: var(--ivory); }
+.windows__list { display: grid; gap: .55rem; }
+.win { display: block; cursor: pointer; position: relative; }
+.win input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.win__card {
+  display: flex; align-items: center; justify-content: space-between; gap: .8rem; min-height: 3.25rem; padding: .7rem 1rem;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md);
+  transition: border-color .2s var(--ease), background .2s var(--ease), box-shadow .2s var(--ease);
+}
+.win__card b { font-weight: 500; font-size: var(--step--1); letter-spacing: .04em; color: var(--ivory); margin-right: auto; }
+.win__card small { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--text-dim); }
+.win__card::before {
+  content: ""; width: 1.15rem; height: 1.15rem; flex: none; border-radius: 50%;
+  border: 1.5px solid var(--text-dim); transition: border-color .2s, background .2s;
+}
+.win:hover .win__card { border-color: rgba(212, 175, 55, .55); background: var(--surface-2); }
+.win input:focus-visible + .win__card { outline: 2px solid var(--gold); outline-offset: 2px; }
+.win input:checked + .win__card {
+  border-color: var(--gold); background: linear-gradient(165deg, rgba(212, 175, 55, .16), rgba(212, 175, 55, .05));
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, .12);
+}
+.win input:checked + .win__card::before { border-color: var(--gold); background: radial-gradient(circle, var(--gold) 0 44%, transparent 48%); }
+.win input:checked + .win__card small { color: var(--gold); }
+.schedule__hint { margin: 0; min-height: 1.1em; font-size: var(--step--2); color: var(--sand); }
+
+/* Pinned summary of the chosen delivery slot (sits above the subtotal) */
+.basket__delivery {
+  display: flex; align-items: center; gap: .75rem; margin-bottom: .8rem; padding: .6rem .8rem;
+  border: 1px dashed rgba(212, 175, 55, .35); border-radius: var(--r-md); color: var(--text-muted);
+  transition: border-color .25s, background .25s;
+}
+.basket__delivery-icon svg { width: 20px; height: 20px; display: block; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.basket__delivery small { display: block; font-size: .6rem; letter-spacing: .2em; text-transform: uppercase; color: var(--text-dim); }
+.basket__delivery strong { display: block; font-weight: 400; font-size: var(--step--1); line-height: 1.3; }
+.basket__delivery.is-set { border-style: solid; border-color: var(--gold); background: rgba(212, 175, 55, .09); color: var(--gold); }
+.basket__delivery.is-set strong { color: var(--ivory); }
+
+@media (max-width: 420px) {
+  .calendar { padding-inline: .6rem; }
+  .win__card { min-height: 3.5rem; }
+}
+@media (prefers-reduced-motion: reduce) { .calendar, .windows { animation: none; } }
+
+/* Keep the picker inside its column at every width */
+.schedule { grid-template-columns: minmax(0, 1fr); }
+.schedule > * { min-width: 0; }
+.calendar__dow, .calendar__grid { min-width: 0; }
+.cal-day { min-width: 0; padding: 0; }
+
+@media (max-width: 480px) {
+  .basket__scroll, .basket > h2, .basket__foot { padding-inline: 1rem; }
+  .calendar { padding: .8rem .4rem .7rem; border-radius: var(--r-md); }
+  .calendar__dow, .calendar__grid { gap: .15rem; }
+  .cal-day { aspect-ratio: auto; height: 2.75rem; min-height: 0; border-radius: 14px; }
+  .calendar__nav { width: 2.75rem; height: 2.75rem; }
+  .win__card { padding-inline: .8rem; gap: .6rem; }
+  .win__card small { font-size: .58rem; letter-spacing: .12em; }
+}
