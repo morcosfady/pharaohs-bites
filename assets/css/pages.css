@@ -944,6 +944,7 @@
 }
 .mode-switch button[aria-pressed="true"] { background: rgba(212, 175, 55, .16); color: var(--gold); }
 
+.order-item[hidden] { display: none; }
 .order-item {
   display: grid;
   grid-template-columns: 92px 1fr auto;
