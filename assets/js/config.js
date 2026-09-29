@@ -33,7 +33,7 @@
 
     /* --- When --- */
     // TODO: confirm real hours.
-    hours: "Thu – Sun, 12:00 PM – 8:00 PM (CT)",
+    hours: "Open 24/7",
     // TODO: confirm real lead time for large/catering orders.
     cateringNotice: "at least 48 hours",
 

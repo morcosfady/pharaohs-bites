@@ -1,7 +1,7 @@
 {
   "name": "Pharaoh's Bites — Egyptian Cloud Kitchen",
   "short_name": "Pharaoh's Bites",
-  "description": "All plant-based Egyptian food, made fresh to order, in Dallas, TX.",
+  "description": "Egyptian food with 100% plant-based meats, made fresh to order, in Dallas, TX.",
   "start_url": "/index.html",
   "scope": "/",
   "display": "standalone",

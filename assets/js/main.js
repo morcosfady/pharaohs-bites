@@ -1419,6 +1419,23 @@
       });
     });
 
+    /* Occasion: choosing "Other" reveals a box where the customer types it */
+    $$("form select[name='occasion']").forEach(function (select) {
+      var form = select.closest("form");
+      var box = form && $("[data-occasion-other]", form);
+      var input = box && $("input", box);
+      if (!box || !input) return;
+      var sync = function () {
+        var other = select.value === "Other";
+        box.hidden = !other;
+        input.required = other;
+        if (!other) { input.value = ""; input.setAttribute("aria-invalid", "false"); var e = $(".error-text", box); if (e) e.textContent = ""; }
+      };
+      select.addEventListener("change", function () { sync(); if (select.value === "Other") input.focus(); });
+      form.addEventListener("reset", function () { setTimeout(sync, 0); });
+      sync();
+    });
+
     /* Catering date floor = today */
     $$("input[type='date'][data-min-today]").forEach(function (input) {
       input.min = new Date().toISOString().split("T")[0];

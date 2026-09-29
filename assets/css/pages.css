@@ -1340,3 +1340,6 @@ body.nav-open .site-header.is-stuck {
   .hero__meta span { padding: .55rem .9rem; border-radius: 18px; }
 }
 @media (max-width: 760px) { .hero__scroll { color: var(--sand); opacity: .85; } }
+
+/* A .field is display:flex, which would override the hidden attribute */
+.field[hidden] { display: none; }
