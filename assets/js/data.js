@@ -53,7 +53,7 @@
     { id: "goulash-beef", cat: "mains", name: "Goulash Tray with Plant-Based Beef", ar: "صينية جلاش باللحمة",
       price: 35,
       desc: "Crisp, golden layers of Egyptian goulash filled with seasoned plant-based ground beef, green peppers, onions, and olives. Cut into squares and served in a half-size foil tray.",
-      tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/goulash-beef.webp" },
+      tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/goulash-beef.webp?v=2" },
 
     { id: "kofta-tray", cat: "mains", name: "Plant-Based Kofta Tray with Salsa & Rice", ar: "صينية كفتة بالصلصة والأرز",
       price: 40,
