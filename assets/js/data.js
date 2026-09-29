@@ -147,7 +147,13 @@
     { id: "avocado-drink", cat: "drinks", name: "Avocado Drink", ar: "عصير أفوكادو",
       price: 8,
       desc: "Creamy avocado blended with milk and white honey for a smooth, naturally sweet drink.",
-      tags: ["Vegetarian"], img: "assets/img/menu-real/avocado-drink.webp" }
+      tags: ["Vegetarian"], img: "assets/img/menu-real/avocado-drink.webp" },
+
+    /* Photo: "Diet-Coke-Can.jpg" by Evan-Amos, public domain (Wikimedia Commons). */
+    { id: "diet-coke", cat: "drinks", name: "Diet Coke 12 oz", ar: "دايت كوكاكولا",
+      price: 2.5,
+      desc: "Ice-cold Diet Coke, a classic 12 oz can. The perfect partner for feteer and trays.",
+      tags: ["Cold"], img: "assets/img/menu-real/diet-coke.webp" }
   ];
 
   /* Gallery ----------------------------------------------------------- */
