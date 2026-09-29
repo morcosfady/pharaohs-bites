@@ -738,7 +738,19 @@
   function initOrderInteractions() {
     document.addEventListener("click", function (e) {
       var add = e.target.closest("[data-add]");
-      if (add) { addToBasket(add.getAttribute("data-add"), add.getAttribute("data-name")); return; }
+      if (add) {
+        /* Off the order page (e.g. the home page) an Order button saves the dish
+           to the basket, then sends the customer straight to the Menu / order page. */
+        if (!$("[data-order-list]")) {
+          var dish = add.getAttribute("data-add");
+          basket[dish] = (basket[dish] || 0) + 1;
+          Store.write("basket", basket);
+          window.location.href = "order.html";
+          return;
+        }
+        addToBasket(add.getAttribute("data-add"), add.getAttribute("data-name"));
+        return;
+      }
 
       var fav = e.target.closest("[data-fav]");
       if (fav) { toggleFav(fav.getAttribute("data-fav"), fav.getAttribute("data-name")); return; }
