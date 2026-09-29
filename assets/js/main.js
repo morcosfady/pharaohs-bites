@@ -597,6 +597,32 @@
     var filters = $("[data-order-filters]");
 
     host.innerHTML = D.MENU.map(function (item) {
+      /* The house signature gets its own bigger, richer card */
+      if (item.hero) {
+        return '' +
+          '<article class="order-item order-item--hero" data-cat="' + esc(item.cat) + '" data-reveal>' +
+            '<div class="hero-item__media media media--4x3">' +
+              '<span class="hero-item__ribbon"><img src="assets/img/pharaoh-mark.svg" alt="" aria-hidden="true" width="26" height="30">The House Signature</span>' +
+              '<img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + ' — ' + esc(item.desc.slice(0, 60)) + '" loading="lazy" decoding="async" width="1052" height="787">' +
+            "</div>" +
+            '<div class="hero-item__body">' +
+              '<p class="hero-item__eyebrow">Our No. 1 &middot; Made to order</p>' +
+              '<h3 class="hero-item__title"><span class="gold-text">' + esc(item.name) + "</span>" +
+                ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3>" +
+              '<p class="hero-item__desc">' + esc(item.desc) + "</p>" +
+              '<ul class="hero-item__facts" aria-label="Highlights">' +
+                "<li>Stretched by hand</li><li>Baked after you order</li><li>Homemade butter</li>" +
+              "</ul>" +
+              '<div class="hero-item__foot">' +
+                '<span class="order-item__price hero-item__price">' + money(item.price) + "</span>" +
+                '<div class="flex gap-2 items-center">' +
+                  '<button class="fav" type="button" data-fav="' + esc(item.id) + '" data-name="' + esc(item.name) + '" aria-pressed="false">' + SVG_HEART + "</button>" +
+                  '<button class="btn btn--gold hero-item__add" type="button" data-add="' + esc(item.id) + '" data-name="' + esc(item.name) + '">Add to order</button>' +
+                "</div>" +
+              "</div>" +
+            "</div>" +
+          "</article>";
+      }
       return '' +
         '<article class="order-item" data-cat="' + esc(item.cat) + '" data-reveal>' +
           '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
