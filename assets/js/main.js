@@ -703,7 +703,7 @@
   }
 
   /* --- Customer details ------------------------------------------------ */
-  var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "street", "city", "state", "zip"];
+  var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "email", "street", "city", "state", "zip"];
 
   function readCustomer() {
     var form = $("[data-checkout-form]");
@@ -754,6 +754,7 @@
     first_name: { ok: function (v) { return v.length > 0; }, msg: "Enter your first name." },
     last_name:  { ok: function (v) { return v.length > 0; }, msg: "Enter your last name." },
     phone:      { ok: function (v) { var n = v.replace(/\D/g, "").length; return n >= 10 && n <= 15; }, msg: "Enter a phone number with area code, like (555) 123-4567." },
+    email:      { ok: function (v) { return v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }, msg: "That email does not look right, or leave it empty." },
     street:     { ok: function (v) { return v.length > 0; }, msg: "Enter your street address." },
     city:       { ok: function (v) { return v.length > 0; }, msg: "Enter your city." },
     state:      { ok: function (v) { return /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX." },
@@ -1144,7 +1145,7 @@
     var payload = {
       checkout_token: token,
       customer: {
-        name: order.customer.name, phone: order.customer.phone, street: order.customer.street, apt: order.customer.apt,
+        name: order.customer.name, phone: order.customer.phone, email: order.customer.email || "", street: order.customer.street, apt: order.customer.apt,
         city: order.customer.city, state: order.customer.state, zip: order.customer.zip,
         instructions: deliveryInstructions(order.customer),
         requested_at: order.customer.requested_at ? new Date(order.customer.requested_at).toISOString() : ""
@@ -1198,6 +1199,18 @@
     var win = window.open(url, "_blank", "noopener");
     if (!win) window.location.href = url;   /* popup blocked: same tab */
     toast("Opening WhatsApp with your order…");
+  }
+
+  /* Shown after the order is saved (WhatsApp-only mode). Customers without
+     WhatsApp still know their order reached us, and can resend by message. */
+  function showOrderReceived(orderNumber, order) {
+    var box = document.createElement("div");
+    box.className = "pay-return";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.innerHTML = '<div class="pay-return__card"><h2>Order received ✅</h2><p>Your order <b>' + esc(orderNumber) + '</b> is saved and we have been notified. We will contact you on <b>' + esc((order.customer && order.customer.phone) || "your phone") + '</b> to confirm. If WhatsApp did not open, that is fine — you do not need to do anything else.</p><button class="btn btn--block" type="button" data-rc-close>Close</button></div>';
+    document.body.appendChild(box);
+    $("[data-rc-close]", box).addEventListener("click", function () { box.remove(); });
   }
 
   function setCheckoutBusy(btn, busy, label) {
@@ -1259,6 +1272,7 @@
       if (payFirst) { startPayment(btn, order, state); return; }
       toast("Order " + orderNumber + " saved");
       openWhatsApp(order, number);
+      showOrderReceived(orderNumber, order);
     }).catch(function (err) {
       submitting = false;
       setCheckoutBusy(btn, false);
