@@ -415,7 +415,7 @@
       if (!nudge) { then(); return; }
       var shown = showAddons({
         category: nudge.category, eyebrow: nudge.eyebrow, title: nudge.title, lead: nudge.lead,
-        skip: "No thanks", done: (C.financeCheckoutEndpoint ? "Continue to payment" : "Continue to WhatsApp"),
+        skip: "No thanks", done: (C.financeCheckoutEndpoint ? "Continue to payment" : "Place order"),
         onContinue: step
       });
       if (!shown) step();
@@ -797,7 +797,7 @@
       else if (!detailsFilled(customer)) note.textContent = "Almost there. " + firstProblem(customer).msg;
       else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
       else if (min > 0 && subtotal < min) note.textContent = "Heads up: our usual minimum is " + money(min) + ". Send it anyway and we will confirm.";
-      else note.textContent = "WhatsApp opens with your order ready to send. We confirm the delivery fee before payment.";
+      else note.textContent = "We save your order right away and email your receipt. The delivery fee ($5 + $1.75 per mile) is added to your total.";
     }
   }
 
@@ -1201,7 +1201,7 @@
     if (url.length > 12000) url = whatsappUrl(number, orderAsCompactText(order));
     var win = window.open(url, "_blank", "noopener");
     if (!win) window.location.href = url;   /* popup blocked: same tab */
-    toast("Opening WhatsApp with your order…");
+    toast("Order placed ✓");
   }
 
   /* Shown after the order is saved (WhatsApp-only mode). Customers without
@@ -1254,7 +1254,7 @@
     btn.disabled = busy;
     btn.classList.toggle("is-busy", busy);
     var span = $("[data-checkout-label]", btn);
-    if (span) span.textContent = label || (C.financeCheckoutEndpoint ? "Pay securely & send order" : "Complete Order on WhatsApp");
+    if (span) span.textContent = label || (C.financeCheckoutEndpoint ? "Pay securely & send order" : "Place Order");
   }
 
   function showCheckoutError(msg) {
