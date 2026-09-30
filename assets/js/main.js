@@ -709,7 +709,7 @@
     var form = $("[data-checkout-form]");
     if (!form) return null;
     var c = {};
-    ["first_name", "last_name", "phone", "street", "apt", "city", "state", "zip", "instructions", "requested_date", "requested_window", "requested_at"].forEach(function (k) {
+    ["first_name", "last_name", "phone", "email", "street", "apt", "city", "state", "zip", "instructions", "requested_date", "requested_window", "requested_at"].forEach(function (k) {
       var el = form.elements[k];
       c[k] = el ? el.value.trim() : "";
     });
