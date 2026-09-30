@@ -754,7 +754,7 @@
     first_name: { ok: function (v) { return v.length > 0; }, msg: "Enter your first name." },
     last_name:  { ok: function (v) { return v.length > 0; }, msg: "Enter your last name." },
     phone:      { ok: function (v) { var n = v.replace(/\D/g, "").length; return n >= 10 && n <= 15; }, msg: "Enter a phone number with area code, like (555) 123-4567." },
-    email:      { ok: function (v) { return v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }, msg: "That email does not look right, or leave it empty." },
+    email:      { ok: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }, msg: "Enter your email, like name@example.com. We send your receipt there." },
     street:     { ok: function (v) { return v.length > 0; }, msg: "Enter your street address." },
     city:       { ok: function (v) { return v.length > 0; }, msg: "Enter your city." },
     state:      { ok: function (v) { return /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX." },
@@ -1208,7 +1208,7 @@
     box.className = "pay-return";
     box.setAttribute("role", "dialog");
     box.setAttribute("aria-modal", "true");
-    box.innerHTML = '<div class="pay-return__card"><h2>Order received ✅</h2><p>Your order <b>' + esc(orderNumber) + '</b> is saved and we have been notified. We will contact you on <b>' + esc((order.customer && order.customer.phone) || "your phone") + '</b> to confirm. If WhatsApp did not open, that is fine — you do not need to do anything else.</p><button class="btn btn--block" type="button" data-rc-close>Close</button></div>';
+    box.innerHTML = '<div class="pay-return__card"><h2>Order received ✅</h2><p>Your order <b>' + esc(orderNumber) + '</b> is confirmed. Your receipt is on its way to <b>' + esc((order.customer && order.customer.email) || "your email") + '</b>. If WhatsApp did not open, that is fine — you do not need to do anything else.</p><button class="btn btn--block" type="button" data-rc-close>Close</button></div>';
     document.body.appendChild(box);
     $("[data-rc-close]", box).addEventListener("click", function () { box.remove(); });
   }
