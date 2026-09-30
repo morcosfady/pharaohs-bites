@@ -785,7 +785,10 @@
     var scheduleOk = scheduleComplete(customer);
     var number = C.orderWhatsappNumber || C.whatsappNumber;
 
-    checkout.disabled = !(hasItems && detailsOk && number);
+    var ready = !!(hasItems && detailsOk && number);
+    checkout.classList.toggle("is-disabled", !ready);
+    checkout.setAttribute("aria-disabled", ready ? "false" : "true");
+    if (ready && missingShown) { missingShown = false; showCheckoutError(""); }
 
     var note = $("[data-basket-note]");
     if (note) {
@@ -1213,6 +1216,40 @@
     $("[data-rc-close]", box).addEventListener("click", function () { box.remove(); });
   }
 
+  /* Tapping the button while something is missing: say exactly what, and jump to it. */
+  var missingShown = false;
+  var FIELD_LABELS = { first_name: "first name", last_name: "last name", phone: "phone number", email: "email", street: "street address", city: "city", state: "state", zip: "ZIP code" };
+  function reportMissing() {
+    var form = $("[data-checkout-form]");
+    var cust = readCustomer() || {};
+    var missing = [], first = null;
+    Object.keys(FIELD_RULES).forEach(function (k) {
+      if (!FIELD_RULES[k].ok(cust[k] || "")) {
+        missing.push(FIELD_LABELS[k] || k);
+        var el = form && form.elements[k];
+        if (el) { if (!first) first = el; el.dispatchEvent(new Event("focusout", { bubbles: true })); }
+      }
+    });
+    if (!validDeliveryDate(cust.requested_date)) {
+      missing.push("delivery date");
+      if (!first) first = $("[data-date-trigger]");
+    } else if (!windowById(cust.requested_window)) {
+      missing.push("delivery time window");
+      if (!first) first = $("[data-schedule]");
+    }
+    var msg = "Please complete: " + missing.join(", ") + ".";
+    var box = $("[data-checkout-error]"), text = $("[data-checkout-error-text]"), retry = $("[data-checkout-retry]");
+    if (text) text.textContent = msg;
+    if (retry) retry.hidden = true;
+    if (box) box.hidden = false;
+    missingShown = true;
+    toast(msg);
+    if (first) {
+      try { first.scrollIntoView({ block: "center", behavior: "smooth" }); } catch (e) {}
+      setTimeout(function () { try { if (first.focus) first.focus({ preventScroll: true }); } catch (e) {} }, 350);
+    }
+  }
+
   function setCheckoutBusy(btn, busy, label) {
     btn.disabled = busy;
     btn.classList.toggle("is-busy", busy);
@@ -1225,16 +1262,14 @@
     var text = $("[data-checkout-error-text]");
     if (text) text.textContent = msg;
     if (box) box.hidden = !msg;
+    var rt = $("[data-checkout-retry]");
+    if (rt) rt.hidden = false;
   }
 
   function submitOrder(btn, skipNudges) {
     if (submitting) return;                    /* double-click guard */
-    if (!Object.keys(basket).length) return;
-    if (!customerComplete(readCustomer())) {
-      toast(detailsFilled(readCustomer()) ? "Please choose a delivery date (from tomorrow) and a time window." : firstProblem(readCustomer()).msg);
-      updateCheckoutState();
-      return;
-    }
+    if (!Object.keys(basket).length) { toast("Add a dish to your order first."); return; }
+    if (!customerComplete(readCustomer())) { reportMissing(); updateCheckoutState(); return; }
     var number = C.orderWhatsappNumber || C.whatsappNumber;
     if (!number) { toast("Ordering is not connected yet — please call us."); return; }
     showCheckoutError("");

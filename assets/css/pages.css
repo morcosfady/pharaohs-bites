@@ -1514,3 +1514,7 @@ body.nav-open .site-header.is-stuck {
 .pay-return__card h2{margin:0 0 8px;font-size:1.4rem}
 .pay-return__card p{margin:0 0 18px}
 .pay-return__card [hidden]{display:none}
+
+/* Order button looks disabled but still answers a tap with what is missing */
+.btn--whatsapp.is-disabled { opacity: .45; cursor: not-allowed; box-shadow: none; transform: none; }
+.btn--whatsapp.is-disabled:hover { background: inherit; transform: none; }
