@@ -831,9 +831,11 @@
     if (addr) addr.hidden = pickup;
     document.querySelectorAll("[data-sched-word]").forEach(function (e) { e.textContent = pickup ? "Pickup" : "Delivery"; });
     document.querySelectorAll("[data-sched-word-lc]").forEach(function (e) { e.textContent = pickup ? "pickup" : "delivery"; });
+    var pa = $("[data-pickup-addr]");
+    if (pa) { pa.hidden = !pickup || !C.pickupAddress; pa.innerHTML = '<b>Pickup address</b>' + esc(C.pickupAddress || ""); }
     var il = $("[data-instr-label]"); if (il) il.textContent = pickup ? "Notes" : "Delivery instructions";
     var bn = $("[data-basket-notice]");
-    if (bn) bn.textContent = pickup ? "Pickup is free. You will see the pickup address right after you pay, and it is in your receipt email." : "Delivery is $5 + $1.75 per mile from our kitchen. Enter your address to see your exact delivery fee before you pay.";
+    if (bn) bn.textContent = pickup ? "Pickup is free. Pick up at the address shown above. It is also in your receipt email." : "Delivery is $5 + $1.75 per mile from our kitchen. Enter your address to see your exact delivery fee before you pay.";
     renderTotals();
     if (!pickup) refreshQuote();
     updateCheckoutState();

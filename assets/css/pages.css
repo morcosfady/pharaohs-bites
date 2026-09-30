@@ -1556,3 +1556,7 @@ body.nav-open .site-header.is-stuck {
 .fulfil__opt input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
 [data-address-fields][hidden] { display: none; }
 .basket__row--fee-note span:last-child { color: var(--gold-light); }
+
+.fulfil__addr { grid-column: 1 / -1; margin: .1rem 0 0; padding: .75rem .9rem; border: 1px solid var(--gold); border-radius: 12px; background: rgba(212, 175, 55, .1); color: var(--ivory); font-size: var(--step--1); line-height: 1.5; }
+.fulfil__addr b { color: var(--gold-light); letter-spacing: .08em; text-transform: uppercase; font-size: .75rem; display: block; margin-bottom: .15rem; }
+.fulfil__addr[hidden] { display: none; }
