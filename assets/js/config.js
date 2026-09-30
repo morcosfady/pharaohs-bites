@@ -77,7 +77,7 @@
        Leave financeOrderEndpoint empty to skip recording (WhatsApp only).
     ------------------------------------------------------------------- */
     financeOrderEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-order",
-    financeCheckoutEndpoint: "", /* online card payment: OFF until Stripe is approved. Set to https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-checkout to enable */
+    financeCheckoutEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-checkout",
     financeAnonKey: "sb_publishable_7gy7wfs9_FxaPBE_Ap5Spw_3SDZ2IEf",
     // Fallback while no endpoint exists: hand the order to WhatsApp so a
     // customer is never left with a dead button.

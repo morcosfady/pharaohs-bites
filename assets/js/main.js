@@ -797,7 +797,7 @@
       else if (!detailsFilled(customer)) note.textContent = "Almost there. " + firstProblem(customer).msg;
       else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
       else if (min > 0 && subtotal < min) note.textContent = "Heads up: our usual minimum is " + money(min) + ". Send it anyway and we will confirm.";
-      else note.textContent = "We save your order right away and email your receipt. The delivery fee ($5 + $1.75 per mile) is added to your total.";
+      else note.textContent = C.financeCheckoutEndpoint ? "Next you pay securely by card. Your receipt is emailed after payment. The delivery fee ($5 + $1.75 per mile) is added to your total." : "We save your order right away and email your receipt. The delivery fee ($5 + $1.75 per mile) is added to your total.";
     }
   }
 
@@ -1147,6 +1147,7 @@
   function recordOrder(order, token) {
     var payload = {
       checkout_token: token,
+      pay_online: !!C.financeCheckoutEndpoint,
       customer: {
         name: order.customer.name, phone: order.customer.phone, email: order.customer.email || "", street: order.customer.street, apt: order.customer.apt,
         city: order.customer.city, state: order.customer.state, zip: order.customer.zip,
@@ -1254,7 +1255,7 @@
     btn.disabled = busy;
     btn.classList.toggle("is-busy", busy);
     var span = $("[data-checkout-label]", btn);
-    if (span) span.textContent = label || (C.financeCheckoutEndpoint ? "Pay securely & send order" : "Place Order");
+    if (span) span.textContent = label || (C.financeCheckoutEndpoint ? "Place Order & Pay" : "Place Order");
   }
 
   function showCheckoutError(msg) {
@@ -1366,21 +1367,26 @@
     box.className = "pay-return";
     box.setAttribute("role", "dialog");
     box.setAttribute("aria-modal", "true");
-    box.innerHTML = '<div class="pay-return__card"><h2 data-pr-title>Confirming your payment…</h2><p data-pr-text>Please wait a moment.</p><button class="btn btn--whatsapp btn--block" type="button" data-pr-send hidden>Send my order to WhatsApp</button></div>';
+    box.innerHTML = '<div class="pay-return__card"><h2 data-pr-title>Confirming your payment…</h2><p data-pr-text>Please wait a moment.</p><button class="btn btn--place btn--block" type="button" data-pr-done hidden>Done</button><button class="btn btn--whatsapp btn--block mt-2" type="button" data-pr-send hidden>Send my order to WhatsApp</button></div>';
     document.body.appendChild(box);
-    var title = $("[data-pr-title]", box), text = $("[data-pr-text]", box), send = $("[data-pr-send]", box);
+    var title = $("[data-pr-title]", box), text = $("[data-pr-text]", box), send = $("[data-pr-send]", box), doneBtn = $("[data-pr-done]", box);
     var tries = 0;
+    function finish() {
+      Store.write("pendingPay", null); Store.write("checkout", null);
+      clearBasket();
+      box.remove();
+    }
     function done() {
       title.textContent = "Payment received ✅";
-      text.textContent = "Order " + orderNo + " is paid. Last step: send it to us on WhatsApp so we can start cooking.";
-      send.textContent = "Send my order to WhatsApp";
+      text.textContent = "Your order " + orderNo + " is confirmed and paid. Your receipt is on its way to your email. You can also send your order on WhatsApp if you like (optional).";
+      doneBtn.hidden = false;
+      doneBtn.onclick = finish;
+      send.textContent = "Also send on WhatsApp (optional)";
       send.hidden = false;
       send.onclick = function () {
         var win = window.open(pending.waUrl, "_blank", "noopener");
         if (!win) window.location.href = pending.waUrl;
-        Store.write("pendingPay", null); Store.write("checkout", null);
-        clearBasket();
-        box.remove();
+        finish();
       };
     }
     function poll() {
