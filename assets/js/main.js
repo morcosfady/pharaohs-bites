@@ -415,7 +415,7 @@
       if (!nudge) { then(); return; }
       var shown = showAddons({
         category: nudge.category, eyebrow: nudge.eyebrow, title: nudge.title, lead: nudge.lead,
-        skip: "No thanks", done: "Continue to WhatsApp",
+        skip: "No thanks", done: (C.financeCheckoutEndpoint ? "Continue to payment" : "Continue to WhatsApp"),
         onContinue: step
       });
       if (!shown) step();
@@ -1074,9 +1074,9 @@
       "🧺 Dishes: *" + order.items.length + "*   🔢 Total Qty: *" + count + "*",
       "🧮 Subtotal: *" + money(order.subtotal) + "* 💵",
       "🗓️ Delivery: *" + formatDeliveryDate(c.requested_date) + " · " + (win ? win.label : "") + "*",
-      "🚗 Delivery Fee: _To be determined_ ⏳",
+      order.deliveryFee != null ? "🚗 Delivery Fee: *" + money(order.deliveryFee) + "* 💵" : "🚗 Delivery Fee: _To be determined_ ⏳",
       "🏛️ Tax: _To be confirmed_ ⏳",
-      "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
+      order.deliveryFee != null ? "✅ *TOTAL (dishes + delivery):* *" + money(order.subtotal + order.deliveryFee) + "* 💰" : "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
     ];
 
     return [
@@ -1139,6 +1139,7 @@
     return [tag, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
   }
 
+  var lastDeliveryFee = null;
   function recordOrder(order, token) {
     var payload = {
       checkout_token: token,
@@ -1161,6 +1162,7 @@
       if (timer) clearTimeout(timer);
       return res.json().catch(function () { return {}; }).then(function (data) {
         if (!res.ok || !data.ok) throw new Error(data.error || ("Server error " + res.status));
+        lastDeliveryFee = typeof data.delivery_fee === "number" ? data.delivery_fee : null;
         return data.order_number;
       });
     }, function (err) {
@@ -1202,7 +1204,7 @@
     btn.disabled = busy;
     btn.classList.toggle("is-busy", busy);
     var span = $("[data-checkout-label]", btn);
-    if (span) span.textContent = label || "Complete Order on WhatsApp";
+    if (span) span.textContent = label || (C.financeCheckoutEndpoint ? "Pay securely & send order" : "Complete Order on WhatsApp");
   }
 
   function showCheckoutError(msg) {
@@ -1233,9 +1235,12 @@
     if (!C.financeOrderEndpoint) { openWhatsApp(order, number); return; }
 
     var state = checkoutToken(order);
+    var payFirst = !!C.financeCheckoutEndpoint;
     /* Already recorded (e.g. page refreshed after success): reuse the number. */
     if (state.orderNumber) {
       order.orderNumber = state.orderNumber;
+      order.deliveryFee = typeof state.deliveryFee === "number" ? state.deliveryFee : null;
+      if (payFirst) { startPayment(btn, order, state); return; }
       openWhatsApp(order, number);
       return;
     }
@@ -1246,8 +1251,12 @@
       state.orderNumber = orderNumber;
       Store.write("checkout", state);
       order.orderNumber = orderNumber;
+      order.deliveryFee = lastDeliveryFee;
+      state.deliveryFee = lastDeliveryFee;
+      Store.write("checkout", state);
       submitting = false;
       setCheckoutBusy(btn, false);
+      if (payFirst) { startPayment(btn, order, state); return; }
       toast("Order " + orderNumber + " saved");
       openWhatsApp(order, number);
     }).catch(function (err) {
@@ -1255,6 +1264,94 @@
       setCheckoutBusy(btn, false);
       showCheckoutError("We could not save your order (" + err.message + "). Nothing was lost — your basket and details are still here. Please try again, or message us on WhatsApp directly.");
     });
+  }
+
+  /* --- Online payment (Stripe Checkout) ---------------------------------
+     The order is saved first, then the customer pays on Stripe's secure
+     page. WhatsApp only opens AFTER the payment is confirmed (see
+     initPaidReturn). The amount is always read from the database. */
+  function callCheckout(action, orderNumber, token) {
+    return fetch(C.financeCheckoutEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") },
+      body: JSON.stringify({ action: action, order_number: orderNumber, checkout_token: token })
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        if (!res.ok || !data.ok) throw new Error(data.error || ("Server error " + res.status));
+        return data;
+      });
+    }, function () { throw new Error("Network error — check your connection."); });
+  }
+
+  var PAID_TAG = "\n\n✅ *PAID ONLINE by card*";
+
+  function startPayment(btn, order, state) {
+    if (submitting) return;
+    submitting = true;
+    setCheckoutBusy(btn, true, "Opening secure payment…");
+    /* Keep the finished WhatsApp link so it can be sent after the payment page. */
+    var number = C.orderWhatsappNumber || C.whatsappNumber;
+    var url = whatsappUrl(number, orderAsText(order) + PAID_TAG);
+    if (url.length > 12000) url = whatsappUrl(number, orderAsCompactText(order) + PAID_TAG);
+    Store.write("pendingPay", { orderNumber: order.orderNumber, token: state.token, waUrl: url });
+    callCheckout("create", order.orderNumber, state.token).then(function (data) {
+      if (data.paid) { window.location.href = "order.html?paid=1&order=" + encodeURIComponent(order.orderNumber); return; }
+      window.location.href = data.url;
+    }).catch(function (err) {
+      submitting = false;
+      setCheckoutBusy(btn, false);
+      showCheckoutError("We could not open the payment page (" + err.message + "). Your order is saved as " + order.orderNumber + " — nothing was charged. Please try again, or message us on WhatsApp.");
+    });
+  }
+
+  function initPaidReturn() {
+    var q = new URLSearchParams(window.location.search);
+    var orderNo = q.get("order");
+    if (!orderNo || (!q.get("paid") && !q.get("cancelled"))) return;
+    var pending = Store.read("pendingPay", null);
+    if (window.history && history.replaceState) history.replaceState(null, "", "order.html");
+    if (q.get("cancelled")) { showCheckoutError("Payment was cancelled. Your order " + orderNo + " is saved and nothing was charged — press the button to pay when you are ready."); return; }
+    if (!pending || pending.orderNumber !== orderNo) { toast("Payment received. Thank you — we will confirm your order shortly."); return; }
+
+    var box = document.createElement("div");
+    box.className = "pay-return";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.innerHTML = '<div class="pay-return__card"><h2 data-pr-title>Confirming your payment…</h2><p data-pr-text>Please wait a moment.</p><button class="btn btn--whatsapp btn--block" type="button" data-pr-send hidden>Send my order to WhatsApp</button></div>';
+    document.body.appendChild(box);
+    var title = $("[data-pr-title]", box), text = $("[data-pr-text]", box), send = $("[data-pr-send]", box);
+    var tries = 0;
+    function done() {
+      title.textContent = "Payment received ✅";
+      text.textContent = "Order " + orderNo + " is paid. Last step: send it to us on WhatsApp so we can start cooking.";
+      send.textContent = "Send my order to WhatsApp";
+      send.hidden = false;
+      send.onclick = function () {
+        var win = window.open(pending.waUrl, "_blank", "noopener");
+        if (!win) window.location.href = pending.waUrl;
+        Store.write("pendingPay", null); Store.write("checkout", null);
+        clearBasket();
+        box.remove();
+      };
+    }
+    function poll() {
+      callCheckout("status", orderNo, pending.token).then(function (d) {
+        if (d.paid) { done(); return; }
+        if (++tries >= 15) {
+          title.textContent = "Still confirming…";
+          text.textContent = "Your card was accepted but the confirmation is slow. Tap below to check again.";
+          send.textContent = "Check again";
+          send.hidden = false;
+          send.onclick = function () { send.hidden = true; tries = 0; title.textContent = "Confirming your payment…"; poll(); };
+          return;
+        }
+        setTimeout(poll, 2000);
+      }).catch(function () {
+        if (++tries < 15) setTimeout(poll, 2000);
+        else { title.textContent = "Could not confirm"; text.textContent = "Please message us on WhatsApp with order " + orderNo + "."; }
+      });
+    }
+    poll();
   }
 
   /* --- Gallery + lightbox ---------------------------------------------- */
@@ -1579,6 +1676,7 @@
     initAddons();
 
     initCheckoutForm();
+    initPaidReturn();
     initHours();
     initForms();
     initParallax();
