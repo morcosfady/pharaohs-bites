@@ -833,7 +833,7 @@
     document.querySelectorAll("[data-sched-word-lc]").forEach(function (e) { e.textContent = pickup ? "pickup" : "delivery"; });
     var il = $("[data-instr-label]"); if (il) il.textContent = pickup ? "Notes" : "Delivery instructions";
     var bn = $("[data-basket-notice]");
-    if (bn) bn.textContent = pickup ? "Pickup is free. We send the pickup address with your receipt." : "Delivery is $5 + $1.75 per mile from our kitchen. Enter your address to see your exact delivery fee before you pay.";
+    if (bn) bn.textContent = pickup ? "Pickup is free. You will see the pickup address right after you pay, and it is in your receipt email." : "Delivery is $5 + $1.75 per mile from our kitchen. Enter your address to see your exact delivery fee before you pay.";
     renderTotals();
     if (!pickup) refreshQuote();
     updateCheckoutState();
@@ -1449,9 +1449,9 @@
       clearBasket();
       box.remove();
     }
-    function done() {
+    function done(d) {
       title.textContent = "Payment received ✅";
-      text.textContent = "Your order " + orderNo + " is confirmed and paid. Your receipt is on its way to your email. You can also send your order on WhatsApp if you like (optional).";
+      text.textContent = "Your order " + orderNo + " is confirmed and paid. " + (d && d.pickup_address ? "Pickup address: " + d.pickup_address + ". " : "") + "Your receipt is on its way to your email. You can also send your order on WhatsApp if you like (optional).";
       doneBtn.hidden = false;
       doneBtn.onclick = finish;
       send.textContent = "Also send on WhatsApp (optional)";
@@ -1464,7 +1464,7 @@
     }
     function poll() {
       callCheckout("status", orderNo, pending.token).then(function (d) {
-        if (d.paid) { done(); return; }
+        if (d.paid) { done(d); return; }
         if (++tries >= 15) {
           title.textContent = "Still confirming…";
           text.textContent = "Your card was accepted but the confirmation is slow. Tap below to check again.";
