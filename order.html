@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="assets/css/main.css?v=63">
-<link rel="stylesheet" href="assets/css/pages.css?v=119">
+<link rel="stylesheet" href="assets/css/pages.css?v=120">
 <link rel="stylesheet" href="assets/css/pharaonic.css?v=61">
 <script type="application/ld+json">
 {
@@ -108,9 +108,14 @@
 
           <div class="basket__scroll" data-basket-scroll>
             <div class="basket__list" data-basket-list></div>
-          <p class="basket__notice">Delivery fee is not included in the subtotal. It is added to your total: $5 + $1.75 per mile from our kitchen.</p>
+          <p class="basket__notice" data-basket-notice>Delivery fee is not included in the subtotal. It is added to your total: $5 + $1.75 per mile from our kitchen.</p>
 
           <form class="checkout-form" data-checkout-form novalidate>
+            <fieldset class="fulfil" data-fulfil>
+              <legend class="fulfil__legend">How would you like your order?</legend>
+              <label class="fulfil__opt"><input type="radio" name="fulfillment" value="delivery" checked><span><b>Delivery</b><small>$5 + $1.75 per mile</small></span></label>
+              <label class="fulfil__opt"><input type="radio" name="fulfillment" value="pickup"><span><b>Pickup</b><small>Free</small></span></label>
+            </fieldset>
             <h3 class="checkout-form__title">Your details</h3>
             <div class="field-row field-row--halves">
               <div class="field">
@@ -130,6 +135,7 @@
               <label for="co-email">Email <span aria-hidden="true">*</span> <small>(we send your receipt here)</small></label>
               <input id="co-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="you@example.com" required>
             </div>
+            <div data-address-fields>
             <div class="field">
               <label for="co-street">Street address <span aria-hidden="true">*</span></label>
               <input id="co-street" name="street" type="text" autocomplete="address-line1" required>
@@ -152,18 +158,19 @@
                 <input id="co-zip" name="zip" type="text" inputmode="numeric" autocomplete="postal-code" pattern="\d{5}(-\d{4})?" required>
               </div>
             </div>
+            </div>
             <div class="field">
-              <label for="co-instructions">Delivery instructions <small>(optional)</small></label>
+              <label for="co-instructions"><span data-instr-label>Delivery instructions</span> <small>(optional)</small></label>
               <input id="co-instructions" name="instructions" type="text" maxlength="500" placeholder="Gate code, leave at door, call on arrival…">
             </div>
             <fieldset class="schedule" data-schedule>
-              <legend>Delivery date &amp; time <span aria-hidden="true">*</span></legend>
+              <legend><span data-sched-word>Delivery</span> date &amp; time <span aria-hidden="true">*</span></legend>
               <input type="hidden" name="requested_date">
               <input type="hidden" name="requested_at">
 
               <button class="date-trigger" type="button" data-date-trigger aria-haspopup="dialog" aria-expanded="false" aria-controls="co-calendar">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
-                <span class="date-trigger__text"><small>Delivery date</small><strong data-date-label>Select a date</strong></span>
+                <span class="date-trigger__text"><small><span data-sched-word>Delivery</span> date</small><strong data-date-label>Select a date</strong></span>
                 <svg class="date-trigger__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
               </button>
 
@@ -190,10 +197,12 @@
           <div class="basket__foot">
           <div class="basket__delivery" data-delivery-summary>
             <span class="basket__delivery-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span>
-            <div><small>Requested delivery</small><strong data-delivery-text>Choose a date &amp; time window</strong></div>
+            <div><small>Requested <span data-sched-word-lc>delivery</span></small><strong data-delivery-text>Choose a date &amp; time window</strong></div>
           </div>
           <div class="basket__totals">
-            <div class="basket__row basket__row--total"><span>Order subtotal</span><span data-subtotal>$0</span></div>
+            <div class="basket__row"><span>Subtotal</span><span data-subtotal>$0</span></div>
+            <div class="basket__row"><span data-fee-label>Delivery</span><span data-fee-value>enter your address</span></div>
+            <div class="basket__row basket__row--total"><span>Total</span><span data-total>$0</span></div>
           </div>
           <button class="btn btn--place btn--block mt-3" type="button" data-checkout aria-disabled="true">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 7h12l-1 13H7L6 7Z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 7a3 3 0 0 1 6 0"/></svg>
@@ -330,8 +339,8 @@
   </div>
 </footer>
 
-<script src="assets/js/config.js?v=102"></script>
+<script src="assets/js/config.js?v=103"></script>
 <script src="assets/js/data.js?v=101"></script>
-<script src="assets/js/main.js?v=102" defer></script>
+<script src="assets/js/main.js?v=103" defer></script>
 </body>
 </html>

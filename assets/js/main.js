@@ -697,6 +697,8 @@
 
     var set = function (sel, val) { var el = $(sel); if (el) el.textContent = money(val); };
     set("[data-subtotal]", subtotal);
+    lastSubtotal = subtotal;
+    renderTotals();
 
     updateCheckoutState(subtotal);
     syncAddons();
@@ -704,6 +706,12 @@
 
   /* --- Customer details ------------------------------------------------ */
   var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "email", "street", "city", "state", "zip"];
+
+  function getFulfillment() {
+    var r = document.querySelector('[name="fulfillment"]:checked');
+    return r ? r.value : "delivery";
+  }
+  var ADDRESS_KEYS = { street: 1, city: 1, state: 1, zip: 1 };
 
   function readCustomer() {
     var form = $("[data-checkout-form]");
@@ -715,6 +723,7 @@
     });
     /* Everything downstream (WhatsApp message, finance system) takes one name. */
     c.name = [c.first_name, c.last_name].filter(Boolean).join(" ");
+    c.fulfillment = getFulfillment();
     return c;
   }
 
@@ -763,12 +772,72 @@
   function firstProblem(c) {
     if (!c) return null;
     var keys = Object.keys(FIELD_RULES);
-    for (var i = 0; i < keys.length; i++) if (!FIELD_RULES[keys[i]].ok(c[keys[i]] || "")) return { field: keys[i], msg: FIELD_RULES[keys[i]].msg };
+    for (var i = 0; i < keys.length; i++) {
+      if (c.fulfillment === "pickup" && ADDRESS_KEYS[keys[i]]) continue;
+      if (!FIELD_RULES[keys[i]].ok(c[keys[i]] || "")) return { field: keys[i], msg: FIELD_RULES[keys[i]].msg };
+    }
     return null;
   }
   function detailsFilled(c) { return !!c && !firstProblem(c); }
 
   function customerComplete(c) { return detailsFilled(c) && scheduleComplete(c); }
+
+  /* --- Delivery / pickup choice, live delivery fee and total ---------------- */
+  var lastSubtotal = 0;
+  var quote = { key: "", state: "idle", fee: 0, miles: 0 };
+  var quoteTimer = null;
+
+  function renderTotals() {
+    var pickup = getFulfillment() === "pickup";
+    var label = $("[data-fee-label]"), value = $("[data-fee-value]"), total = $("[data-total]");
+    if (!label || !value || !total) return;
+    if (pickup) { label.textContent = "Pickup"; value.textContent = "Free"; total.textContent = money(lastSubtotal); return; }
+    if (quote.state === "ok") {
+      label.textContent = "Delivery (" + quote.miles + " mi)"; value.textContent = money(quote.fee);
+      total.textContent = money(lastSubtotal + quote.fee);
+    } else {
+      label.textContent = "Delivery";
+      value.textContent = quote.state === "loading" ? "calculating…" : quote.state === "err" ? "check your address" : "enter your address";
+      total.textContent = lastSubtotal > 0 ? money(lastSubtotal) + " + delivery" : money(0);
+    }
+  }
+
+  function refreshQuote() {
+    var form = $("[data-checkout-form]");
+    if (!form || getFulfillment() === "pickup" || !C.financeQuoteEndpoint) return;
+    var cu = readCustomer();
+    var ok = ["street", "city", "state", "zip"].every(function (k) { return FIELD_RULES[k].ok(cu[k] || ""); });
+    if (!ok) { quote = { key: "", state: "idle", fee: 0, miles: 0 }; renderTotals(); return; }
+    var key = [cu.street, cu.city, cu.state, cu.zip].join("|").toLowerCase();
+    if (key === quote.key && quote.state !== "err") return;
+    quote = { key: key, state: "loading", fee: 0, miles: 0 };
+    renderTotals();
+    fetch(C.financeQuoteEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") },
+      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
+      if (quote.key !== key) return;                      /* address changed meanwhile */
+      if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles };
+      else quote = { key: key, state: "err", fee: 0, miles: 0 };
+      renderTotals();
+    }).catch(function () { if (quote.key === key) { quote = { key: key, state: "err", fee: 0, miles: 0 }; renderTotals(); } });
+  }
+  function scheduleQuote() { clearTimeout(quoteTimer); quoteTimer = setTimeout(refreshQuote, 500); }
+
+  function applyFulfillment() {
+    var pickup = getFulfillment() === "pickup";
+    var addr = $("[data-address-fields]");
+    if (addr) addr.hidden = pickup;
+    document.querySelectorAll("[data-sched-word]").forEach(function (e) { e.textContent = pickup ? "Pickup" : "Delivery"; });
+    document.querySelectorAll("[data-sched-word-lc]").forEach(function (e) { e.textContent = pickup ? "pickup" : "delivery"; });
+    var il = $("[data-instr-label]"); if (il) il.textContent = pickup ? "Notes" : "Delivery instructions";
+    var bn = $("[data-basket-notice]");
+    if (bn) bn.textContent = pickup ? "Pickup is free. We send the pickup address with your receipt." : "Delivery is $5 + $1.75 per mile from our kitchen. Enter your address to see your exact delivery fee before you pay.";
+    renderTotals();
+    if (!pickup) refreshQuote();
+    updateCheckoutState();
+  }
 
   function updateCheckoutState(subtotal) {
     var checkout = $("[data-checkout]");
@@ -958,10 +1027,12 @@
       Store.write("customer", readCustomer());
       updateCheckoutState();
     });
+    form.addEventListener("change", function (e) { if (e.target && e.target.name === "fulfillment") applyFulfillment(); });
+    form.addEventListener("input", function (e) { if (e.target && ADDRESS_KEYS[e.target.name]) scheduleQuote(); });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
     initSchedule(form);
     initFieldValidation(form);
-    updateCheckoutState();
+    applyFulfillment();
   }
 
   function initOrderInteractions() {
@@ -1041,7 +1112,7 @@
   function orderAsText(order) {
     var nl = "\n";
     var c = order.customer || {};
-    var address = [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
+    var address = c.fulfillment === "pickup" ? "PICKUP (no delivery)" : [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
     var count = order.items.reduce(function (n, l) { return n + l.qty; }, 0);
 
     var head = ["🔔👑✨ *NEW PHARAOH’S BITES ORDER* ✨👑🔔"];
@@ -1078,7 +1149,7 @@
       "🧺 Dishes: *" + order.items.length + "*   🔢 Total Qty: *" + count + "*",
       "🧮 Subtotal: *" + money(order.subtotal) + "* 💵",
       "🗓️ Delivery: *" + formatDeliveryDate(c.requested_date) + " · " + (win ? win.label : "") + "*",
-      order.deliveryFee != null ? "🚗 Delivery Fee: *" + money(order.deliveryFee) + "* 💵" : "🚗 Delivery Fee: _To be determined_ ⏳",
+      (order.customer && order.customer.fulfillment === "pickup") ? "🛍️ Pickup: *free*" : (order.deliveryFee != null ? "🚗 Delivery Fee: *" + money(order.deliveryFee) + "* 💵" : "🚗 Delivery Fee: _To be determined_ ⏳"),
       "🏛️ Tax: _To be confirmed_ ⏳",
       order.deliveryFee != null ? "✅ *TOTAL (dishes + delivery):* *" + money(order.subtotal + order.deliveryFee) + "* 💰" : "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
     ];
@@ -1099,7 +1170,7 @@
   function orderAsCompactText(order) {
     var c = order.customer || {};
     var win = windowById(c.requested_window);
-    var address = [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
+    var address = c.fulfillment === "pickup" ? "PICKUP (no delivery)" : [c.street, c.apt, c.city + ", " + c.state + " " + c.zip].filter(Boolean).join(", ");
     var out = ["*NEW PHARAOH'S BITES ORDER*"];
     if (order.orderNumber) out.push("Order No: *" + order.orderNumber + "*");
     out.push("", "*Name:* " + c.name, "*Phone:* " + c.phone, "*Address:* " + address);
@@ -1148,6 +1219,7 @@
     var payload = {
       checkout_token: token,
       pay_online: !!C.financeCheckoutEndpoint,
+      fulfillment: order.customer.fulfillment === "pickup" ? "pickup" : "delivery",
       customer: {
         name: order.customer.name, phone: order.customer.phone, email: order.customer.email || "", street: order.customer.street, apt: order.customer.apt,
         city: order.customer.city, state: order.customer.state, zip: order.customer.zip,
@@ -1225,6 +1297,7 @@
     var cust = readCustomer() || {};
     var missing = [], first = null;
     Object.keys(FIELD_RULES).forEach(function (k) {
+      if (cust.fulfillment === "pickup" && ADDRESS_KEYS[k]) return;
       if (!FIELD_RULES[k].ok(cust[k] || "")) {
         missing.push(FIELD_LABELS[k] || k);
         var el = form && form.elements[k];
