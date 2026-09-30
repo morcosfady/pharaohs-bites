@@ -708,6 +708,7 @@
   var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "email", "street", "city", "state", "zip"];
 
   function getFulfillment() {
+    if (!C.enablePickup) return "delivery";
     var r = document.querySelector('[name="fulfillment"]:checked');
     return r ? r.value : "delivery";
   }
@@ -826,6 +827,9 @@
   function scheduleQuote() { clearTimeout(quoteTimer); quoteTimer = setTimeout(refreshQuote, 500); }
 
   function applyFulfillment() {
+    var fu = $("[data-fulfil]");
+    if (fu) fu.hidden = !C.enablePickup;
+    if (!C.enablePickup) { var dl = document.querySelector('[name="fulfillment"][value="delivery"]'); if (dl) dl.checked = true; }
     var pickup = getFulfillment() === "pickup";
     var addr = $("[data-address-fields]");
     if (addr) addr.hidden = pickup;
