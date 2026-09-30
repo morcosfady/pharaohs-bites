@@ -153,12 +153,7 @@
     { id: "diet-coke", cat: "drinks", name: "Diet Coke 12 oz", ar: "دايت كوكاكولا",
       price: 2.5,
       desc: "Ice-cold Diet Coke, a classic 12 oz can. The perfect partner for feteer and trays.",
-      tags: ["Cold"], img: "assets/img/menu-real/diet-coke.webp" },
-    /* TEMPORARY test item - remove after the live payment check */
-    { id: "test-item", cat: "drinks", name: "TEST ITEM (1 cent)", ar: "تجربة",
-      price: 0.01,
-      desc: "Temporary test item for checking payments. Not a real dish.",
-      tags: ["Test"], img: "assets/img/menu-real/diet-coke.webp" }
+      tags: ["Cold"], img: "assets/img/menu-real/diet-coke.webp" }
   ];
 
   /* Gallery ----------------------------------------------------------- */
