@@ -499,7 +499,7 @@
       return '<span class="combo__part"><img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="44" height="44"><span>' + esc(m.name) + "</span></span>";
     }).join("");
     return '<div class="combo__parts">' + thumbs + "</div>" +
-      (save > 0 ? '<div class="combo__save">Save ' + money(save) + ' <span>vs ' + money(worth) + (item.pick ? " buying them separately" : " separately") + "</span></div>" : "");
+      (save > 0 ? '<div class="combo__save">You save ' + money(save) + ' <span>instead of <s>' + money(worth) + "</s></span></div>" : "");
   }
 
   function menuRow(item) {
@@ -508,7 +508,7 @@
       return '<span class="' + cls + '">' + esc(t) + "</span>";
     }).join("");
     return '' +
-      '<article class="order-item menu-item" data-reveal>' +
+      '<article class="order-item menu-item' + (item.includes ? " menu-item--combo" : "") + '" data-reveal>' +
         '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
         "<div><h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
           ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3>" +
