@@ -487,6 +487,21 @@
       "</article>";
   }
 
+  /* Combos: small photos of what's inside, plus how much the bundle saves. */
+  function comboExtras(item) {
+    if (!item.includes) return "";
+    var parts = item.includes.map(function (id) {
+      return D.MENU.filter(function (m) { return m.id === id; })[0];
+    }).filter(Boolean);
+    var worth = item.worth || parts.reduce(function (n, m) { return n + m.price; }, 0);
+    var save = worth - item.price;
+    var thumbs = parts.map(function (m) {
+      return '<span class="combo__part"><img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="44" height="44"><span>' + esc(m.name) + "</span></span>";
+    }).join("");
+    return '<div class="combo__parts">' + thumbs + "</div>" +
+      (save > 0 ? '<div class="combo__save">Save ' + money(save) + ' <span>vs ' + money(worth) + (item.pick ? " buying them separately" : " separately") + "</span></div>" : "");
+  }
+
   function menuRow(item) {
     var pills = (item.tags || []).map(function (t) {
       var cls = /vegan|vegetarian/i.test(t) ? "pill pill--veg" : (/signature|chef|tasting|special/i.test(t) ? "pill pill--gold" : "pill");
@@ -497,7 +512,7 @@
         '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
         "<div><h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
           ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3>" +
-          "<p>" + esc(item.desc) + "</p>" +
+          "<p>" + esc(item.desc) + "</p>" + comboExtras(item) +
           (pills ? '<div class="menu-item__meta">' + pills + "</div>" : "") +
         "</div>" +
         '<div class="order-item__side">' +

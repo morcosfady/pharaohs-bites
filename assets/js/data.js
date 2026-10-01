@@ -24,12 +24,12 @@
 
   /* Categories -------------------------------------------------------- */
   var CATEGORIES = [
+    { id: "combos",   name: "Combos",         blurb: "Bundled together and priced to save." },
     { id: "mains",    name: "The Main Table", blurb: "Feteer stretched by hand, and the baked trays an Egyptian table is built around. Everything here is made to order." },
     { id: "soups",    name: "Soups",          blurb: "Simmered slowly and sent out hot in a sealed container." },
     { id: "desserts", name: "Sweet",          blurb: "Syrup, nuts, cream and chocolate. Cut to order and boxed while still warm." },
     { id: "sides",    name: "On the Side",    blurb: "What Egyptians actually put next to feteer — cheese, honey, tahini, baba ganoush and hummus." },
-    { id: "drinks",   name: "Drinks",         blurb: "Made to order and sealed for the journey." },
-    { id: "combos",   name: "Combos",         blurb: "Bundled together and priced to save." }
+    { id: "drinks",   name: "Drinks",         blurb: "Made to order and sealed for the journey." }
   ];
 
   /* Menu -------------------------------------------------------------- */
@@ -162,18 +162,21 @@
       tags: ["Cold"], img: "assets/img/menu-real/diet-coke.webp" },
 
     /* ---------------- COMBOS ---------------- */
-    { id: "feteer-dip-trio", cat: "combos", name: "Feteer Dip Trio", ar: "ثلاثية الإضافات",
-      price: 10,
-      desc: "Black Honey, Egyptian White Cheese and Tahini together, at a bundled price.",
-      tags: ["Combo"], img: "assets/img/menu-real/white-cheese.webp" },
-
     { id: "feteer-and-dip-trio", cat: "combos", name: "Feteer + Dip Trio", ar: "فطير مع ثلاثية الإضافات",
       price: 32,
+      includes: ["feteer-meshaltet", "black-honey", "white-cheese", "tahini"],
       desc: "A whole Feteer Meshaltet with the Feteer Dip Trio — Black Honey, Egyptian White Cheese and Tahini — bundled together.",
       tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
 
+    { id: "feteer-dip-trio", cat: "combos", name: "Feteer Dip Trio", ar: "ثلاثية الإضافات",
+      price: 10,
+      includes: ["black-honey", "white-cheese", "tahini"],
+      desc: "Black Honey, Egyptian White Cheese and Tahini together, at a bundled price.",
+      tags: ["Combo"], img: "assets/img/menu-real/white-cheese.webp" },
+
     { id: "pick-3-puddings", cat: "combos", name: "Pick Any 3 Puddings", ar: "اختر ٣ بودينج",
       price: 14,
+      includes: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"], pick: 3, worth: 15,
       desc: "Any three: Banana Pudding, Chocolate Pudding, Crème Caramel Flan or Rice Pudding. Tell us which three when you order.",
       tags: ["Combo"], img: "assets/img/menu-real/chocolate-pudding.webp" }
   ];

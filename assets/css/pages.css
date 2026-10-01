@@ -446,6 +446,11 @@
 /* The menu now uses the same photo rows as the order page, two abreast on wide screens */
 .menu-items { display: grid; gap: .9rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); }
 .menu-item p { font-size: var(--step--1); color: var(--text-muted); }
+.combo__parts { display: flex; flex-wrap: wrap; gap: .5rem .75rem; margin-top: .7rem; }
+.combo__part { display: inline-flex; align-items: center; gap: .4rem; font-size: .72rem; color: var(--muted, #b9b2a3); }
+.combo__part img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(212,175,55,.35); }
+.combo__save { display: inline-block; margin-top: .6rem; padding: .25rem .65rem; border-radius: 999px; background: rgba(212,175,55,.14); border: 1px solid rgba(212,175,55,.5); color: #e3c35a; font-size: .8rem; font-weight: 600; }
+.combo__save span { font-weight: 400; opacity: .75; margin-left: .25rem; }
 .menu-item__meta { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .55rem; }
 
 /* Floating "view your order" pill on the menu page */
