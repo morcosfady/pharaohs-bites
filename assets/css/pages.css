@@ -1671,3 +1671,7 @@ body.nav-open .site-header.is-stuck {
 .combo__grp--pick span:last-child { max-width: 7.5rem; line-height: 1.25; }
 .combo__grp--or { flex-direction: row; align-items: center; padding: 0; border: 0; gap: .45rem; }
 .combo__orbox { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; padding: .3rem .5rem; border: 1px dashed var(--line); border-radius: 12px; }
+/* Combos tab: green, like the "You save" badge, so deals stand out from the gold dishes */
+.chip--combo { color: #5fd69a; border-color: rgba(31, 163, 92, .6); background: rgba(31, 163, 92, .08); }
+.chip--combo:hover { color: #fff; border-color: #1fa35c; }
+.chip--combo[aria-pressed="true"] { background: linear-gradient(115deg, #3ccf85, #1fa35c 55%, #0f7a43); border-color: transparent; color: #fff; box-shadow: 0 8px 24px rgba(31, 163, 92, .35); }

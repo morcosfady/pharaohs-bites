@@ -24,12 +24,12 @@
 
   /* Categories -------------------------------------------------------- */
   var CATEGORIES = [
-    { id: "combos",   name: "Combos",         blurb: "Bundled together and priced to save." },
     { id: "mains",    name: "The Main Table", blurb: "Feteer stretched by hand, and the baked trays an Egyptian table is built around. Everything here is made to order." },
     { id: "soups",    name: "Soups",          blurb: "Simmered slowly and sent out hot in a sealed container." },
     { id: "desserts", name: "Sweet",          blurb: "Syrup, nuts, cream and chocolate. Cut to order and boxed while still warm." },
     { id: "sides",    name: "On the Side",    blurb: "What Egyptians actually put next to feteer — cheese, honey, tahini, baba ganoush and hummus." },
-    { id: "drinks",   name: "Drinks",         blurb: "Made to order and sealed for the journey." }
+    { id: "drinks",   name: "Drinks",         blurb: "Made to order and sealed for the journey." },
+    { id: "combos",   name: "Combos",         blurb: "Bundled together and priced to save." }
   ];
 
   /* Menu -------------------------------------------------------------- */

@@ -739,7 +739,7 @@
       filters.innerHTML =
         '<button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>' +
         D.CATEGORIES.map(function (c) {
-          return '<button class="chip" type="button" data-filter="' + c.id + '" aria-pressed="false">' + esc(c.name) + "</button>";
+          return '<button class="chip' + (c.id === "combos" ? " chip--combo" : "") + '" type="button" data-filter="' + c.id + '" aria-pressed="false">' + esc(c.name) + "</button>";
         }).join("");
     }
 
@@ -843,7 +843,7 @@
       filters.innerHTML =
         '<button class="chip" type="button" data-order-filter="all" aria-pressed="true">Everything</button>' +
         D.CATEGORIES.map(function (c) {
-          return '<button class="chip" type="button" data-order-filter="' + c.id + '" aria-pressed="false">' + esc(c.name) + "</button>";
+          return '<button class="chip' + (c.id === "combos" ? " chip--combo" : "") + '" type="button" data-order-filter="' + c.id + '" aria-pressed="false">' + esc(c.name) + "</button>";
         }).join("");
 
       filters.addEventListener("click", function (e) {
