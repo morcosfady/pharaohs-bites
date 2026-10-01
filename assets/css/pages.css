@@ -1570,3 +1570,36 @@ body.nav-open .site-header.is-stuck {
 .fulfil__addr[hidden] { display: none; }
 
 .fulfil[hidden] { display: none; }
+
+/* Order panel on laptops: the pinned bottom part must not squeeze the dishes ------------
+   - the dishes always get a decent minimum height (about 3 dishes)
+   - if the screen is too short for everything, the whole panel scrolls instead of the dishes
+   - the pinned bottom part is made more compact */
+@media (min-width: 981px) {
+  .basket { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(212, 175, 55, .55) transparent; }
+  .basket__scroll { min-height: 19rem; flex: 1 0 19rem; }
+  .basket__foot { padding: .75rem 1.3rem 1rem; }
+  .basket__foot .basket__delivery { padding: .45rem .7rem; }
+  .basket__totals { margin-top: .5rem; padding-top: .55rem; gap: .25rem; }
+  .basket__row--total { padding-top: .25rem; }
+  .basket__foot .promo { margin-bottom: .2rem; gap: .2rem; }
+  .basket__foot .promo__label { font-size: .7rem; }
+  .basket__foot .promo__row input { min-height: 2.4rem; padding-block: .35rem; }
+  .basket__foot .promo__row .btn { padding-block: .35rem; min-height: 2.4rem; }
+  .basket__foot .btn--place { min-height: 3.1rem; margin-top: .5rem; }
+  .basket__foot .form-note { margin-top: .4rem; font-size: .72rem; line-height: 1.35; }
+}
+@media (min-width: 981px) and (max-height: 820px) {
+  .basket > h2 { padding: .9rem 1.3rem .7rem; }
+  .basket__scroll { padding: .8rem 1.3rem; }
+  .basket__foot .basket__delivery { display: none; }   /* the chosen date is already visible in the form above */
+}
+
+/* Order panel on laptops: compact dish rows so more of your order is visible (Remove sits on the name line) */
+@media (min-width: 981px) {
+  .basket .basket-item { padding: .5rem .75rem; gap: .2rem .6rem; }
+  .basket .basket-item__name { grid-column: 1 / 3; grid-row: 1; font-size: var(--step--1); }
+  .basket .basket-item .remove { grid-column: 3; grid-row: 1; justify-self: end; min-height: 0; padding: 0; font-size: .6rem; }
+  .basket .basket__list { gap: .5rem; }
+  .basket .qty button { width: 1.7rem; height: 1.7rem; font-size: .95rem; }
+}
