@@ -189,12 +189,6 @@
       desc: "Feteer Meshaltet with Egyptian White Cheese, Black Honey and Tahini, plus a shake of your choice.",
       tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
 
-    { id: "feteer-and-dip-trio", cat: "combos", name: "Feteer + Dip Trio", ar: "فطير مع ثلاثية الإضافات",
-      price: 32,
-      includes: ["feteer-meshaltet", "black-honey", "white-cheese", "tahini"],
-      desc: "A whole Feteer Meshaltet with a trio of sides — Black Honey, Egyptian White Cheese and Tahini — bundled together.",
-      tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
-
     { id: "meal-for-one", cat: "combos", name: "Meal for One", ar: "وجبة لفرد",
       price: 30.5, worth: 33,
       includes: ["feteer-meshaltet"],
