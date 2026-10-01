@@ -732,12 +732,15 @@
      The earliest date is tomorrow in the customer's own time zone. The same
      rule drives the calendar, the button state, the submit guard and the
      order builder, so a bad date cannot slip through any of them. */
+  /* Delivery and Pickup have their own time windows. */
   var WINDOWS = [
-    { id: "w1", label: "9:00 AM–12:00 PM", sub: "Morning",   hour: 9 },
-    { id: "w2", label: "12:00 PM–3:00 PM", sub: "Midday",    hour: 12 },
-    { id: "w3", label: "3:00 PM–6:00 PM",  sub: "Afternoon", hour: 15 },
-    { id: "w4", label: "6:00 PM–9:00 PM",  sub: "Evening",   hour: 18 }
+    { id: "d1", mode: "delivery", label: "8:00 AM–11:00 AM", sub: "Morning",   hour: 8 },
+    { id: "d2", mode: "delivery", label: "8:00 PM–11:00 PM", sub: "Night",     hour: 20 },
+    { id: "p1", mode: "pickup",   label: "11:00 AM–2:00 PM", sub: "Midday",    hour: 11 },
+    { id: "p2", mode: "pickup",   label: "2:00 PM–5:00 PM",  sub: "Afternoon", hour: 14 },
+    { id: "p3", mode: "pickup",   label: "5:00 PM–8:00 PM",  sub: "Evening",   hour: 17 }
   ];
+  function windowsForMode(mode) { return WINDOWS.filter(function (w) { return w.mode === mode; }); }
   function pad2(n) { return (n < 10 ? "0" : "") + n; }
   function toYmd(d) { return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
   function parseYmd(v) {
@@ -756,7 +759,11 @@
       ? { weekday: "long", month: "long", day: "numeric", year: "numeric" }
       : { weekday: "short", month: "short", day: "numeric" });
   }
-  function scheduleComplete(c) { return !!c && validDeliveryDate(c.requested_date) && !!windowById(c.requested_window); }
+  function scheduleComplete(c) {
+    if (!c || !validDeliveryDate(c.requested_date)) return false;
+    var w = windowById(c.requested_window);
+    return !!w && w.mode === (c.fulfillment === "pickup" ? "pickup" : "delivery");
+  }
 
   /* One rule per field: used for the button state, the note under the button
      and the inline messages, so they can never disagree. */
@@ -785,6 +792,7 @@
 
   /* --- Delivery / pickup choice, live delivery fee and total ---------------- */
   var lastSubtotal = 0;
+  var rerenderSchedule = null;   /* set by initSchedule: swaps the time windows when Delivery/Pickup changes */
   var quote = { key: "", state: "idle", fee: 0, miles: 0 };
   var quoteTimer = null;
 
@@ -841,6 +849,7 @@
     var bn = $("[data-basket-notice]");
     if (bn) bn.textContent = pickup ? "Pickup is free. Pick up at the address shown above. It is also in your receipt email." : "Delivery is $5 + $1.75 per mile from our kitchen. Enter your address to see your exact delivery fee before you pay.";
     renderTotals();
+    if (rerenderSchedule) rerenderSchedule();
     if (!pickup) refreshQuote();
     updateCheckoutState();
   }
@@ -918,13 +927,21 @@
 
     var savedCust = Store.read("customer", null);
     var savedWinId = (savedCust && savedCust.requested_window) || "";
-    winList.innerHTML = WINDOWS.map(function (w) {
-      return '<label class="win"><input type="radio" name="requested_window" value="' + w.id + '"' + (w.id === savedWinId ? " checked" : "") + '>' +
-        '<span class="win__card"><b>' + w.label + '</b><small>' + w.sub + '</small></span></label>';
-    }).join("");
-    var radios = $$("input[name=requested_window]", winList);
-
+    var radios = [];
     function chosenWindow() { var r = radios.filter(function (x) { return x.checked; })[0]; return r ? windowById(r.value) : null; }
+    function renderWindows() {
+      var mode = getFulfillment();
+      var keep = chosenWindow() ? chosenWindow().id : savedWinId;
+      winList.innerHTML = windowsForMode(mode).map(function (w) {
+        return '<label class="win"><input type="radio" name="requested_window" value="' + w.id + '"' + (w.id === keep ? " checked" : "") + '>' +
+          '<span class="win__card"><b>' + w.label + '</b><small>' + w.sub + '</small></span></label>';
+      }).join("");
+      radios = $$("input[name=requested_window]", winList);
+      savedWinId = "";
+      var wt = $("[data-windows-title]", root); if (wt) wt.textContent = "Choose one " + (mode === "pickup" ? "pickup" : "delivery") + " window";
+    }
+    renderWindows();
+    rerenderSchedule = function () { renderWindows(); changed(); };
     function monthStart(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
 
     function renderCalendar() {
@@ -969,9 +986,9 @@
       label.textContent = okDate ? formatDeliveryDate(fDate.value, true) : "Select a date";
       trigger.classList.toggle("is-set", okDate);
       winBox.hidden = !okDate;
-      note.textContent = "Earliest delivery: " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable.";
-      if (!okDate) hint.textContent = "Pick a delivery date, from tomorrow onward.";
-      else if (!win) hint.textContent = "Now choose one delivery window.";
+      note.textContent = "Earliest " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + ": " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable.";
+      if (!okDate) hint.textContent = "Pick a " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " date, from tomorrow onward.";
+      else if (!win) hint.textContent = "Now choose one " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " window.";
       else hint.textContent = "";
       if (summary) {
         summary.classList.toggle("is-set", !!(okDate && win));
@@ -1311,10 +1328,10 @@
       }
     });
     if (!validDeliveryDate(cust.requested_date)) {
-      missing.push("delivery date");
+      missing.push((cust.fulfillment === "pickup" ? "pickup" : "delivery") + " date");
       if (!first) first = $("[data-date-trigger]");
     } else if (!windowById(cust.requested_window)) {
-      missing.push("delivery time window");
+      missing.push((cust.fulfillment === "pickup" ? "pickup" : "delivery") + " time window");
       if (!first) first = $("[data-schedule]");
     }
     var msg = "Please complete: " + missing.join(", ") + ".";
