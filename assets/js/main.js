@@ -853,7 +853,7 @@
   /* Apply button: needs the address, phone and email so the server can check "once per customer". */
   function applyPromo() {
     var input = $("[data-promo-input]");
-    var code = input ? input.value.replace(/s+/g, "").toUpperCase() : "";
+    var code = input ? input.value.replace(/\s+/g, "").toUpperCase() : "";
     if (input) input.value = code;
     if (!code) { promoCode = ""; renderPromo(""); quote.key = ""; renderTotals(); refreshQuote(); return; }
     var cu = readCustomer() || {};
