@@ -28,7 +28,8 @@
     { id: "soups",    name: "Soups",          blurb: "Simmered slowly and sent out hot in a sealed container." },
     { id: "desserts", name: "Sweet",          blurb: "Syrup, nuts, cream and chocolate. Cut to order and boxed while still warm." },
     { id: "sides",    name: "On the Side",    blurb: "What Egyptians actually put next to feteer — cheese, honey, tahini, baba ganoush and hummus." },
-    { id: "drinks",   name: "Drinks",         blurb: "Made to order and sealed for the journey." }
+    { id: "drinks",   name: "Drinks",         blurb: "Made to order and sealed for the journey." },
+    { id: "combos",   name: "Combos",         blurb: "Bundled together and priced to save." }
   ];
 
   /* Menu -------------------------------------------------------------- */
@@ -46,7 +47,7 @@
       tags: ["House Special", "Plant-Based"], img: "assets/img/menu-real/feteer-beef-mozzarella.webp" },
 
     { id: "macarona-bechamel", cat: "mains", signature: true, name: "Macarona Béchamel Tray", ar: "صينية مكرونة بشاميل",
-      price: 30, featured: true,
+      price: 35, featured: true,
       desc: "Tender penne layered with savory plant-based beef and creamy béchamel, baked until golden and served in hearty squares. Comes in a half-size foil tray.",
       tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/macarona-bechamel.webp" },
 
@@ -67,12 +68,12 @@
 
     /* ---------------- SOUPS ---------------- */
     { id: "lentil-soup", cat: "soups", name: "Lentil Soup", ar: "شوربة عدس",
-      price: 8,
+      price: 7,
       desc: "Warm, velvety Egyptian creamy lentil soup, gently seasoned and served in a generous paper bowl.",
       tags: ["Vegan"], img: "assets/img/menu-real/lentil-soup.webp" },
 
     { id: "orzo-soup", cat: "soups", name: "Egyptian Orzo Soup", ar: "لسان العصفور",
-      price: 6,
+      price: 7,
       desc: "Tender toasted orzo pasta simmered in a warm, savory broth, Egyptian comfort in every spoonful.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/orzo-soup.webp" },
 
@@ -88,7 +89,7 @@
       tags: ["House Special", "Contains Nuts"], img: "assets/img/menu-real/goulash-nuts.webp" },
 
     { id: "round-cake", cat: "desserts", name: "Small Round Cake", ar: "كيكة صغيرة",
-      price: 8,
+      price: 10,
       desc: "A small, freshly baked plain cake with a golden crust and soft, fluffy crumb.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/round-cake.webp" },
 
@@ -103,7 +104,7 @@
       tags: ["Vegetarian"], img: "assets/img/menu-real/banana-pudding.webp" },
 
     { id: "rice-pudding", cat: "desserts", signature: true, name: "Rice Pudding", ar: "رز باللبن",
-      price: 5.5,
+      price: 6,
       desc: "Creamy Egyptian rice pudding topped with mixed nuts (optional), served chilled in a small dessert cup.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/rice-pudding.webp" },
 
@@ -139,13 +140,13 @@
       tags: ["Vegan"], img: "assets/img/menu-real/baba-ganoush.webp" },
 
     { id: "hummus", cat: "sides", name: "Hummus", ar: "حمص",
-      price: 3,
+      price: 4,
       desc: "Creamy hummus, a blend of chickpeas and tahini, served in a small cup.",
       tags: ["Vegan"], img: "assets/img/menu-real/hummus.webp" },
 
     /* ---------------- DRINKS ---------------- */
     { id: "protein-shake", cat: "drinks", name: "Special Chocolate Protein Shake", ar: "مشروب البروتين بالشوكولاتة",
-      price: 12, special: true, featured: true,
+      price: 9, special: true, featured: true,
       desc: "A rich, creamy chocolate 22g protein shake blended smooth and served chilled.",
       tags: ["House Special", "22g Protein"], img: "assets/img/menu-real/protein-shake.webp" },
 
@@ -158,7 +159,23 @@
     { id: "diet-coke", cat: "drinks", name: "Diet Coke 12 oz", ar: "دايت كوكاكولا",
       price: 2.5,
       desc: "Ice-cold Diet Coke, a classic 12 oz can. The perfect partner for feteer and trays.",
-      tags: ["Cold"], img: "assets/img/menu-real/diet-coke.webp" }
+      tags: ["Cold"], img: "assets/img/menu-real/diet-coke.webp" },
+
+    /* ---------------- COMBOS ---------------- */
+    { id: "feteer-dip-trio", cat: "combos", name: "Feteer Dip Trio", ar: "ثلاثية الإضافات",
+      price: 10,
+      desc: "Black Honey, Egyptian White Cheese and Tahini together, at a bundled price.",
+      tags: ["Combo"], img: "assets/img/menu-real/white-cheese.webp" },
+
+    { id: "feteer-and-dip-trio", cat: "combos", name: "Feteer + Dip Trio", ar: "فطير مع ثلاثية الإضافات",
+      price: 32,
+      desc: "A whole Feteer Meshaltet with the Feteer Dip Trio — Black Honey, Egyptian White Cheese and Tahini — bundled together.",
+      tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
+
+    { id: "pick-3-puddings", cat: "combos", name: "Pick Any 3 Puddings", ar: "اختر ٣ بودينج",
+      price: 14,
+      desc: "Any three: Banana Pudding, Chocolate Pudding, Crème Caramel Flan or Rice Pudding. Tell us which three when you order.",
+      tags: ["Combo"], img: "assets/img/menu-real/chocolate-pudding.webp" }
   ];
 
   /* Gallery ----------------------------------------------------------- */
