@@ -23,7 +23,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400;500&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="assets/css/main.css?v=63">
-<link rel="stylesheet" href="assets/css/pages.css?v=122">
+<link rel="stylesheet" href="assets/css/pages.css?v=123">
 <link rel="stylesheet" href="assets/css/pharaonic.css?v=61">
 <script type="application/ld+json">
 {
@@ -202,6 +202,14 @@
           </div>
           <div class="basket__totals">
             <div class="basket__row"><span>Subtotal</span><span data-subtotal>$0</span></div>
+            <div class="promo field" data-promo>
+              <label for="co-promo" class="promo__label">Promo code</label>
+              <div class="promo__row">
+                <input id="co-promo" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="30" placeholder="Enter code" data-promo-input>
+                <button class="btn btn--ghost" type="button" data-promo-apply>Apply</button>
+              </div>
+              <small class="promo__msg" data-promo-msg role="status" aria-live="polite" hidden></small>
+            </div>
             <div class="basket__row"><span data-fee-label>Delivery</span><span data-fee-value>enter your address</span></div>
             <div class="basket__row basket__row--total"><span>Total</span><span data-total>$0</span></div>
           </div>
@@ -342,6 +350,6 @@
 
 <script src="assets/js/config.js?v=107"></script>
 <script src="assets/js/data.js?v=103"></script>
-<script src="assets/js/main.js?v=107" defer></script>
+<script src="assets/js/main.js?v=108" defer></script>
 </body>
 </html>

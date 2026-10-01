@@ -793,7 +793,18 @@
   /* --- Delivery / pickup choice, live delivery fee and total ---------------- */
   var lastSubtotal = 0;
   var rerenderSchedule = null;   /* set by initSchedule: swaps the time windows when Delivery/Pickup changes */
-  var quote = { key: "", state: "idle", fee: 0, miles: 0 };
+  var quote = { key: "", state: "idle", fee: 0, miles: 0, promo: null };
+  /* Promo code the customer typed. The server is the judge: it checks the code and that this
+     phone / email has not used it before. "promo" in a quote reply says whether it counts. */
+  var promoCode = "";
+  function promoValid() { return !!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid); }
+  function renderPromo(msg, bad) {
+    var el = $("[data-promo-msg]");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.hidden = !msg;
+    el.classList.toggle("is-bad", !!bad);
+  }
   var quoteTimer = null;
 
   function renderTotals() {
@@ -801,7 +812,10 @@
     var label = $("[data-fee-label]"), value = $("[data-fee-value]"), total = $("[data-total]");
     if (!label || !value || !total) return;
     if (pickup) { label.textContent = "Pickup"; value.textContent = "Free"; total.textContent = money(lastSubtotal); return; }
-    if (quote.state === "ok") {
+    if (quote.state === "ok" && promoValid()) {
+      label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
+      total.textContent = money(lastSubtotal);
+    } else if (quote.state === "ok") {
       label.textContent = "Delivery (" + quote.miles + " mi)"; value.textContent = money(quote.fee);
       total.textContent = money(lastSubtotal + quote.fee);
     } else {
@@ -817,20 +831,46 @@
     var cu = readCustomer();
     var ok = ["street", "city", "state", "zip"].every(function (k) { return FIELD_RULES[k].ok(cu[k] || ""); });
     if (!ok) { quote = { key: "", state: "idle", fee: 0, miles: 0 }; renderTotals(); return; }
-    var key = [cu.street, cu.city, cu.state, cu.zip].join("|").toLowerCase();
+    var key = [cu.street, cu.city, cu.state, cu.zip, promoCode, promoCode ? cu.phone + "|" + cu.email : ""].join("|").toLowerCase();
     if (key === quote.key && quote.state !== "err") return;
-    quote = { key: key, state: "loading", fee: 0, miles: 0 };
+    quote = { key: key, state: "loading", fee: 0, miles: 0, promo: null };
     renderTotals();
     fetch(C.financeQuoteEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") },
-      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip })
+      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip, promo: promoCode || undefined, phone: cu.phone, email: cu.email })
     }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
       if (quote.key !== key) return;                      /* address changed meanwhile */
-      if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles };
-      else quote = { key: key, state: "err", fee: 0, miles: 0 };
+      if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles, promo: d.promo || null };
+      else quote = { key: key, state: "err", fee: 0, miles: 0, promo: null };
+      if (promoCode && quote.state === "ok") {
+        if (quote.promo && quote.promo.valid) renderPromo(promoCode + " applied: free delivery 🎉", false);
+        else renderPromo((quote.promo && quote.promo.message) || "that promo code is not valid", true);
+      }
       renderTotals();
     }).catch(function () { if (quote.key === key) { quote = { key: key, state: "err", fee: 0, miles: 0 }; renderTotals(); } });
+  }
+  /* Apply button: needs the address, phone and email so the server can check "once per customer". */
+  function applyPromo() {
+    var input = $("[data-promo-input]");
+    var code = input ? input.value.replace(/s+/g, "").toUpperCase() : "";
+    if (input) input.value = code;
+    if (!code) { promoCode = ""; renderPromo(""); quote.key = ""; renderTotals(); refreshQuote(); return; }
+    var cu = readCustomer() || {};
+    if (getFulfillment() === "pickup") { renderPromo("Promo codes apply to delivery orders.", true); return; }
+    if (!FIELD_RULES.phone.ok(cu.phone || "") || !FIELD_RULES.email.ok(cu.email || "")) { renderPromo("Fill in your phone and email first, then apply the code.", true); return; }
+    var addrOk = ["street", "city", "state", "zip"].every(function (k) { return FIELD_RULES[k].ok(cu[k] || ""); });
+    if (!addrOk) { renderPromo("Fill in your delivery address first, then apply the code.", true); return; }
+    promoCode = code;
+    renderPromo("Checking…", false);
+    quote.key = "";
+    refreshQuote();
+  }
+  function initPromo() {
+    var btn = $("[data-promo-apply]"), input = $("[data-promo-input]");
+    if (!btn || !input) return;
+    btn.addEventListener("click", applyPromo);
+    input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } });
   }
   function scheduleQuote() { clearTimeout(quoteTimer); quoteTimer = setTimeout(refreshQuote, 500); }
 
@@ -1051,10 +1091,11 @@
       updateCheckoutState();
     });
     form.addEventListener("change", function (e) { if (e.target && e.target.name === "fulfillment") applyFulfillment(); });
-    form.addEventListener("input", function (e) { if (e.target && ADDRESS_KEYS[e.target.name]) scheduleQuote(); });
+    form.addEventListener("input", function (e) { if (e.target && (ADDRESS_KEYS[e.target.name] || (promoCode && (e.target.name === "phone" || e.target.name === "email")))) scheduleQuote(); });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
     initSchedule(form);
     initFieldValidation(form);
+    initPromo();
     applyFulfillment();
   }
 
@@ -1249,6 +1290,7 @@
         instructions: deliveryInstructions(order.customer),
         requested_at: order.customer.requested_at ? new Date(order.customer.requested_at).toISOString() : ""
       },
+      promo: promoCode && promoValid() ? promoCode : undefined,
       items: order.items.map(function (l) { return { slug: l.id, quantity: l.qty, options: l.options || "" }; })
     };
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
