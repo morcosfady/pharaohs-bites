@@ -654,16 +654,32 @@
   /* Combos: small photos of what's inside, plus how much the bundle saves. */
   function comboExtras(item) {
     if (!item.includes) return "";
-    var parts = item.includes.map(function (id) {
-      return D.MENU.filter(function (m) { return m.id === id; })[0];
-    }).filter(Boolean);
+    var get = function (id) { return menuItem(id); };
+    var parts = item.includes.map(get).filter(Boolean);
     var worth = item.worth != null ? item.worth : parts.reduce(function (n, m) { return n + m.price; }, 0);
     var save = worth - item.price;
-    var thumbs = parts.map(function (m) {
+    var part = function (m) {
       return '<span class="combo__part"><img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="44" height="44"><span>' + esc(m.name) + "</span></span>";
-    }).join("");
-    var picksLine = item.slots ? '<div class="combo__picks">You choose: ' + item.slots.map(function (sl) { return sl.count + " " + esc(sl.label.toLowerCase()); }).join(" &middot; ") + "</div>" : "";
-    return '<div class="combo__parts">' + thumbs + "</div>" + picksLine +
+    };
+    /* The contents as a row of groups joined by "+". Fixed items are one group each; a choice with two
+       options (main, shake) stacks the options with "or" between; a bigger choice shows a small photo stack. */
+    var inSlot = {};
+    (item.slots || []).forEach(function (sl) { sl.options.forEach(function (id) { inSlot[id] = true; }); });
+    var groups = parts.filter(function (m) { return !inSlot[m.id]; }).map(function (m) { return '<span class="combo__grp">' + part(m) + "</span>"; });
+    (item.slots || []).forEach(function (sl) {
+      var opts = sl.options.map(get).filter(Boolean);
+      if (opts.length <= 2) {
+        groups.push('<span class="combo__grp combo__grp--or"><span class="combo__orbox">' + opts.map(part).join('<span class="combo__or">or</span>') + "</span></span>");
+      } else {
+        var noun = sl.label.toLowerCase();
+        if (sl.count === 1) noun = noun.replace(/s$/, "");
+        groups.push('<span class="combo__grp combo__grp--pick"><span class="combo__stack">' +
+          opts.slice(0, 4).map(function (m) { return '<img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="36" height="36">'; }).join("") +
+          "</span><span>" + sl.count + " " + esc(noun) + " of your choice</span></span>");
+      }
+    });
+    var flow = groups.join("");
+    return '<div class="combo__parts combo__flow">' + flow + "</div>" +
       (save > 0 ? '<div class="combo__save"><b>You save ' + money(save) + '</b> <span>instead of <s>' + money(worth) + "</s></span></div>" : "");
   }
 

@@ -1650,3 +1650,24 @@ body.nav-open .site-header.is-stuck {
   .cp-actions .btn { width: 100%; }
   .cp-status { font-size: .74rem; }
 }
+
+/* ---- Combo contents: groups joined by "+", alternatives stacked with "or" ---- */
+.combo__flow { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem .5rem; }
+.combo__plus { color: var(--gold); font-size: 1.1rem; font-weight: 600; line-height: 1; }
+.combo__grp { display: inline-flex; align-items: center; gap: .5rem; }
+.combo__grp--or { flex-direction: column; align-items: flex-start; gap: .15rem; padding: .3rem .5rem; border: 1px dashed var(--line); border-radius: 12px; }
+.combo__or { font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); padding-left: .2rem; }
+.combo__grp--pick { padding: .3rem .6rem .3rem .35rem; border: 1px dashed var(--line); border-radius: 999px; font-size: .74rem; color: var(--gold-light); }
+.combo__stack { display: inline-flex; }
+.combo__stack img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid #1b1b1b; margin-left: -9px; }
+.combo__stack img:first-child { margin-left: 0; }
+.combo__flow { gap: .5rem .45rem; }
+.combo__grp + .combo__grp::before { content: "+"; color: var(--gold); font-size: 1.1rem; font-weight: 600; margin-right: .05rem; }
+.combo__grp--or { align-items: flex-start; }
+.combo__grp--or::before { align-self: center; }
+.combo__flow .combo__part { max-width: 10.5rem; }
+.combo__flow .combo__part img { width: 38px; height: 38px; }
+.combo__flow .combo__part span { line-height: 1.25; }
+.combo__grp--pick span:last-child { max-width: 7.5rem; line-height: 1.25; }
+.combo__grp--or { flex-direction: row; align-items: center; padding: 0; border: 0; gap: .45rem; }
+.combo__orbox { display: flex; flex-direction: column; align-items: flex-start; gap: .15rem; padding: .3rem .5rem; border: 1px dashed var(--line); border-radius: 12px; }
