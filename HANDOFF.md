@@ -333,3 +333,15 @@ Dashboard:
 5. Review `tax_status` for drinks/desserts.
 6. Refresh the stale README/session logs, add Instagram/Facebook links when they exist.
 7. Consider making the About banner use an owner photo.
+
+---
+
+## 14. Combos (added 2026-10-01)
+
+The full write-up lives in the finance repo (`pharaohs-bites-finance/docs/HANDOFF.md`, section "Combos", and `docs/COMBO-PRICING.md`). Website side in short:
+
+- `assets/js/data.js`: combos are `cat: "combos"` items, listed best profit first. `includes` = fixed contents (shown as photos), `slots` = what the customer picks (`key`, `label`, `count`, optional `distinct`, `options`), `worth` = cheapest picks bought separately (for the "You save" badge). `CATEGORIES` order is the tab order and the "Everything" section order; **Combos is last**.
+- `assets/js/main.js`: `comboExtras` draws the card contents ("+" between items, "or" between two options, photo stack for bigger choices, green savings badge). `openComboPicker` is the pick window. The basket key carries the picks (`id~slot=a,b&slot=c`), `buildOrder` sends `choices` and a readable `options` line; the server re-checks the picks and prices everything from its database. Old basket lines without valid picks are dropped on load.
+- `assets/css/pages.css` (end of file): combo card, badge, picker and green `chip--combo` tab styles.
+- Live combos: Party Tray $89.50, Family Feast $69, Egyptian Breakfast $39.50, Meal for One $33, Sides Platter $19, Pick Any 3 Puddings $15. Feteer + Dip Trio was removed.
+- **Always bump `?v=` for pages.css, main.js and data.js in every HTML file** when editing them, or browsers keep showing the old version.
