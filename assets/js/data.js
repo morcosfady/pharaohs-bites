@@ -161,11 +161,46 @@
       desc: "Ice-cold Diet Coke, a classic 12 oz can. The perfect partner for feteer and trays.",
       tags: ["Cold"], img: "assets/img/menu-real/diet-coke.webp" },
 
-    /* ---------------- COMBOS ---------------- */
+    /* ---------------- COMBOS ----------------
+       Listed best profit first. `includes` = the fixed contents (shown as photos); `slots` = what the customer
+       picks (the order page opens a picker; the server checks the picks against the combo_slots table);
+       `worth` = what the cheapest possible picks cost separately, for the "You save" badge. */
+    { id: "party-tray", cat: "combos", name: "Party Tray", ar: "صينية الحفلة",
+      price: 89.5, worth: 99,
+      includes: ["feteer-meshaltet", "feteer-dip-trio"],
+      slots: [{ key: "main", label: "Main", count: 1, options: ["macarona-bechamel", "kofta-tray"] },
+              { key: "puddings", label: "Puddings", count: 4, options: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"] }],
+      desc: "Feteer Meshaltet, one main (Macarona Béchamel or Kofta Tray), the full Sides Platter and four puddings of your choice.",
+      tags: ["Combo", "Best value"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
+
+    { id: "family-feast", cat: "combos", name: "Family Feast", ar: "عزومة العيلة",
+      price: 69, worth: 76.5,
+      includes: ["feteer-meshaltet"],
+      slots: [{ key: "main", label: "Main", count: 1, options: ["macarona-bechamel", "kofta-tray"] },
+              { key: "sides", label: "Sides", count: 2, distinct: true, options: ["white-cheese", "black-honey", "white-honey", "tahini", "baba-ganoush", "hummus"] },
+              { key: "puddings", label: "Puddings", count: 2, options: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"] }],
+      desc: "Feteer Meshaltet, plus one main (Macarona Béchamel or Kofta Tray), two sides and two puddings of your choice.",
+      tags: ["Combo", "Best value"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
+
+    { id: "egyptian-breakfast", cat: "combos", name: "Egyptian Breakfast", ar: "فطار مصري",
+      price: 39.5, worth: 43.5,
+      includes: ["feteer-meshaltet", "white-cheese", "black-honey", "tahini"],
+      slots: [{ key: "shake", label: "Shake", count: 1, options: ["protein-shake", "avocado-drink"] }],
+      desc: "Feteer Meshaltet with Egyptian White Cheese, Black Honey and Tahini, plus a shake of your choice.",
+      tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
+
     { id: "feteer-and-dip-trio", cat: "combos", name: "Feteer + Dip Trio", ar: "فطير مع ثلاثية الإضافات",
       price: 32,
       includes: ["feteer-meshaltet", "black-honey", "white-cheese", "tahini"],
       desc: "A whole Feteer Meshaltet with a trio of sides — Black Honey, Egyptian White Cheese and Tahini — bundled together.",
+      tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
+
+    { id: "meal-for-one", cat: "combos", name: "Meal for One", ar: "وجبة لفرد",
+      price: 30.5, worth: 33,
+      includes: ["feteer-meshaltet"],
+      slots: [{ key: "side", label: "Side", count: 1, options: ["white-cheese", "black-honey", "white-honey", "tahini", "baba-ganoush", "hummus"] },
+              { key: "pudding", label: "Pudding", count: 1, options: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"] }],
+      desc: "Feteer Meshaltet with one side and one pudding of your choice.",
       tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
 
     { id: "feteer-dip-trio", cat: "combos", name: "Sides Platter", ar: "طبق الإضافات",
@@ -175,9 +210,10 @@
       tags: ["Combo"], img: "assets/img/menu-real/white-cheese.webp" },
 
     { id: "pick-3-puddings", cat: "combos", name: "Pick Any 3 Puddings", ar: "اختر ٣ بودينج",
-      price: 14,
-      includes: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"], pick: 3, worth: 15,
-      desc: "Any three: Banana Pudding, Chocolate Pudding, Crème Caramel Flan or Rice Pudding. Tell us which three when you order.",
+      price: 15, worth: 15,
+      includes: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"],
+      slots: [{ key: "puddings", label: "Puddings", count: 3, options: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"] }],
+      desc: "Any three: Banana Pudding, Chocolate Pudding, Crème Caramel Flan or Rice Pudding, as many of one kind as you like.",
       tags: ["Combo"], img: "assets/img/menu-real/chocolate-pudding.webp" }
   ];
 

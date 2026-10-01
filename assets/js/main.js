@@ -38,6 +38,45 @@
   var favourites = Store.read("favourites", []);
   var basket = Store.read("basket", {});
 
+  /* --- Combos with choices ---------------------------------------------
+     A combo with `slots` is added to the basket with the customer's picks
+     baked into its key:  family-feast~main=kofta-tray&sides=tahini,hummus&...
+     so the same combo with different picks is a different basket line. */
+  function menuItem(id) { return D.MENU.filter(function (m) { return m.id === id; })[0]; }
+  function keyId(k) { return String(k).split("~")[0]; }
+  function keyPicks(k) {
+    var out = {}, q = String(k).split("~")[1];
+    if (!q) return out;
+    q.split("&").forEach(function (p) { var kv = p.split("="); if (kv[0] && kv[1]) out[kv[0]] = kv[1].split(","); });
+    return out;
+  }
+  function makeKey(item, picks) {
+    return item.id + "~" + item.slots.map(function (s) { return s.key + "=" + picks[s.key].join(","); }).join("&");
+  }
+  function picksValid(item, picks) {
+    return item.slots.every(function (s) {
+      var p = picks[s.key] || [];
+      if (p.length !== s.count) return false;
+      if (!p.every(function (id) { return s.options.indexOf(id) > -1; })) return false;
+      return !s.distinct || p.filter(function (id, i) { return p.indexOf(id) === i; }).length === p.length;
+    });
+  }
+  function picksText(item, picks) {
+    return item.slots.map(function (s) {
+      var counts = {}, order = [];
+      (picks[s.key] || []).forEach(function (id) { if (!counts[id]) { counts[id] = 0; order.push(id); } counts[id]++; });
+      return s.label + ": " + order.map(function (id) {
+        var m = menuItem(id);
+        return (m ? m.name : id) + (counts[id] > 1 ? " \u00d7" + counts[id] : "");
+      }).join(", ");
+    }).join(" \u00b7 ");
+  }
+  /* A saved basket can hold a choice combo without picks (from before picks existed): drop those lines. */
+  Object.keys(basket).forEach(function (k) {
+    var it = menuItem(keyId(k));
+    if (it && it.slots && !picksValid(it, keyPicks(k))) delete basket[k];
+  });
+
   /* --- Toasts --------------------------------------------------------- */
   var toastStack;
   function toast(message) {
@@ -250,6 +289,8 @@
     return Object.keys(basket).reduce(function (sum, id) { return sum + basket[id]; }, 0);
   }
   function addToBasket(id, name) {
+    var combo = menuItem(id);
+    if (combo && combo.slots) { openComboPicker(combo); return; }
     basket[id] = (basket[id] || 0) + 1;
     Store.write("basket", basket);
     toast(name + " added to your order");
@@ -313,6 +354,129 @@
      the same [data-add] / [data-qty] buttons as the rest of the page, so the
      global click handler does the work; renderBasket() keeps the rows in
      step with the basket. */
+  /* --- Combo picker: choose the mains, sides, puddings... before adding ------ */
+  var picker = null, pickerState = null, pickerLastFocus = null;
+
+  function openComboPicker(item) {
+    if (!picker) {
+      picker = document.createElement("div");
+      picker.className = "addon";
+      picker.setAttribute("role", "dialog");
+      picker.setAttribute("aria-modal", "true");
+      picker.setAttribute("aria-hidden", "true");
+      document.body.appendChild(picker);
+      picker.addEventListener("click", onPickerClick);
+      picker.addEventListener("keydown", onPickerKey);
+      document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeComboPicker(); });
+    }
+    pickerState = { item: item, picks: {} };
+    item.slots.forEach(function (s) { pickerState.picks[s.key] = []; });
+    pickerLastFocus = document.activeElement;
+    renderPicker(true);
+    picker.classList.add("is-open");
+    picker.setAttribute("aria-hidden", "false");
+    document.body.classList.add("nav-open");
+    $(".addon__close", picker).focus();
+  }
+
+  function closeComboPicker() {
+    if (!picker || !picker.classList.contains("is-open")) return;
+    picker.classList.remove("is-open");
+    picker.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("nav-open");
+    pickerState = null;
+    if (pickerLastFocus && pickerLastFocus.focus) pickerLastFocus.focus();
+  }
+
+  function renderPicker(fromTop) {
+    var item = pickerState.item;
+    var panel = $(".addon__panel", picker);
+    var scroll = panel ? panel.scrollTop : 0;
+    var complete = true, missing = [];
+    var sections = item.slots.map(function (s) {
+      var have = pickerState.picks[s.key].length;
+      if (have !== s.count) { complete = false; var left = s.count - have, noun = s.label.toLowerCase(); missing.push(left + " " + (left === 1 ? noun.replace(/s$/, "") : noun)); }
+      var rows = s.options.map(function (id) {
+        var m = menuItem(id);
+        if (!m) return "";
+        var n = pickerState.picks[s.key].filter(function (x) { return x === id; }).length;
+        var control = s.count === 1
+          ? '<span class="cp-radio" aria-hidden="true"></span>'
+          : '<div class="qty" aria-label="Quantity of ' + esc(m.name) + '">' +
+              '<button type="button" data-cp-step="' + esc(s.key + "|" + id + "|-1") + '" aria-label="Fewer ' + esc(m.name) + '">&minus;</button>' +
+              "<output>" + n + "</output>" +
+              '<button type="button" data-cp-step="' + esc(s.key + "|" + id + "|1") + '" aria-label="More ' + esc(m.name) + '">+</button></div>';
+        return '<div class="addon-item' + (n ? " is-added" : "") + (s.count === 1 ? " cp-choose" : " cp-multi") + '"' +
+          (s.count === 1 ? ' role="radio" tabindex="0" aria-checked="' + (n ? "true" : "false") + '" data-cp-choose="' + esc(s.key + "|" + id) + '"' : "") + ">" +
+          '<div class="media"><img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="58" height="58"></div>' +
+          '<div><div class="addon-item__name">' + esc(m.name) + ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(m.ar) + "</span></div>" +
+            '<span class="addon-item__price">Included</span></div>' +
+          '<div class="addon-item__side">' + control + "</div></div>";
+      }).join("");
+      return '<section class="cp-slot" aria-label="' + esc(s.label) + '">' +
+        '<h3 class="cp-slot__title">Pick ' + s.count + " " + esc(s.label.toLowerCase()) +
+          (s.distinct ? " <small>(all different)</small>" : "") +
+          '<span class="cp-slot__count' + (have === s.count ? " is-done" : "") + '">' + have + " / " + s.count + "</span></h3>" +
+        '<div class="addon__list">' + rows + "</div></section>";
+    }).join("");
+    picker.innerHTML =
+      '<div class="addon__panel">' +
+        '<button class="lb-btn addon__close" type="button" data-cp-close aria-label="Close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>' +
+        '<p class="eyebrow">Make it yours</p>' +
+        '<h2 class="addon__title">' + esc(item.name) + " &middot; " + money(item.price) + "</h2>" +
+        '<p class="addon__lead">' + esc(item.desc) + "</p>" + sections +
+        '<div class="addon__actions cp-actions">' +
+          '<span class="cp-status" role="status">' + (complete ? "All set" : "Still to choose: " + esc(missing.join(", "))) + "</span>" +
+          '<button class="btn btn--gold btn--sm" type="button" data-cp-add' + (complete ? "" : " disabled") + ">Add to order &middot; " + money(item.price) + "</button>" +
+        "</div></div>";
+    hydrateImages(picker);
+    var np = $(".addon__panel", picker);
+    if (np && !fromTop) np.scrollTop = scroll;
+  }
+
+  function onPickerKey(e) {
+    if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches("[data-cp-choose]")) { e.preventDefault(); e.target.click(); }
+  }
+
+  function onPickerClick(e) {
+    if (!pickerState) return;
+    if (e.target === picker || e.target.closest("[data-cp-close]")) { closeComboPicker(); return; }
+    var item = pickerState.item;
+    var slotOf = function (key) { return item.slots.filter(function (s) { return s.key === key; })[0]; };
+    var choose = e.target.closest("[data-cp-choose]");
+    if (choose) {
+      var cp = choose.getAttribute("data-cp-choose").split("|");
+      pickerState.picks[cp[0]] = [cp[1]];
+      renderPicker(); return;
+    }
+    var step = e.target.closest("[data-cp-step]");
+    if (step) {
+      var sp = step.getAttribute("data-cp-step").split("|"), slot = slotOf(sp[0]), list = pickerState.picks[sp[0]];
+      if (sp[2] === "1") {
+        var already = list.filter(function (x) { return x === sp[1]; }).length;
+        if (list.length < slot.count && !(slot.distinct && already)) list.push(sp[1]);
+      } else {
+        var at = list.lastIndexOf(sp[1]);
+        if (at > -1) list.splice(at, 1);
+      }
+      renderPicker(); return;
+    }
+    if (e.target.closest("[data-cp-add]")) {
+      var picks = {};
+      item.slots.forEach(function (s) {
+        picks[s.key] = pickerState.picks[s.key].slice().sort(function (a, b) { return s.options.indexOf(a) - s.options.indexOf(b); });
+      });
+      if (!picksValid(item, picks)) return;
+      var key = makeKey(item, picks);
+      basket[key] = (basket[key] || 0) + 1;
+      Store.write("basket", basket);
+      toast(item.name + " added to your order");
+      renderBasket();
+      syncBasketBadge();
+      closeComboPicker();
+    }
+  }
+
   var addonLastFocus = null;
 
   function addonRow(item) {
@@ -403,7 +567,7 @@
 
   function basketHasCategory(cat) {
     return Object.keys(basket).some(function (id) {
-      var item = D.MENU.filter(function (m) { return m.id === id; })[0];
+      var item = menuItem(keyId(id));
       return item && item.cat === cat;
     });
   }
@@ -493,18 +657,19 @@
     var parts = item.includes.map(function (id) {
       return D.MENU.filter(function (m) { return m.id === id; })[0];
     }).filter(Boolean);
-    var worth = item.worth || parts.reduce(function (n, m) { return n + m.price; }, 0);
+    var worth = item.worth != null ? item.worth : parts.reduce(function (n, m) { return n + m.price; }, 0);
     var save = worth - item.price;
     var thumbs = parts.map(function (m) {
       return '<span class="combo__part"><img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="44" height="44"><span>' + esc(m.name) + "</span></span>";
     }).join("");
-    return '<div class="combo__parts">' + thumbs + "</div>" +
-      (save > 0 ? '<div class="combo__save">You save ' + money(save) + ' <span>instead of <s>' + money(worth) + "</s></span></div>" : "");
+    var picksLine = item.slots ? '<div class="combo__picks">You choose: ' + item.slots.map(function (sl) { return sl.count + " " + esc(sl.label.toLowerCase()); }).join(" &middot; ") + "</div>" : "";
+    return '<div class="combo__parts">' + thumbs + "</div>" + picksLine +
+      (save > 0 ? '<div class="combo__save"><b>You save ' + money(save) + '</b> <span>instead of <s>' + money(worth) + "</s></span></div>" : "");
   }
 
   function menuRow(item) {
     var pills = (item.tags || []).map(function (t) {
-      var cls = /vegan|vegetarian/i.test(t) ? "pill pill--veg" : (/signature|chef|tasting|special/i.test(t) ? "pill pill--gold" : "pill");
+      var cls = /vegan|vegetarian/i.test(t) ? "pill pill--veg" : (/signature|chef|tasting|special|best value/i.test(t) ? "pill pill--gold" : "pill");
       return '<span class="' + cls + '">' + esc(t) + "</span>";
     }).join("");
     return '' +
@@ -690,7 +855,7 @@
       list.innerHTML =
         '<div class="basket-head" aria-hidden="true"><span>Item</span><span>Qty</span><span>Each</span><span>Total</span></div>' +
         ids.map(function (id) {
-          var item = D.MENU.filter(function (m) { return m.id === id; })[0];
+          var item = menuItem(keyId(id));
           if (!item) return "";
           var qty = basket[id];
           var line = item.price * qty;
@@ -705,6 +870,7 @@
               "</div>" +
               '<span class="basket-item__each">' + money(item.price) + "</span>" +
               '<span class="basket-item__price">' + money(line) + "</span>" +
+              (item.slots ? '<small class="basket-item__picks">' + esc(picksText(item, keyPicks(id))) + "</small>" : "") +
               '<button type="button" class="remove" data-remove="' + esc(id) + '">Remove</button>' +
             "</div>";
         }).join("");
@@ -914,7 +1080,7 @@
     if (!checkout) return;
     if (subtotal == null) {
       subtotal = Object.keys(basket).reduce(function (sum, id) {
-        var item = D.MENU.filter(function (m) { return m.id === id; })[0];
+        var item = menuItem(keyId(id));
         return sum + (item ? item.price * basket[id] : 0);
       }, 0);
     }
@@ -1122,8 +1288,11 @@
            to the basket, then sends the customer straight to the Menu / order page. */
         if (!$("[data-order-list]")) {
           var dish = add.getAttribute("data-add");
-          basket[dish] = (basket[dish] || 0) + 1;
-          Store.write("basket", basket);
+          var dishItem = menuItem(dish);
+          if (!(dishItem && dishItem.slots)) {   /* choice combos are picked on the order page */
+            basket[dish] = (basket[dish] || 0) + 1;
+            Store.write("basket", basket);
+          }
           window.location.href = "order.html";
           return;
         }
@@ -1159,9 +1328,10 @@
   ------------------------------------------------------------------------ */
   function buildOrder() {
     var lines = Object.keys(basket).map(function (id) {
-      var item = D.MENU.filter(function (m) { return m.id === id; })[0];
+      var item = menuItem(keyId(id));
       if (!item) return null;
-      return { id: id, name: item.name, ar: item.ar || "", qty: basket[id], options: "", unitPrice: item.price, lineTotal: item.price * basket[id] };
+      var picks = item.slots ? keyPicks(id) : null;
+      return { id: item.id, name: item.name, ar: item.ar || "", qty: basket[id], options: picks ? picksText(item, picks) : "", choices: picks, unitPrice: item.price, lineTotal: item.price * basket[id] };
     }).filter(Boolean);
 
     var subtotal = lines.reduce(function (sum, l) { return sum + l.lineTotal; }, 0);
@@ -1306,7 +1476,7 @@
         requested_at: order.customer.requested_at ? new Date(order.customer.requested_at).toISOString() : ""
       },
       promo: promoCode && promoValid() ? promoCode : undefined,
-      items: order.items.map(function (l) { return { slug: l.id, quantity: l.qty, options: l.options || "" }; })
+      items: order.items.map(function (l) { return { slug: l.id, quantity: l.qty, options: l.options || "", choices: l.choices || undefined }; })
     };
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
     var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 15000) : null;
