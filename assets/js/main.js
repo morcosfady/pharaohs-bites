@@ -831,14 +831,14 @@
     var cu = readCustomer();
     var ok = ["street", "city", "state", "zip"].every(function (k) { return FIELD_RULES[k].ok(cu[k] || ""); });
     if (!ok) { quote = { key: "", state: "idle", fee: 0, miles: 0 }; renderTotals(); return; }
-    var key = [cu.street, cu.city, cu.state, cu.zip, promoCode, promoCode ? cu.phone + "|" + cu.email : ""].join("|").toLowerCase();
+    var key = [cu.street, cu.city, cu.state, cu.zip, promoCode, promoCode ? cu.phone + "|" + cu.email + "|" + cu.apt : ""].join("|").toLowerCase();
     if (key === quote.key && quote.state !== "err") return;
     quote = { key: key, state: "loading", fee: 0, miles: 0, promo: null };
     renderTotals();
     fetch(C.financeQuoteEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") },
-      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip, promo: promoCode || undefined, phone: cu.phone, email: cu.email })
+      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip, apt: cu.apt, promo: promoCode || undefined, phone: cu.phone, email: cu.email })
     }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
       if (quote.key !== key) return;                      /* address changed meanwhile */
       if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles, promo: d.promo || null };
@@ -1091,7 +1091,7 @@
       updateCheckoutState();
     });
     form.addEventListener("change", function (e) { if (e.target && e.target.name === "fulfillment") applyFulfillment(); });
-    form.addEventListener("input", function (e) { if (e.target && (ADDRESS_KEYS[e.target.name] || (promoCode && (e.target.name === "phone" || e.target.name === "email")))) scheduleQuote(); });
+    form.addEventListener("input", function (e) { if (e.target && (ADDRESS_KEYS[e.target.name] || (promoCode && (e.target.name === "phone" || e.target.name === "email" || e.target.name === "apt")))) scheduleQuote(); });
     form.addEventListener("submit", function (e) { e.preventDefault(); });
     initSchedule(form);
     initFieldValidation(form);
