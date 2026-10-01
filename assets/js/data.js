@@ -71,6 +71,11 @@
       desc: "Warm, velvety Egyptian creamy lentil soup, gently seasoned and served in a generous paper bowl.",
       tags: ["Vegan"], img: "assets/img/menu-real/lentil-soup.webp" },
 
+    { id: "orzo-soup", cat: "soups", name: "Egyptian Orzo Soup", ar: "لسان العصفور",
+      price: 6,
+      desc: "Tender toasted orzo pasta simmered in a warm, savory broth, Egyptian comfort in every spoonful.",
+      tags: ["Vegetarian"], img: "assets/img/menu-real/orzo-soup.webp" },
+
     /* ---------------- SWEET ---------------- */
     { id: "om-ali", cat: "desserts", signature: true, name: "Om Ali", ar: "أم علي",
       price: 25, special: true, featured: true,
