@@ -736,9 +736,9 @@
   var WINDOWS = [
     { id: "d1", mode: "delivery", label: "8:00 AM–11:00 AM", sub: "Morning",   hour: 8 },
     { id: "d2", mode: "delivery", label: "8:00 PM–11:00 PM", sub: "Night",     hour: 20 },
-    { id: "p1", mode: "pickup",   label: "11:00 AM–2:00 PM", sub: "Midday",    hour: 11 },
-    { id: "p2", mode: "pickup",   label: "2:00 PM–5:00 PM",  sub: "Afternoon", hour: 14 },
-    { id: "p3", mode: "pickup",   label: "5:00 PM–8:00 PM",  sub: "Evening",   hour: 17 }
+    { id: "p1", mode: "pickup",   label: "2:00 PM–4:00 PM",  sub: "Afternoon", hour: 14 },
+    { id: "p2", mode: "pickup",   label: "4:00 PM–6:00 PM",  sub: "Late afternoon", hour: 16 },
+    { id: "p3", mode: "pickup",   label: "6:00 PM–8:00 PM",  sub: "Evening",   hour: 18 }
   ];
   function windowsForMode(mode) { return WINDOWS.filter(function (w) { return w.mode === mode; }); }
   function pad2(n) { return (n < 10 ? "0" : "") + n; }
