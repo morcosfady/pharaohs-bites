@@ -190,11 +190,11 @@
       tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
 
     { id: "meal-for-one", cat: "combos", name: "Meal for One", ar: "وجبة لفرد",
-      price: 30.5, worth: 33,
+      price: 33, worth: 36.5,
       includes: ["feteer-meshaltet"],
-      slots: [{ key: "side", label: "Side", count: 1, options: ["white-cheese", "black-honey", "white-honey", "tahini", "baba-ganoush", "hummus"] },
+      slots: [{ key: "sides", label: "Sides", count: 2, distinct: true, options: ["white-cheese", "black-honey", "white-honey", "tahini", "baba-ganoush", "hummus"] },
               { key: "pudding", label: "Pudding", count: 1, options: ["banana-pudding", "chocolate-pudding", "creme-caramel", "rice-pudding"] }],
-      desc: "Feteer Meshaltet with one side and one pudding of your choice.",
+      desc: "Feteer Meshaltet with two sides and one pudding of your choice.",
       tags: ["Combo"], img: "assets/img/menu-real/feteer-meshaltet-wide.jpg" },
 
     { id: "feteer-dip-trio", cat: "combos", name: "Sides Platter", ar: "طبق الإضافات",
