@@ -808,7 +808,7 @@
               '<p class="hero-item__eyebrow">Our No. 1 &middot; Made to order</p>' +
               '<h3 class="hero-item__title"><span class="gold-text">' + esc(item.name) + "</span>" +
                 ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3>" +
-              '<p class="hero-item__desc">' + esc(item.desc) + "</p>" +
+              '<p class="hero-item__desc">' + esc(item.desc) + "</p>" + containsLine(item) +
               '<ul class="hero-item__facts" aria-label="Highlights">' +
                 "<li>Stretched by hand</li><li>Baked after you order</li><li>Homemade butter</li>" +
               "</ul>" +
@@ -828,7 +828,7 @@
           "<div>" +
             (item.signature ? '<span class="sig-badge">' + ankh("ankh-icon") + 'The House Signature</span>' : "") +
             "<h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
-            ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3><p>" + (item.includes ? esc(item.desc) + "</p>" + comboExtras(item) : esc(item.desc.slice(0, 96)) + "…</p>") + "</div>" +
+            ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3><p>" + (item.includes ? esc(item.desc) + "</p>" + comboExtras(item) : esc(item.desc.slice(0, 96)) + "…</p>") + containsLine(item) + "</div>" +
           '<div class="order-item__side">' +
             '<span class="order-item__price">' + money(item.price) + "</span>" +
             '<div class="flex gap-2 items-center">' +
@@ -858,9 +858,38 @@
     }
   }
 
+  /* Cottage-food label info (Texas H&S Code 437.0193): allergens on every menu row and, before paying,
+     in the "Allergens & food info" block. The same map lives in the receipt email (notify.ts). */
+  function containsLine(item) {
+    return item.allergens && item.allergens.length
+      ? '<p class="order-item__contains">Contains: ' + esc(item.allergens.join(", ")) + "</p>" : "";
+  }
+  function renderFoodInfo() {
+    var host = $("[data-foodinfo-body]");
+    if (!host) return;
+    var seen = {}, tcs = false, store = [];
+    Object.keys(basket).forEach(function (id) {
+      var item = menuItem(keyId(id));
+      if (!item || item.resale) return;
+      (item.allergens || []).forEach(function (a) { seen[a] = 1; });
+      if (item.tcs) tcs = true;
+      if (item.storebought && store.indexOf(item.name) < 0) store.push(item.name);
+    });
+    var all = Object.keys(seen);
+    var html = "<p><strong>Pharaoh’s Bites</strong>, Texas Cottage Food Reg. #20668</p>" +
+      "<p>THIS PRODUCT WAS PRODUCED IN A PRIVATE RESIDENCE THAT IS NOT SUBJECT TO GOVERNMENTAL LICENSING OR INSPECTION.</p>";
+    if (store.length) html += "<p>" + esc(store.join(", ")) + (store.length > 1 ? " are" : " is") + " store-bought, not a cottage food.</p>";
+    html += Object.keys(basket).length
+      ? "<p><strong>In your order, contains:</strong> " + (all.length ? esc(all.join(", ")) : "none of the major allergens") + ".</p>"
+      : "<p>Add a dish to see its allergens here.</p>";
+    if (tcs) html += "<p><strong>SAFE HANDLING INSTRUCTIONS:</strong> To prevent illness from bacteria, keep this food refrigerated or frozen until the food is prepared for consumption.</p>";
+    host.innerHTML = html;
+  }
+
   function renderBasket() {
     var list = $("[data-basket-list]");
     if (!list) return;
+    renderFoodInfo();
 
     var ids = Object.keys(basket);
     var subtotal = 0;

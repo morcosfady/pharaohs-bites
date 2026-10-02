@@ -1689,3 +1689,12 @@ body.nav-open .site-header.is-stuck {
   opacity: 0; pointer-events: none; transition: opacity .15s var(--ease);
 }
 .cal-day.is-closed:hover::after, .cal-day.is-closed:focus-visible::after { opacity: 1; }
+
+/* Allergen line on each order row + collapsible food info above the pay button */
+.order-item p.order-item__contains, .hero-item__body .order-item__contains { margin-top: .3rem; font-size: .78rem; line-height: 1.35; color: var(--text-dim); }
+.foodinfo { margin-top: .7rem; font-size: .75rem; line-height: 1.45; color: var(--text-dim); }
+.foodinfo summary { cursor: pointer; padding: .2rem 0; color: var(--text-muted); list-style-position: inside; }
+.foodinfo__body { padding: .3rem 0 .1rem; overflow-wrap: anywhere; }
+.foodinfo__body p { margin: 0 0 .4rem; font-size: inherit; color: inherit; }
+.foodinfo__body strong { color: var(--text-muted); font-weight: 600; }
+@media (min-width: 981px) { .foodinfo__body { max-height: 9rem; overflow-y: auto; overscroll-behavior: contain; } }
