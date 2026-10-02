@@ -883,7 +883,7 @@
     html += Object.keys(basket).length
       ? "<p><strong>In your order, contains:</strong> " + (all.length ? esc(all.join(", ")) : "none of the major allergens") + ".</p>"
       : "<p>Add a dish to see its allergens here.</p>";
-    if (tcs) html += "<p><strong>SAFE HANDLING INSTRUCTIONS:</strong> To prevent illness from bacteria, keep this food refrigerated or frozen until the food is prepared for consumption.</p>";
+    if (tcs) html += "<p class=\"foodinfo__safe\"><strong>SAFE HANDLING INSTRUCTIONS:</strong> To prevent illness from bacteria, keep this food refrigerated or frozen until the food is prepared for consumption.</p>";
     host.innerHTML = html;
   }
 

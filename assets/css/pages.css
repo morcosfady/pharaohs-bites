@@ -1697,4 +1697,5 @@ body.nav-open .site-header.is-stuck {
 .foodinfo__body { padding: .3rem 0 .1rem; overflow-wrap: anywhere; }
 .foodinfo__body p { margin: 0 0 .25rem; font-size: inherit; color: inherit; }
 .foodinfo__body strong { color: var(--text-muted); font-weight: 600; }
-@media (min-width: 981px) { .foodinfo__body { max-height: 9rem; overflow-y: auto; overscroll-behavior: contain; } }
+@media (min-width: 981px) { .foodinfo__body { max-height: 15rem; overflow-y: auto; overscroll-behavior: contain; } }
+.foodinfo__body p.foodinfo__safe { font-size: 1rem; line-height: 1.4; }
