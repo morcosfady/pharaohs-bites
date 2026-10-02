@@ -947,7 +947,9 @@
     return (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) ? d : null;
   }
   function earliestDate() { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1); }
-  function validDeliveryDate(v) { var d = parseYmd(v); return !!d && d.getTime() >= earliestDate().getTime(); }
+  /* Days the owner switched off in the dashboard (Kitchen Calendar). Filled in by initSchedule; the server checks again. */
+  var closedDays = {};
+  function validDeliveryDate(v) { var d = parseYmd(v); return !!d && d.getTime() >= earliestDate().getTime() && !closedDays[v]; }
   function windowById(id) { return WINDOWS.filter(function (w) { return w.id === id; })[0] || null; }
   function formatDeliveryDate(v, long) {
     var d = parseYmd(v);
@@ -1187,16 +1189,16 @@
       var offset = first.getDay(), days = new Date(y, m + 1, 0).getDate(), html = "", todayKey = toYmd(new Date());
       for (var i = 0; i < offset; i++) html += '<span class="cal-blank"></span>';
       for (var day = 1; day <= days; day++) {
-        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < min.getTime(), sel = key === fDate.value;
-        html += '<button type="button" class="cal-day' + (off ? " is-off" : "") + (sel ? " is-selected" : "") + (key === todayKey ? " is-today" : "") +
-          '" data-date="' + key + '"' + (off ? " disabled" : "") + ' aria-label="' + formatDeliveryDate(key, true) + (off ? " (unavailable)" : "") +
+        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < min.getTime(), shut = !off && !!closedDays[key], sel = key === fDate.value;
+        html += '<button type="button" class="cal-day' + (off ? " is-off" : "") + (shut ? " is-closed" : "") + (sel ? " is-selected" : "") + (key === todayKey ? " is-today" : "") +
+          '" data-date="' + key + '"' + (off ? " disabled" : "") + (shut ? ' aria-disabled="true" data-tip="Fully booked" title="Fully booked"' : "") + ' aria-label="' + formatDeliveryDate(key, true) + (off ? " (unavailable)" : shut ? " (fully booked)" : "") +
           '" aria-pressed="' + sel + '" tabindex="-1">' + day + "</button>";
       }
       grid.innerHTML = html;
       var minMonth = monthStart(min);
       prev.disabled = first.getTime() <= minMonth.getTime();
       next.disabled = first.getTime() >= new Date(minMonth.getFullYear(), minMonth.getMonth() + 12, 1).getTime();
-      var tab = $(".cal-day.is-selected", grid) || $(".cal-day:not(.is-off)", grid);
+      var tab = $(".cal-day.is-selected", grid) || $(".cal-day:not(.is-off):not(.is-closed)", grid);
       if (tab) tab.tabIndex = 0;
     }
 
@@ -1239,6 +1241,18 @@
     if (!validDeliveryDate(fDate.value)) { fDate.value = ""; radios.forEach(function (x) { x.checked = false; }); }
     refresh();
 
+    /* Fetch the closed days; if the request fails the calendar simply stays fully open (the server still refuses closed days). */
+    if (C.financeClosedDaysEndpoint && window.fetch) {
+      fetch(C.financeClosedDaysEndpoint + "&day=gte." + toYmd(new Date()), { headers: { "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") } })
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (rows) {
+          closedDays = {};
+          (rows || []).forEach(function (r) { if (r && r.day) closedDays[r.day] = true; });
+          if (!cal.hidden) renderCalendar();
+          changed();
+        }).catch(function () {});
+    }
+
     trigger.addEventListener("click", function () { if (cal.hidden) openCal(); else closeCal(false); });
     prev.addEventListener("click", function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); renderCalendar(); });
     next.addEventListener("click", function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); renderCalendar(); });
@@ -1246,6 +1260,7 @@
     grid.addEventListener("click", function (e) {
       var b = e.target.closest(".cal-day");
       if (!b || b.disabled) return;
+      if (b.classList.contains("is-closed")) { note.textContent = formatDeliveryDate(b.getAttribute("data-date"), true) + " is fully booked. Please pick another day."; return; }
       var needWindow = !chosenWindow();
       fDate.value = b.getAttribute("data-date");
       closeCal(true);

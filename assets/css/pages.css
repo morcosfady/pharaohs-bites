@@ -1675,3 +1675,17 @@ body.nav-open .site-header.is-stuck {
 .chip--combo { color: #5fd69a; border-color: rgba(31, 163, 92, .6); background: rgba(31, 163, 92, .08); }
 .chip--combo:hover { color: #fff; border-color: #1fa35c; }
 .chip--combo[aria-pressed="true"] { background: linear-gradient(115deg, #3ccf85, #1fa35c 55%, #0f7a43); border-color: transparent; color: #fff; box-shadow: 0 8px 24px rgba(31, 163, 92, .35); }
+
+/* Days the owner closed in the dashboard: red, not selectable, "Fully booked" on hover or focus */
+.cal-day.is-closed, .cal-day.is-closed:not(.is-selected) {
+  position: relative; cursor: not-allowed; color: #fff; text-decoration: none;
+  background: rgba(198, 64, 64, .78); border-color: rgba(255, 140, 140, .55);
+}
+.cal-day.is-closed:hover, .cal-day.is-closed:focus-visible { background: rgba(198, 64, 64, .95); border-color: #ff9a9a; transform: none; outline: none; }
+.cal-day.is-closed::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  background: #1b1b1b; color: #fff; border: 1px solid rgba(255, 140, 140, .6); border-radius: 8px;
+  padding: .3rem .55rem; font-size: .72rem; line-height: 1.2; white-space: nowrap; z-index: 5;
+  opacity: 0; pointer-events: none; transition: opacity .15s var(--ease);
+}
+.cal-day.is-closed:hover::after, .cal-day.is-closed:focus-visible::after { opacity: 1; }

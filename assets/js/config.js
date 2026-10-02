@@ -81,6 +81,7 @@
     financeQuoteEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/delivery-quote",
     enablePickup: true,    /* set to true to bring back the Delivery / Pickup choice */
     pickupAddress: "4911 Haverwood Ln, Dallas, TX 75287",
+    financeClosedDaysEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/rest/v1/closed_days?select=day",
     financeAnonKey: "sb_publishable_7gy7wfs9_FxaPBE_Ap5Spw_3SDZ2IEf",
     // Fallback while no endpoint exists: hand the order to WhatsApp so a
     // customer is never left with a dead button.
