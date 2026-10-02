@@ -876,9 +876,9 @@
       if (item.storebought && store.indexOf(item.name) < 0) store.push(item.name);
     });
     var all = Object.keys(seen);
-    var html = "<p><strong>Pharaoh’s Bites</strong>, Texas Cottage Food Reg. #20668</p>" +
+    var html = "<p><strong>Pharaoh’s Bites is a Texas Cottage Food Operation, Reg. #20668.</strong></p>" +
       "<p>THIS PRODUCT WAS PRODUCED IN A PRIVATE RESIDENCE THAT IS NOT SUBJECT TO GOVERNMENTAL LICENSING OR INSPECTION.</p>" +
-      "<p>Made in a home kitchen that also handles milk, eggs, wheat, soy, tree nuts and sesame. Cross-contact is possible.</p>";
+      "<p>Home kitchen: may contain traces of milk, eggs, wheat, soy, tree nuts, sesame.</p>";
     if (store.length) html += "<p>" + esc(store.join(", ")) + (store.length > 1 ? " are" : " is") + " store-bought, not a cottage food.</p>";
     html += Object.keys(basket).length
       ? "<p><strong>In your order, contains:</strong> " + (all.length ? esc(all.join(", ")) : "none of the major allergens") + ".</p>"
