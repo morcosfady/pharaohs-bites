@@ -1217,9 +1217,10 @@
       var min = earliestDate(), first = view, y = first.getFullYear(), m = first.getMonth();
       title.textContent = first.toLocaleDateString("en-US", { month: "long", year: "numeric" });
       var offset = first.getDay(), days = new Date(y, m + 1, 0).getDate(), html = "", todayKey = toYmd(new Date());
+      var today0 = new Date(min.getFullYear(), min.getMonth(), min.getDate() - 1);   /* today shows red "Fully booked": the earliest booking is tomorrow */
       for (var i = 0; i < offset; i++) html += '<span class="cal-blank"></span>';
       for (var day = 1; day <= days; day++) {
-        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < min.getTime(), shut = !off && !!closedDays[key], sel = key === fDate.value;
+        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < today0.getTime(), shut = !off && (key === todayKey || !!closedDays[key]), sel = key === fDate.value;
         html += '<button type="button" class="cal-day' + (off ? " is-off" : "") + (shut ? " is-closed" : "") + (sel ? " is-selected" : "") + (key === todayKey ? " is-today" : "") +
           '" data-date="' + key + '"' + (off ? " disabled" : "") + (shut ? ' aria-disabled="true" data-tip="Fully booked" title="Fully booked"' : "") + ' aria-label="' + formatDeliveryDate(key, true) + (off ? " (unavailable)" : shut ? " (fully booked)" : "") +
           '" aria-pressed="' + sel + '" tabindex="-1">' + day + "</button>";
