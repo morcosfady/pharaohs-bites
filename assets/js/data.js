@@ -92,7 +92,7 @@
     { id: "orzo-soup", cat: "soups", allergens: ["Wheat"], name: "Egyptian Orzo Soup", ar: "لسان العصفور",
       price: 7,
       desc: "Tender toasted orzo pasta simmered in a warm, savory broth, Egyptian comfort in every spoonful.",
-      tags: ["Vegetarian"], img: "assets/img/menu-real/orzo-soup.webp" },
+      tags: ["Vegan"], img: "assets/img/menu-real/orzo-soup.webp" },
 
     /* ---------------- SWEET ---------------- */
     { id: "om-ali", cat: "desserts", allergens: ["Milk", "Wheat", "Tree nuts"], tcs: true, signature: true, name: "Om Ali", ar: "أم علي",
