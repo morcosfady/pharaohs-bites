@@ -1116,7 +1116,7 @@
       if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles, promo: d.promo || null };
       else quote = { key: key, state: "err", fee: 0, miles: 0, promo: null };
       if (promoCode && quote.state === "ok") {
-        if (quote.promo && quote.promo.valid) renderPromo(promoCode + " applied: free delivery 🎉", false);
+        if (quote.promo && quote.promo.valid) renderPromo(quote.promo.message || (promoCode + " applied: free delivery 🎉"), false);
         else renderPromo((quote.promo && quote.promo.message) || "that promo code is not valid", true);
       }
       renderTotals();
