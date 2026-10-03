@@ -288,9 +288,10 @@
   function basketCount() {
     return Object.keys(basket).reduce(function (sum, id) { return sum + basket[id]; }, 0);
   }
-  function addToBasket(id, name) {
+  function addToBasket(id, name, skipMilk) {
     var combo = menuItem(id);
     if (combo && combo.slots) { openComboPicker(combo); return; }
+    if (combo && combo.milkVariant && !skipMilk) { openMilkChoice(combo); return; }
     if (combo && combo.onlyWith && (basket[id] || 0) >= (basket[combo.onlyWith] || 0)) {
       toast("One " + combo.name.toLowerCase() + " per " + menuItem(combo.onlyWith).name);
       return;
@@ -531,6 +532,7 @@
       : D.MENU.filter(function (m) { return m.cat === opts.category && m.id !== opts.exclude && !m.hidden; });
     if (!extras.length) return false;
 
+    $(".addon__actions", box).hidden = false;
     $("[data-addon-eyebrow]", box).textContent = opts.eyebrow;
     $("[data-addon-title]", box).textContent = opts.title;
     $("[data-addon-lead]", box).textContent = opts.lead;
@@ -560,6 +562,33 @@
       lead: item.name + " is best torn open and eaten with these. Add any you like, or skip — it is entirely up to you.",
       skip: "No thanks", done: "Done"
     });
+  }
+
+  /* "Which milk?" prompt for drinks that have an almond-milk version. */
+  function openMilkChoice(item) {
+    var box = $("[data-addon]");
+    if (!box) { addToBasket(item.id, item.name, true); return; }
+    var alt = menuItem(item.milkVariant);
+    var extra = alt.price - item.price;
+    $("[data-addon-eyebrow]", box).textContent = "Your drink";
+    $("[data-addon-title]", box).textContent = "Which milk would you like?";
+    $("[data-addon-lead]", box).textContent = item.name + " is made with whole milk, or with almond milk" + (isVegan(alt) ? " (100% vegan)" : "") + ".";
+    var choice = function (it, label, note) {
+      return '<button class="btn btn--sm milk-choice" type="button" data-milk="' + esc(it.id) + '" data-name="' + esc(it.name) + '">' +
+        "<span>" + label + "</span><small>" + note + "</small></button>";
+    };
+    $("[data-addon-list]", box).innerHTML =
+      choice(item, "Whole milk", money(item.price)) +
+      choice(alt, "Almond milk" + (isVegan(alt) ? " " + veganBadge() : ""), money(alt.price) + (extra > 0 ? " (+" + money(extra) + ")" : ""));
+    $(".addon__actions", box).hidden = true;
+    addonContinue = null;
+    if (!box.classList.contains("is-open")) {
+      addonLastFocus = document.activeElement;
+      box.classList.add("is-open");
+      box.setAttribute("aria-hidden", "false");
+      document.body.classList.add("nav-open");
+    }
+    $(".addon__panel", box).scrollTop = 0;
   }
 
   function openItemAddons(item) {
@@ -637,6 +666,12 @@
     var box = $("[data-addon]");
     if (!box) return;
     box.addEventListener("click", function (e) {
+      var milk = e.target.closest("[data-milk]");
+      if (milk) {
+        closeAddons(false);
+        addToBasket(milk.getAttribute("data-milk"), milk.getAttribute("data-name"), true);
+        return;
+      }
       if (e.target.closest("[data-addon-continue]")) closeAddons(true);
       else if (e.target === box || e.target.closest("[data-addon-close]")) closeAddons(false);
     });
@@ -724,13 +759,14 @@
   }
 
   function menuRow(item) {
-    var pills = (item.tags || []).map(function (t) {
+    var veganNote = item.veganOption ? '<span class="pill pill--veg pill--vegan">' + LEAF_SVG + "Vegan with almond milk</span>" : "";
+    var pills = veganNote + (item.tags || []).map(function (t) {
       if (/^vegan$/i.test(t)) return '<span class="pill pill--veg pill--vegan">' + LEAF_SVG + "Vegan</span>";
       var cls = /vegan|vegetarian/i.test(t) ? "pill pill--veg" : (/signature|chef|tasting|special|best value/i.test(t) ? "pill pill--gold" : "pill");
       return '<span class="' + cls + '">' + esc(t) + "</span>";
     }).join("");
     return '' +
-      '<article class="order-item menu-item' + (item.includes ? " menu-item--combo" : "") + '"' + (isVegan(item) ? " data-vegan" : "") + ' data-reveal>' +
+      '<article class="order-item menu-item' + (item.includes ? " menu-item--combo" : "") + '"' + (isVegan(item) || item.veganOption ? " data-vegan" : "") + ' data-reveal>' +
         '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
         "<div><h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) + (isVegan(item) ? " " + veganBadge() : "") +
           ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3>" +
@@ -865,7 +901,7 @@
           "</article>";
       }
       return '' +
-        '<article class="order-item' + (item.signature ? " order-item--sig" : "") + (item.includes ? " menu-item--combo" : "") + '" data-cat="' + esc(item.cat) + '"' + (isVegan(item) ? " data-vegan" : "") + ' data-reveal>' +
+        '<article class="order-item' + (item.signature ? " order-item--sig" : "") + (item.includes ? " menu-item--combo" : "") + '" data-cat="' + esc(item.cat) + '"' + (isVegan(item) || item.veganOption ? " data-vegan" : "") + ' data-reveal>' +
           '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
           "<div>" +
             (item.signature ? '<span class="sig-badge">' + ankh("ankh-icon") + 'The House Signature</span>' : "") +

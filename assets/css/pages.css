@@ -1711,3 +1711,7 @@ body.nav-open .site-header.is-stuck {
 .chip--vegan svg { width: 1.1em; height: 1.1em; }
 .chip--vegan:hover { color: #fff; border-color: #1fa35c; }
 .chip--vegan[aria-pressed="true"] { background: #1fa35c; border-color: transparent; color: #fff; }
+
+/* "Which milk?" choice buttons in the add-on dialog */
+.milk-choice { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: .6rem; padding: .9rem 1.1rem; text-align: left; }
+.milk-choice small { opacity: .75; letter-spacing: .05em; }

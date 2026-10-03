@@ -13,6 +13,8 @@
      tags     rendered as pills; vegan/vegetarian turn green, special turns gold
      img      PLACEHOLDER photography. Swap these for the real photos.
      suggestItems  optional list of dish ids offered in the add-on prompt instead of a whole category.
+     milkVariant  id of the almond-milk version; adding this drink asks "whole or almond milk?" first.
+     veganOption  true -> listed in the Vegan tab (its almond version is vegan).
      hidden   true -> not listed on the menu or order page (add-on only).
      onlyWith dish id this add-on needs in the basket; it is removed when that dish is, and at most one per dish.
      suggest  optional category id. Adding this dish on the order page opens
@@ -160,12 +162,21 @@
       tags: [], img: "assets/img/menu-real/hummus.webp" },
 
     /* ---------------- DRINKS ---------------- */
-    { id: "protein-shake", cat: "drinks", allergens: ["Milk", "Soy"], tcs: true, name: "Special Chocolate Protein Shake", ar: "مشروب البروتين بالشوكولاتة",
+    { id: "protein-shake", cat: "drinks", allergens: ["Milk", "Soy"], tcs: true, name: "Special Chocolate Protein Shake", ar: "مشروب البروتين بالشوكولاتة", milkVariant: "protein-shake-almond",
       price: 9, special: true, featured: true,
       desc: "A rich, creamy chocolate 22g protein shake blended smooth and served chilled.",
       tags: ["House Special", "22g Protein"], img: "assets/img/menu-real/protein-shake.webp" },
 
-    { id: "avocado-drink", cat: "drinks", allergens: ["Milk"], tcs: true, name: "Avocado Drink", ar: "عصير أفوكادو",
+    /* Almond-milk versions: not listed, chosen in the "which milk?" prompt (milkVariant on the whole-milk drink). */
+    { id: "protein-shake-almond", cat: "drinks", hidden: true, allergens: ["Milk", "Soy", "Tree nuts"], tcs: true, name: "Special Chocolate Protein Shake (Almond Milk)", ar: "مشروب البروتين بالشوكولاتة بحليب اللوز",
+      price: 10, desc: "A rich, creamy chocolate 22g protein shake blended smooth with almond milk and served chilled.",
+      tags: ["22g Protein"], img: "assets/img/menu-real/protein-shake.webp" },
+
+    { id: "avocado-drink-almond", cat: "drinks", hidden: true, allergens: ["Tree nuts"], tcs: true, name: "Avocado Drink (Almond Milk)", ar: "عصير أفوكادو بحليب اللوز",
+      price: 9, desc: "Creamy avocado blended with almond milk, no honey. 100% vegan.",
+      tags: ["Vegan"], img: "assets/img/menu-real/avocado-drink.webp" },
+
+    { id: "avocado-drink", cat: "drinks", allergens: ["Milk"], tcs: true, name: "Avocado Drink", ar: "عصير أفوكادو", milkVariant: "avocado-drink-almond", veganOption: true,
       price: 8,
       desc: "Creamy avocado blended with milk and white honey for a smooth, naturally sweet drink.",
       tags: ["Vegetarian"], img: "assets/img/menu-real/avocado-drink.webp" },
