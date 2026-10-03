@@ -643,7 +643,7 @@
       if (!nudge) { then(); return; }
       var shown = showAddons({
         category: nudge.category, eyebrow: nudge.eyebrow, title: nudge.title, lead: nudge.lead,
-        skip: "No thanks", done: (C.financeCheckoutEndpoint ? "Continue to payment" : "Place order"),
+        skip: "No thanks", done: (C.financeCheckoutEndpoint && !freePromo() ? "Continue to payment" : "Place order"),
         onContinue: step
       });
       if (!shown) step();
@@ -1105,6 +1105,8 @@
   /* Promo code the customer typed. The server is the judge: it checks the code and that this
      phone / email has not used it before. "promo" in a quote reply says whether it counts. */
   var promoCode = "";
+  /* A "free order" promo (whole order free): no card step, total shows $0. */
+  function freePromo() { return !!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid && quote.promo.free); }
   function promoValid() { return !!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid); }
   function renderPromo(msg, bad) {
     var el = $("[data-promo-msg]");
@@ -1119,8 +1121,13 @@
     var pickup = getFulfillment() === "pickup";
     var label = $("[data-fee-label]"), value = $("[data-fee-value]"), total = $("[data-total]");
     if (!label || !value || !total) return;
+    var go = $("[data-checkout-label]");
+    if (go && !submitting && C.financeCheckoutEndpoint) go.textContent = freePromo() ? "Place Order" : "Place Order & Pay";
     if (pickup) { label.textContent = "Pickup"; value.textContent = "Free"; total.textContent = money(lastSubtotal); return; }
-    if (quote.state === "ok" && promoValid()) {
+    if (quote.state === "ok" && freePromo()) {
+      label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
+      total.innerHTML = "<s>" + money(lastSubtotal) + "</s> $0";
+    } else if (quote.state === "ok" && promoValid()) {
       label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
       total.textContent = money(lastSubtotal);
     } else if (quote.state === "ok") {
@@ -1608,7 +1615,7 @@
   function recordOrder(order, token) {
     var payload = {
       checkout_token: token,
-      pay_online: !!C.financeCheckoutEndpoint,
+      pay_online: !!C.financeCheckoutEndpoint && !freePromo(),
       fulfillment: order.customer.fulfillment === "pickup" ? "pickup" : "delivery",
       customer: {
         name: order.customer.name, phone: order.customer.phone, email: order.customer.email || "", street: order.customer.street, apt: order.customer.apt,
@@ -1719,7 +1726,7 @@
     btn.disabled = busy;
     btn.classList.toggle("is-busy", busy);
     var span = $("[data-checkout-label]", btn);
-    if (span) span.textContent = label || (C.financeCheckoutEndpoint ? "Place Order & Pay" : "Place Order");
+    if (span) span.textContent = label || (C.financeCheckoutEndpoint && !freePromo() ? "Place Order & Pay" : "Place Order");
   }
 
   function showCheckoutError(msg) {
@@ -1748,7 +1755,7 @@
     if (!C.financeOrderEndpoint) { openWhatsApp(order, number); return; }
 
     var state = checkoutToken(order);
-    var payFirst = !!C.financeCheckoutEndpoint;
+    var payFirst = !!C.financeCheckoutEndpoint && !freePromo();
     /* Already recorded (e.g. page refreshed after success): reuse the number. */
     if (state.orderNumber) {
       order.orderNumber = state.orderNumber;
