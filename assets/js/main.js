@@ -50,17 +50,41 @@
       if (!vid) { vid = "v" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem("nb:vid", vid); }
     } catch (e) { off = true; }
 
+    /* Where did this visit come from? A link tag (?src=qr, ?src=nextdoor ...) wins; otherwise the page they came from. */
+    var SOURCES = [
+      ["QR code (flyer)", /^(qr|flyer|qrcode)$/],
+      ["Nextdoor", /nextdoor/],
+      ["Instagram", /instagram|^ig$/],
+      ["Facebook", /facebook|^fb$|fbclid|^meta$/],
+      ["TikTok", /tiktok/],
+      ["YouTube", /youtube|youtu\.be/],
+      ["X (Twitter)", /twitter|^x$|^x\.com|t\.co$/],
+      ["Snapchat", /snapchat/],
+      ["Pinterest", /pinterest/],
+      ["Reddit", /reddit/],
+      ["LinkedIn", /linkedin/],
+      ["Threads", /threads/],
+      ["WhatsApp", /whatsapp|wa\.me/],
+      ["Telegram", /telegram|^t\.me/],
+      ["Google", /google/],
+      ["Bing", /bing/],
+      ["Email", /^(email|mail|newsletter)$|mail\.google|outlook|yahoo/]
+    ];
+    function match(text) {
+      text = String(text || "").toLowerCase();
+      for (var i = 0; i < SOURCES.length; i++) if (SOURCES[i][1].test(text)) return SOURCES[i][0];
+      return "";
+    }
     function source() {
-      var q = (location.search.match(/[?&]utm_source=([^&]+)/) || [])[1];
-      var from = (q ? decodeURIComponent(q) : "") + " " + (document.referrer || "");
-      if (/instagram|l\.instagram/i.test(from)) return "Instagram";
-      if (/facebook|fb\.com|fbclid/i.test(from) || /fbclid/.test(location.search)) return "Facebook";
-      if (/google/i.test(from)) return "Google";
-      if (/whatsapp|wa\.me/i.test(from)) return "WhatsApp";
-      if (/tiktok/i.test(from)) return "TikTok";
-      if (/nextdoor/i.test(from)) return "Nextdoor";
-      if (document.referrer && document.referrer.indexOf(location.host) < 0) return "Other website";
-      return document.referrer ? "" : "Direct";
+      var m = location.search.match(/[?&](?:src|utm_source)=([^&]+)/);
+      var tagged = m ? match(decodeURIComponent(m[1])) : "";
+      if (tagged) return tagged;
+      if (/[?&]fbclid=/.test(location.search)) return "Facebook";
+      var ref = document.referrer || "";
+      if (!ref) return "Direct";
+      var host = ref.replace(/^https?:\/\//, "").split("/")[0];
+      if (host.indexOf(location.host) > -1) return "";
+      return match(host) || "Other website";
     }
 
     function send(kind, detail, meta) {
