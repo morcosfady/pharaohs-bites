@@ -1118,14 +1118,24 @@
      rule drives the calendar, the button state, the submit guard and the
      order builder, so a bad date cannot slip through any of them. */
   /* Delivery and Pickup have their own time windows. */
+  /* Weekdays: 2 delivery windows + 3 pickup windows. Saturday and Sunday: delivery only, 4 windows. */
   var WINDOWS = [
-    { id: "d1", mode: "delivery", label: "8:00 AM–11:00 AM", sub: "Morning",   hour: 8 },
-    { id: "d2", mode: "delivery", label: "8:00 PM–11:00 PM", sub: "Night",     hour: 20 },
-    { id: "p1", mode: "pickup",   label: "2:00 PM–4:00 PM",  sub: "Afternoon", hour: 14 },
-    { id: "p2", mode: "pickup",   label: "4:00 PM–6:00 PM",  sub: "Late afternoon", hour: 16 },
-    { id: "p3", mode: "pickup",   label: "6:00 PM–8:00 PM",  sub: "Evening",   hour: 18 }
+    { id: "d1", mode: "delivery", days: "weekday", label: "8:00 AM–11:00 AM", sub: "Morning",   hour: 8 },
+    { id: "d2", mode: "delivery", days: "weekday", label: "8:00 PM–11:00 PM", sub: "Night",     hour: 20 },
+    { id: "p1", mode: "pickup",   days: "weekday", label: "2:00 PM–4:00 PM",  sub: "Afternoon", hour: 14 },
+    { id: "p2", mode: "pickup",   days: "weekday", label: "4:00 PM–6:00 PM",  sub: "Late afternoon", hour: 16 },
+    { id: "p3", mode: "pickup",   days: "weekday", label: "6:00 PM–8:00 PM",  sub: "Evening",   hour: 18 },
+    { id: "w1", mode: "delivery", days: "weekend", label: "8:00 AM–11:00 AM", sub: "Morning",   hour: 8 },
+    { id: "w2", mode: "delivery", days: "weekend", label: "11:00 AM–2:00 PM", sub: "Midday",    hour: 11 },
+    { id: "w3", mode: "delivery", days: "weekend", label: "2:00 PM–5:00 PM",  sub: "Afternoon", hour: 14 },
+    { id: "w4", mode: "delivery", days: "weekend", label: "5:00 PM–8:00 PM",  sub: "Evening",   hour: 17 }
   ];
-  function windowsForMode(mode) { return WINDOWS.filter(function (w) { return w.mode === mode; }); }
+  function isWeekend(ymd) { var d = parseYmd(ymd); return !!d && (d.getDay() === 0 || d.getDay() === 6); }
+  /* The windows on offer for this mode on this date (none when pickup is chosen for a weekend day). */
+  function windowsFor(mode, ymd) {
+    var kind = isWeekend(ymd) ? "weekend" : "weekday";
+    return WINDOWS.filter(function (w) { return w.mode === mode && w.days === kind; });
+  }
   function pad2(n) { return (n < 10 ? "0" : "") + n; }
   function toYmd(d) { return d.getFullYear() + "-" + pad2(d.getMonth() + 1) + "-" + pad2(d.getDate()); }
   function parseYmd(v) {
@@ -1137,7 +1147,7 @@
   function earliestDate() { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1); }
   /* Days the owner switched off in the dashboard (Kitchen Calendar). Filled in by initSchedule; the server checks again. */
   var closedDays = {};
-  function validDeliveryDate(v) { var d = parseYmd(v); return !!d && d.getTime() >= earliestDate().getTime() && !closedDays[v]; }
+  function validDeliveryDate(v) { var d = parseYmd(v); return !!d && d.getTime() >= earliestDate().getTime() && !closedDays[v] && !(getFulfillment() === "pickup" && isWeekend(v)); }
   function windowById(id) { return WINDOWS.filter(function (w) { return w.id === id; })[0] || null; }
   function formatDeliveryDate(v, long) {
     var d = parseYmd(v);
@@ -1149,7 +1159,7 @@
   function scheduleComplete(c) {
     if (!c || !validDeliveryDate(c.requested_date)) return false;
     var w = windowById(c.requested_window);
-    return !!w && w.mode === (c.fulfillment === "pickup" ? "pickup" : "delivery");
+    return !!w && windowsFor(c.fulfillment === "pickup" ? "pickup" : "delivery", c.requested_date).indexOf(w) > -1;
   }
 
   /* One rule per field: used for the button state, the note under the button
@@ -1373,13 +1383,13 @@
     function renderWindows() {
       var mode = getFulfillment();
       var keep = chosenWindow() ? chosenWindow().id : savedWinId;
-      winList.innerHTML = windowsForMode(mode).map(function (w) {
+      winList.innerHTML = windowsFor(mode, fDate.value).map(function (w) {
         return '<label class="win"><input type="radio" name="requested_window" value="' + w.id + '"' + (w.id === keep ? " checked" : "") + '>' +
           '<span class="win__card"><b>' + w.label + '</b><small>' + w.sub + '</small></span></label>';
       }).join("");
       radios = $$("input[name=requested_window]", winList);
       savedWinId = "";
-      var wt = $("[data-windows-title]", root); if (wt) wt.textContent = "Choose one " + (mode === "pickup" ? "pickup" : "delivery") + " window";
+      var wt = $("[data-windows-title]", root); if (wt) wt.textContent = "Choose one " + (mode === "pickup" ? "pickup" : "delivery") + " window" + (isWeekend(fDate.value) ? " (weekend delivery times)" : "");
     }
     renderWindows();
     rerenderSchedule = function () { renderWindows(); changed(); };
@@ -1393,6 +1403,7 @@
       for (var i = 0; i < offset; i++) html += '<span class="cal-blank"></span>';
       for (var day = 1; day <= days; day++) {
         var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < today0.getTime(), shut = !off && (key === todayKey || !!closedDays[key]), sel = key === fDate.value;
+        if (!off && !shut && getFulfillment() === "pickup" && isWeekend(key)) { off = true; }
         html += '<button type="button" class="cal-day' + (off ? " is-off" : "") + (shut ? " is-closed" : "") + (sel ? " is-selected" : "") + (key === todayKey ? " is-today" : "") +
           '" data-date="' + key + '"' + (off ? " disabled" : "") + (shut ? ' aria-disabled="true" data-tip="Fully booked" title="Fully booked"' : "") + ' aria-label="' + formatDeliveryDate(key, true) + (off ? " (unavailable)" : shut ? " (fully booked)" : "") +
           '" aria-pressed="' + sel + '" tabindex="-1">' + day + "</button>";
@@ -1428,7 +1439,8 @@
       label.textContent = okDate ? formatDeliveryDate(fDate.value, true) : "Select a date";
       trigger.classList.toggle("is-set", okDate);
       winBox.hidden = !okDate;
-      note.textContent = "Earliest " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + ": " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable.";
+      var wkndNote = getFulfillment() === "pickup" ? " Pickup is available Monday to Friday; on Saturday and Sunday we deliver only." : " On Saturday and Sunday we deliver in four windows, from 8 AM to 8 PM.";
+      note.textContent = "Earliest " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + ": " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable." + wkndNote;
       if (!okDate) hint.textContent = "Pick a " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " date, from tomorrow onward.";
       else if (!win) hint.textContent = "Now choose one " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " window.";
       else hint.textContent = "";
@@ -1464,8 +1476,9 @@
       var b = e.target.closest(".cal-day");
       if (!b || b.disabled) return;
       if (b.classList.contains("is-closed")) { note.textContent = formatDeliveryDate(b.getAttribute("data-date"), true) + " is fully booked. Please pick another day."; return; }
-      var needWindow = !chosenWindow();
       fDate.value = b.getAttribute("data-date");
+      renderWindows();
+      var needWindow = !chosenWindow();
       closeCal(true);
       changed();
       if (needWindow) winBox.scrollIntoView({ block: "nearest", behavior: "smooth" });
