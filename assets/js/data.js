@@ -66,10 +66,10 @@
       desc: "Seasoned plant-based kofta baked in a rich Egyptian tomato salsa and served in a half-size foil tray, with a separate tray of Egyptian rice with toasted vermicelli.",
       tags: ["Vegan", "Plant-Based", "Tray"], img: "assets/img/menu-real/kofta-tray.webp" },
 
-    { id: "meatballs-spaghetti", cat: "mains", allergens: ["Eggs", "Wheat", "Soy"], tcs: true, name: "Plant-Based Meatballs & Spaghetti", ar: "كرات لحم نباتية بالمكرونة",
+    { id: "meatballs-spaghetti", cat: "mains", allergens: ["Wheat", "Soy"], tcs: true, name: "Plant-Based Meatballs & Spaghetti", ar: "كرات لحم نباتية بالمكرونة",
       price: 30,
       desc: "Tender spaghetti tossed in a rich tomato sauce and topped with seasoned plant-based meatballs. Served in a half-size foil tray.",
-      tags: ["Plant-Based"], img: "assets/img/menu-real/meatballs-spaghetti.webp" },
+      tags: ["Vegan", "Plant-Based"], img: "assets/img/menu-real/meatballs-spaghetti.webp" },
 
     { id: "koshary", cat: "mains", allergens: ["Wheat"], tcs: true, name: "Koshary Tray", ar: "كشري",
       price: 25, suggestItems: ["koshary-sauce"],
