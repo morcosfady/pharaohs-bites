@@ -78,6 +78,7 @@
     ------------------------------------------------------------------- */
     financeOrderEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-order",
     financeCheckoutEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-checkout",
+    financeTrackEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/track",   /* anonymous visit log for the dashboard Website Pulse tab */
     financeQuoteEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/delivery-quote",
     enablePickup: true,    /* set to true to bring back the Delivery / Pickup choice */
     pickupAddress: "4911 Haverwood Ln, Dallas, TX 75287",

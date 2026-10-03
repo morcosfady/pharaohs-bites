@@ -35,6 +35,59 @@
       try { localStorage.setItem("nb:" + key, JSON.stringify(value)); } catch (e) {}
     }
   };
+  /* --- Visitor log (anonymous) --------------------------------------------
+     A random id kept in this browser, plus what the visitor does: opened a page,
+     added a dish, pressed Place Order, hit a problem. No names or emails are sent,
+     except first name + last 4 phone digits when an order fails (so we can help).
+     Visit the site once with ?me=1 to stop counting your own visits. */
+  var Track = (function () {
+    var off = false, vid = "", problems = 0;
+    try {
+      if (/[?&]me=1/.test(location.search)) localStorage.setItem("nb:noTrack", "1");
+      if (/[?&]me=0/.test(location.search)) localStorage.removeItem("nb:noTrack");
+      off = !!localStorage.getItem("nb:noTrack") || navigator.doNotTrack === "1";
+      vid = localStorage.getItem("nb:vid") || "";
+      if (!vid) { vid = "v" + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem("nb:vid", vid); }
+    } catch (e) { off = true; }
+
+    function source() {
+      var q = (location.search.match(/[?&]utm_source=([^&]+)/) || [])[1];
+      var from = (q ? decodeURIComponent(q) : "") + " " + (document.referrer || "");
+      if (/instagram|l\.instagram/i.test(from)) return "Instagram";
+      if (/facebook|fb\.com|fbclid/i.test(from) || /fbclid/.test(location.search)) return "Facebook";
+      if (/google/i.test(from)) return "Google";
+      if (/whatsapp|wa\.me/i.test(from)) return "WhatsApp";
+      if (/tiktok/i.test(from)) return "TikTok";
+      if (/nextdoor/i.test(from)) return "Nextdoor";
+      if (document.referrer && document.referrer.indexOf(location.host) < 0) return "Other website";
+      return document.referrer ? "" : "Direct";
+    }
+
+    function send(kind, detail, meta) {
+      if (off || !C.financeTrackEndpoint) return;
+      var page = (location.pathname.split("/").pop() || "index").replace(/\.html$/, "") || "index";
+      try {
+        fetch(C.financeTrackEndpoint, {
+          method: "POST", keepalive: true,
+          headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "" },
+          body: JSON.stringify({ visitor_id: vid, events: [{ kind: kind, page: page, detail: detail || "", meta: meta || {} }] })
+        }).catch(function () {});
+      } catch (e) {}
+    }
+
+    return {
+      id: function () { return vid; },
+      visit: function () {
+        var src = "";
+        try { src = sessionStorage.getItem("nb:src") || ""; if (!src) { src = source(); if (src) sessionStorage.setItem("nb:src", src); } } catch (e) { src = source(); }
+        send("visit", "", { source: src || "Direct" });
+      },
+      add: function (item) { send("add_to_basket", item.id, { item: item.name }); },
+      checkout: function () { send("checkout_started"); },
+      problem: function (type, detail, meta) { if (++problems > 6) return; meta = meta || {}; meta.type = type; send("problem", detail, meta); }
+    };
+  })();
+
   var favourites = Store.read("favourites", []);
   var basket = Store.read("basket", {});
 
@@ -298,6 +351,7 @@
     }
     basket[id] = (basket[id] || 0) + 1;
     Store.write("basket", basket);
+    if (combo) Track.add(combo);
     toast(name + " added to your order");
     renderBasket();
     syncBasketBadge();
@@ -1159,10 +1213,16 @@
     }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
       if (quote.key !== key) return;                      /* address changed meanwhile */
       if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles, promo: d.promo || null };
-      else quote = { key: key, state: "err", fee: 0, miles: 0, promo: null };
+      else {
+        quote = { key: key, state: "err", fee: 0, miles: 0, promo: null };
+        Track.problem("address", (d && d.error) || "address could not be checked", { zip: cu.zip || "" });
+      }
       if (promoCode && quote.state === "ok") {
         if (quote.promo && quote.promo.valid) renderPromo(quote.promo.message || (promoCode + " applied: free delivery 🎉"), false);
-        else renderPromo((quote.promo && quote.promo.message) || "that promo code is not valid", true);
+        else {
+          renderPromo((quote.promo && quote.promo.message) || "that promo code is not valid", true);
+          Track.problem("promo", (quote.promo && quote.promo.message) || "promo code not valid", { code: promoCode });
+        }
       }
       renderTotals();
     }).catch(function () { if (quote.key === key) { quote = { key: key, state: "err", fee: 0, miles: 0 }; renderTotals(); } });
@@ -1617,6 +1677,7 @@
   function recordOrder(order, token) {
     var payload = {
       checkout_token: token,
+      visitor_id: Track.id(),
       pay_online: !!C.financeCheckoutEndpoint && !freePromo(),
       fulfillment: order.customer.fulfillment === "pickup" ? "pickup" : "delivery",
       customer: {
@@ -1736,6 +1797,10 @@
     var text = $("[data-checkout-error-text]");
     if (text) text.textContent = msg;
     if (box) box.hidden = !msg;
+    if (msg) {
+      var cu = readCustomer(), digits = String(cu.phone || "").replace(/\D/g, "");
+      Track.problem("order", msg.slice(0, 280), { name: String(cu.name || "").split(" ")[0], phone4: digits.slice(-4), zip: cu.zip || "" });
+    }
     var rt = $("[data-checkout-retry]");
     if (rt) rt.hidden = false;
   }
@@ -1767,6 +1832,7 @@
       return;
     }
 
+    Track.checkout();
     submitting = true;
     setCheckoutBusy(btn, true, "Saving your order…");
     recordOrder(order, state.token).then(function (orderNumber) {
@@ -2212,6 +2278,14 @@
 
     syncFavButtons();
     syncBasketBadge();
+
+    Track.visit();
+    window.addEventListener("error", function (e) {
+      Track.problem("page", String(e.message || "script error").slice(0, 200) + (e.filename ? " (" + e.filename.split("/").pop() + ":" + e.lineno + ")" : ""));
+    });
+    window.addEventListener("unhandledrejection", function (e) {
+      Track.problem("page", "promise: " + String((e.reason && e.reason.message) || e.reason || "").slice(0, 200));
+    });
 
     applyStagger();
     hydrateImages();
