@@ -62,7 +62,7 @@
     { id: "kofta-tray", cat: "mains", allergens: ["Wheat", "Soy"], tcs: true, name: "Plant-Based Kofta Tray with Salsa & Rice", ar: "صينية كفتة بالصلصة والأرز",
       price: 40,
       desc: "Seasoned plant-based kofta baked in a rich Egyptian tomato salsa and served in a half-size foil tray, with a separate tray of Egyptian rice with toasted vermicelli.",
-      tags: ["Plant-Based", "Tray"], img: "assets/img/menu-real/kofta-tray.webp" },
+      tags: ["Vegan", "Plant-Based", "Tray"], img: "assets/img/menu-real/kofta-tray.webp" },
 
     { id: "meatballs-spaghetti", cat: "mains", allergens: ["Eggs", "Wheat", "Soy"], tcs: true, name: "Plant-Based Meatballs & Spaghetti", ar: "كرات لحم نباتية بالمكرونة",
       price: 30,
@@ -137,7 +137,7 @@
     { id: "black-honey", cat: "sides", allergens: [], storebought: true, name: "Black Honey", ar: "عسل أسود",
       price: 3.5,
       desc: "Rich Egyptian sugarcane molasses with a deep, bold sweetness.",
-      tags: ["Vegan"], img: "assets/img/menu-real/black-honey.webp" },
+      tags: [], img: "assets/img/menu-real/black-honey.webp" },
 
     { id: "white-honey", cat: "sides", allergens: [], storebought: true, name: "White Honey", ar: "عسل أبيض",
       price: 4,
@@ -147,17 +147,17 @@
     { id: "tahini", cat: "sides", allergens: ["Sesame"], storebought: true, name: "Tahini", ar: "طحينة",
       price: 3,
       desc: "Smooth, creamy sesame paste with a rich, nutty flavor.",
-      tags: ["Vegan"], img: "assets/img/menu-real/tahini.webp" },
+      tags: [], img: "assets/img/menu-real/tahini.webp" },
 
     { id: "baba-ganoush", cat: "sides", allergens: ["Sesame"], tcs: true, name: "Baba Ganoush", ar: "بابا غنوج",
       price: 4,
       desc: "Smoky Egyptian baba ganoush made with roasted eggplant and tahini, served in a small cup.",
-      tags: ["Vegan"], img: "assets/img/menu-real/baba-ganoush.webp" },
+      tags: [], img: "assets/img/menu-real/baba-ganoush.webp" },
 
     { id: "hummus", cat: "sides", allergens: ["Sesame"], tcs: true, name: "Hummus", ar: "حمص",
       price: 4,
       desc: "Creamy hummus, a blend of chickpeas and tahini, served in a small cup.",
-      tags: ["Vegan"], img: "assets/img/menu-real/hummus.webp" },
+      tags: [], img: "assets/img/menu-real/hummus.webp" },
 
     /* ---------------- DRINKS ---------------- */
     { id: "protein-shake", cat: "drinks", allergens: ["Milk", "Soy"], tcs: true, name: "Special Chocolate Protein Shake", ar: "مشروب البروتين بالشوكولاتة",
