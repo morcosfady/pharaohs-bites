@@ -1699,3 +1699,15 @@ body.nav-open .site-header.is-stuck {
 .foodinfo__body strong { color: var(--text-muted); font-weight: 600; }
 @media (min-width: 981px) { .foodinfo__body { max-height: 15rem; overflow-y: auto; overscroll-behavior: contain; } }
 .foodinfo__body p.foodinfo__safe { font-size: 1rem; line-height: 1.4; }
+
+/* Vegan mark: a green leaf on vegan dishes, plus the Vegan tab */
+.vegan-badge { display: inline-flex; vertical-align: -.1em; margin-left: .15em; width: 1.15em; height: 1.15em; padding: .15em; border-radius: 50%; background: #1fa35c; color: #fff; }
+.vegan-badge svg { width: 100%; height: 100%; }
+.pill--vegan { display: inline-flex; align-items: center; gap: .35em; }
+.pill--vegan svg { width: 1.2em; height: 1.2em; }
+.tag--vegan { display: inline-flex; align-items: center; gap: .35em; background: rgba(15, 80, 45, .85); color: #d9f5e4; border-color: rgba(60, 207, 133, .6); }
+.tag--vegan svg { width: 1.2em; height: 1.2em; }
+.chip--vegan { display: inline-flex; align-items: center; gap: .4em; color: #8fe0b4; border-color: rgba(60, 207, 133, .45); }
+.chip--vegan svg { width: 1.1em; height: 1.1em; }
+.chip--vegan:hover { color: #fff; border-color: #1fa35c; }
+.chip--vegan[aria-pressed="true"] { background: #1fa35c; border-color: transparent; color: #fff; }

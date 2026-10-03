@@ -291,6 +291,10 @@
   function addToBasket(id, name) {
     var combo = menuItem(id);
     if (combo && combo.slots) { openComboPicker(combo); return; }
+    if (combo && combo.onlyWith && (basket[id] || 0) >= (basket[combo.onlyWith] || 0)) {
+      toast("One " + combo.name.toLowerCase() + " per " + menuItem(combo.onlyWith).name);
+      return;
+    }
     basket[id] = (basket[id] || 0) + 1;
     Store.write("basket", basket);
     toast(name + " added to your order");
@@ -299,9 +303,27 @@
     /* First time this dish goes in: offer its add-ons (e.g. sides for feteer). */
     var item = D.MENU.filter(function (m) { return m.id === id; })[0];
     if (item && item.suggest && basket[id] === 1) openAddons(item);
+    /* Dishes with a specific add-on (koshary -> extra sauce) ask whenever there is a cup still to add. */
+    if (item && item.suggestItems && item.suggestItems.some(function (x) { return (basket[x] || 0) < basket[id]; })) openItemAddons(item);
   }
+  /* An add-on dish (onlyWith) can never be in the basket alone: at most one per copy of its main dish. */
+  function trimAddOns() {
+    var changed = false;
+    D.MENU.forEach(function (m) {
+      if (!m.onlyWith || !basket[m.id]) return;
+      var cap = basket[m.onlyWith] || 0;
+      if (basket[m.id] > cap) {
+        if (cap) basket[m.id] = cap; else delete basket[m.id];
+        changed = true;
+      }
+    });
+    if (changed) Store.write("basket", basket);
+  }
+  trimAddOns();
+
   function setQty(id, qty) {
     if (qty <= 0) delete basket[id]; else basket[id] = qty;
+    trimAddOns();
     Store.write("basket", basket);
     renderBasket();
     syncBasketBadge();
@@ -505,7 +527,8 @@
   function showAddons(opts) {
     var box = $("[data-addon]");
     if (!box) return false;
-    var extras = D.MENU.filter(function (m) { return m.cat === opts.category && m.id !== opts.exclude; });
+    var extras = opts.ids ? opts.ids.map(menuItem).filter(Boolean)
+      : D.MENU.filter(function (m) { return m.cat === opts.category && m.id !== opts.exclude && !m.hidden; });
     if (!extras.length) return false;
 
     $("[data-addon-eyebrow]", box).textContent = opts.eyebrow;
@@ -535,6 +558,18 @@
       eyebrow: "Optional",
       title: "Anything on the side?",
       lead: item.name + " is best torn open and eaten with these. Add any you like, or skip — it is entirely up to you.",
+      skip: "No thanks", done: "Done"
+    });
+  }
+
+  function openItemAddons(item) {
+    var extra = menuItem(item.suggestItems[0]);
+    var what = extra.name.toLowerCase();
+    showAddons({
+      ids: item.suggestItems,
+      eyebrow: "Optional",
+      title: what.charAt(0).toUpperCase() + what.slice(1) + " on the side?",
+      lead: "Add a cup of our tomato sauce for just " + money(extra.price) + ", one per " + item.name + ". Or skip, it is entirely up to you.",
       skip: "No thanks", done: "Done"
     });
   }
@@ -617,6 +652,10 @@
   function ankh(cls, label) {
     return '<span class="' + cls + '"' + (label ? ' role="img" aria-label="' + label + '"' : ' aria-hidden="true"') + '>' + ANKH_SVG + '</span>';
   }
+  /* Green leaf: the mark for vegan dishes. */
+  var LEAF_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19C5 10 10 5 20 4c0 10-5 15-14 15z"/><path d="M5 19c2-5 5-8 9-10"/></svg>';
+  function isVegan(item) { return (item.tags || []).some(function (t) { return /^vegan$/i.test(t); }); }
+  function veganBadge() { return '<span class="vegan-badge" role="img" aria-label="Vegan">' + LEAF_SVG + "</span>"; }
   function pharaoh(label) {
     return ankh("pharaoh-mark", label ? "House special" : "");
   }
@@ -629,7 +668,8 @@
     opts = opts || {};
     var tag = item.special
       ? '<span class="tag tag--special">' + pharaoh(false) + "House Special</span>"
-      : (item.tags && item.tags.length ? '<span class="tag">' + esc(item.tags[0]) + "</span>" : "");
+      : (isVegan(item) ? '<span class="tag tag--vegan">' + LEAF_SVG + "Vegan</span>"
+      : (item.tags && item.tags.length ? '<span class="tag">' + esc(item.tags[0]) + "</span>" : ""));
     return '' +
       '<article class="card dish" data-reveal="scale">' +
         '<div class="media media--4x3">' + tag +
@@ -685,13 +725,14 @@
 
   function menuRow(item) {
     var pills = (item.tags || []).map(function (t) {
+      if (/^vegan$/i.test(t)) return '<span class="pill pill--veg pill--vegan">' + LEAF_SVG + "Vegan</span>";
       var cls = /vegan|vegetarian/i.test(t) ? "pill pill--veg" : (/signature|chef|tasting|special|best value/i.test(t) ? "pill pill--gold" : "pill");
       return '<span class="' + cls + '">' + esc(t) + "</span>";
     }).join("");
     return '' +
-      '<article class="order-item menu-item' + (item.includes ? " menu-item--combo" : "") + '" data-reveal>' +
+      '<article class="order-item menu-item' + (item.includes ? " menu-item--combo" : "") + '"' + (isVegan(item) ? " data-vegan" : "") + ' data-reveal>' +
         '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
-        "<div><h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
+        "<div><h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) + (isVegan(item) ? " " + veganBadge() : "") +
           ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3>" +
           "<p>" + esc(item.desc) + "</p>" + comboExtras(item) +
           (pills ? '<div class="menu-item__meta">' + pills + "</div>" : "") +
@@ -740,7 +781,8 @@
         '<button class="chip" type="button" data-filter="all" aria-pressed="true">All</button>' +
         D.CATEGORIES.map(function (c) {
           return '<button class="chip' + (c.id === "combos" ? " chip--combo" : "") + '" type="button" data-filter="' + c.id + '" aria-pressed="false">' + esc(c.name) + "</button>";
-        }).join("");
+        }).join("") +
+        '<button class="chip chip--vegan" type="button" data-filter="vegan" aria-pressed="false">' + LEAF_SVG + "Vegan</button>";
     }
 
     var state = { cat: "all", q: "" };
@@ -752,7 +794,7 @@
         var shown = 0;
         $$(".menu-item", group).forEach(function (row) {
           var text = row.textContent.toLowerCase();
-          var hit = catMatch && (!state.q || text.indexOf(state.q) > -1);
+          var hit = (catMatch || (state.cat === "vegan" && row.hasAttribute("data-vegan"))) && (!state.q || text.indexOf(state.q) > -1);
           row.hidden = !hit;
           if (hit) shown++;
         });
@@ -774,7 +816,7 @@
         });
         apply();
         if (state.cat !== "all") {
-          var target = $("#" + state.cat);
+          var target = state.cat === "vegan" ? $(".menu-group:not([hidden])", host) : $("#" + state.cat);
           if (target) window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - 130, behavior: reduceMotion ? "auto" : "smooth" });
         }
       });
@@ -795,7 +837,7 @@
     if (!host) return;
     var filters = $("[data-order-filters]");
 
-    host.innerHTML = D.MENU.map(function (item) {
+    host.innerHTML = D.MENU.filter(function (i) { return !i.hidden; }).map(function (item) {
       /* The house signature gets its own bigger, richer card */
       if (item.hero) {
         return '' +
@@ -823,11 +865,11 @@
           "</article>";
       }
       return '' +
-        '<article class="order-item' + (item.signature ? " order-item--sig" : "") + (item.includes ? " menu-item--combo" : "") + '" data-cat="' + esc(item.cat) + '" data-reveal>' +
+        '<article class="order-item' + (item.signature ? " order-item--sig" : "") + (item.includes ? " menu-item--combo" : "") + '" data-cat="' + esc(item.cat) + '"' + (isVegan(item) ? " data-vegan" : "") + ' data-reveal>' +
           '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
           "<div>" +
             (item.signature ? '<span class="sig-badge">' + ankh("ankh-icon") + 'The House Signature</span>' : "") +
-            "<h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) +
+            "<h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) + (isVegan(item) ? " " + veganBadge() : "") +
             ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3><p>" + (item.includes ? esc(item.desc) + "</p>" + comboExtras(item) : esc(item.desc.slice(0, 96)) + "…</p>") + containsLine(item) + "</div>" +
           '<div class="order-item__side">' +
             '<span class="order-item__price">' + money(item.price) + "</span>" +
@@ -844,7 +886,8 @@
         '<button class="chip" type="button" data-order-filter="all" aria-pressed="true">Everything</button>' +
         D.CATEGORIES.map(function (c) {
           return '<button class="chip' + (c.id === "combos" ? " chip--combo" : "") + '" type="button" data-order-filter="' + c.id + '" aria-pressed="false">' + esc(c.name) + "</button>";
-        }).join("");
+        }).join("") +
+        '<button class="chip chip--vegan" type="button" data-order-filter="vegan" aria-pressed="false">' + LEAF_SVG + "Vegan</button>";
 
       filters.addEventListener("click", function (e) {
         var chip = e.target.closest("[data-order-filter]");
@@ -852,7 +895,7 @@
         var cat = chip.getAttribute("data-order-filter");
         $$("[data-order-filter]", filters).forEach(function (c) { c.setAttribute("aria-pressed", String(c === chip)); });
         $$(".order-item", host).forEach(function (row) {
-          row.hidden = cat !== "all" && row.getAttribute("data-cat") !== cat;
+          row.hidden = cat !== "all" && (cat === "vegan" ? !row.hasAttribute("data-vegan") : row.getAttribute("data-cat") !== cat);
         });
       });
     }

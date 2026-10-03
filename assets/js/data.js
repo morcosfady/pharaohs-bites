@@ -12,6 +12,9 @@
      desc     one or two sentences
      tags     rendered as pills; vegan/vegetarian turn green, special turns gold
      img      PLACEHOLDER photography. Swap these for the real photos.
+     suggestItems  optional list of dish ids offered in the add-on prompt instead of a whole category.
+     hidden   true -> not listed on the menu or order page (add-on only).
+     onlyWith dish id this add-on needs in the basket; it is removed when that dish is, and at most one per dish.
      suggest  optional category id. Adding this dish on the order page opens
               a prompt offering everything in that category as an add-on.
    ========================================================================== */
@@ -65,6 +68,18 @@
       price: 30,
       desc: "Tender spaghetti tossed in a rich tomato sauce and topped with seasoned plant-based meatballs. Served in a half-size foil tray.",
       tags: ["Plant-Based"], img: "assets/img/menu-real/meatballs-spaghetti.webp" },
+
+    { id: "koshary", cat: "mains", allergens: ["Wheat"], tcs: true, name: "Koshary Tray", ar: "كشري",
+      price: 25, suggestItems: ["koshary-sauce"],
+      desc: "Egypt's favorite street food, made fresh at home. Layers of rice, lentils and macaroni topped with chickpeas, our rich tomato sauce, tangy garlic-vinegar sauce and golden crispy onions. 100% vegan. Half-size foil tray, feeds 6 to 8.",
+      tags: ["Vegan", "Tray"], img: "assets/img/menu-real/koshary.webp" },
+
+    /* Add-on only: never listed on the menu or order page. It is offered in a prompt after Koshary is
+       added (suggestItems above) and the basket drops it if there is no Koshary (onlyWith). */
+    { id: "koshary-sauce", cat: "addons", hidden: true, onlyWith: "koshary", allergens: [], name: "Extra Tomato Sauce", ar: "صلصة طماطم إضافية",
+      price: 1,
+      desc: "A cup of our tomato sauce on the side for your Koshary Tray.",
+      tags: ["Vegan"], img: "assets/img/menu-real/koshary-sauce.webp" },
 
     /* ---------------- SOUPS ---------------- */
     { id: "lentil-soup", cat: "soups", allergens: [], tcs: true, name: "Lentil Soup", ar: "شوربة عدس",
