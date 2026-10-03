@@ -1005,6 +1005,7 @@
     set("[data-subtotal]", subtotal);
     lastSubtotal = subtotal;
     renderTotals();
+    if (promoCode) scheduleQuote();   /* some codes depend on what is in the basket */
 
     updateCheckoutState(subtotal);
     syncAddons();
@@ -1146,14 +1147,15 @@
     var cu = readCustomer();
     var ok = ["street", "city", "state", "zip"].every(function (k) { return FIELD_RULES[k].ok(cu[k] || ""); });
     if (!ok) { quote = { key: "", state: "idle", fee: 0, miles: 0 }; renderTotals(); return; }
-    var key = [cu.street, cu.city, cu.state, cu.zip, promoCode, promoCode ? cu.phone + "|" + cu.email + "|" + cu.apt : ""].join("|").toLowerCase();
+    var quoteItems = Object.keys(basket).map(function (k) { return { slug: keyId(k), quantity: basket[k] }; });
+    var key = [cu.street, cu.city, cu.state, cu.zip, promoCode, promoCode ? cu.phone + "|" + cu.email + "|" + cu.apt + "|" + JSON.stringify(quoteItems) : ""].join("|").toLowerCase();
     if (key === quote.key && quote.state !== "err") return;
     quote = { key: key, state: "loading", fee: 0, miles: 0, promo: null };
     renderTotals();
     fetch(C.financeQuoteEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") },
-      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip, apt: cu.apt, promo: promoCode || undefined, phone: cu.phone, email: cu.email })
+      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip, apt: cu.apt, promo: promoCode || undefined, phone: cu.phone, email: cu.email, items: promoCode ? quoteItems : undefined })
     }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
       if (quote.key !== key) return;                      /* address changed meanwhile */
       if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles, promo: d.promo || null };
