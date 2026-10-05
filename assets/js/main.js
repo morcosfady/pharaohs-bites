@@ -1196,6 +1196,11 @@
   var promoCode = "";
   /* A "free order" promo (whole order free): no card step, total shows $0. */
   function freePromo() { return !!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid && quote.promo.free); }
+  /* Percent-off code (e.g. 50% off the dishes): the amount taken off the dishes. */
+  function promoDiscount() {
+    if (!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid && quote.promo.percent)) return 0;
+    return Math.round(lastSubtotal * quote.promo.percent) / 100;
+  }
   function promoValid() { return !!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid); }
   function renderPromo(msg, bad) {
     var el = $("[data-promo-msg]");
@@ -1212,8 +1217,16 @@
     if (!label || !value || !total) return;
     var go = $("[data-checkout-label]");
     if (go && !submitting && C.financeCheckoutEndpoint) go.textContent = freePromo() ? "Place Order" : "Place Order & Pay";
+    var prow = $("[data-promo-row]"), disc = pickup ? 0 : promoDiscount();
+    if (prow) {
+      prow.hidden = !disc;
+      if (disc) { $("[data-promo-label]", prow).textContent = promoCode + " (" + quote.promo.percent + "% off dishes)"; $("[data-promo-value]", prow).textContent = "-" + money(disc); }
+    }
     if (pickup) { label.textContent = "Pickup"; value.textContent = "Free"; total.textContent = money(lastSubtotal); return; }
-    if (quote.state === "ok" && freePromo()) {
+    if (quote.state === "ok" && disc) {
+      label.textContent = "Delivery (" + quote.miles + " mi)"; value.textContent = money(quote.fee);
+      total.innerHTML = "<s>" + money(lastSubtotal + quote.fee) + "</s> " + money(lastSubtotal - disc + quote.fee);
+    } else if (quote.state === "ok" && freePromo()) {
       label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
       total.innerHTML = "<s>" + money(lastSubtotal) + "</s> $0";
     } else if (quote.state === "ok" && promoValid()) {
@@ -1644,11 +1657,12 @@
       waSection("💰", "ORDER SUMMARY  |  ملخص الطلب"), "",
       "🧺 Dishes: *" + order.items.length + "*   🔢 Total Qty: *" + count + "*",
       "🧮 Subtotal: *" + money(order.subtotal) + "* 💵",
+      order.discount ? "🏷️ Promo: *-" + money(order.discount) + "* 💚" : null,
       "🗓️ Delivery: *" + formatDeliveryDate(c.requested_date) + " · " + (win ? win.label : "") + "*",
       (order.customer && order.customer.fulfillment === "pickup") ? "🛍️ Pickup: *free*" : (order.deliveryFee != null ? "🚗 Delivery Fee: *" + money(order.deliveryFee) + "* 💵" : "🚗 Delivery Fee: _To be determined_ ⏳"),
       "🏛️ Tax: _To be confirmed_ ⏳",
-      order.deliveryFee != null ? "✅ *TOTAL (dishes + delivery):* *" + money(order.subtotal + order.deliveryFee) + "* 💰" : "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
-    ];
+      order.deliveryFee != null ? "✅ *TOTAL (dishes + delivery):* *" + money(order.subtotal - (order.discount || 0) + order.deliveryFee) + "* 💰" : "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
+    ].filter(function (x) { return x !== null; });
 
     return [
       head.join(nl), "",
@@ -1854,6 +1868,7 @@
        so anything added in the dialog is part of the order. */
     if (!skipNudges) { runCheckoutNudges(function () { submitOrder(btn, true); }); return; }
     var order = buildOrder();
+    order.discount = promoValid() ? promoDiscount() : 0;
 
     /* No finance endpoint configured: WhatsApp only (previous behaviour). */
     if (!C.financeOrderEndpoint) { openWhatsApp(order, number); return; }
