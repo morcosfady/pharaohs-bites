@@ -2132,3 +2132,20 @@ html.has-promo .hero--food { min-height: calc(100svh - var(--promo-h, 0px)); }
 .order-layout > * { min-width: 0; }
 .order-layout .filter-bar[data-order-filters] { max-width: 100%; }
 .footer-area { display: block; }
+
+/* ===== Showcase reel: one video of the finished dishes, with a list that follows it ===== */
+.reel__grid { display: grid; gap: var(--sp-4); align-items: center; }
+.reel__media { position: relative; width: min(100%, 22rem); aspect-ratio: 9 / 16; margin-inline: auto; border-radius: var(--r-lg); overflow: hidden; border: 1px solid rgba(212, 175, 55, .35); background: var(--ink-3); box-shadow: var(--shadow-lg), 0 0 70px rgba(212, 175, 55, .1); }
+.reel__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.reel__bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(255, 255, 255, .12); }
+.reel__bar i { display: block; height: 100%; width: 100%; background: var(--gold); transform: scaleX(0); transform-origin: 0 50%; }
+.reel__list { list-style: none; margin: var(--sp-3) 0 0; padding: 0; display: grid; gap: .35rem; }
+.reel__item { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name price" "ar price"; column-gap: 1rem; align-items: center; text-align: left; padding: .7rem 1rem; background: none; border: 1px solid transparent; border-left: 2px solid var(--line-soft); border-radius: 0 var(--r-md) var(--r-md) 0; color: var(--text-muted); font-family: var(--font-display); font-size: var(--step-1); cursor: pointer; transition: color .3s, background .3s, border-color .3s; }
+.reel__item:hover { color: var(--ivory); }
+.reel__item.is-active { color: var(--ivory); background: rgba(212, 175, 55, .07); border-left-color: var(--gold); }
+.reel__item:focus-visible { outline: 0; box-shadow: var(--focus-ring); }
+.reel__name { grid-area: name; }
+.reel__ar { grid-area: ar; font-family: var(--font-body); font-size: var(--step--1); color: var(--gold-deep); }
+.reel__item.is-active .reel__ar { color: var(--gold); }
+.reel__price { grid-area: price; font-family: var(--font-body); font-size: var(--step-0); color: var(--gold); }
+@media (min-width: 900px) { .reel__grid { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: var(--sp-5); } .reel__media { width: min(100%, 24rem); } }

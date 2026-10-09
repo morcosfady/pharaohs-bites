@@ -431,3 +431,8 @@ What Phase 1 changed:
 - Owner rule: push finished work without asking for "push".
 - Carousel peek: slides are 90% wide with a 1rem gap, so the next dish shows dimmed (opacity .4, `.is-current` brightens the active one) until swiped. Versions now `pages.css?v=163`, `motion.js?v=10`.
 - Carousel smoothness (`pages.css?v=164`, `motion.js?v=11`): each frame of the scroll drives opacity/scale of the cards and a parallax `translate` on the photo (`paint()` in `initSpotlight`); desktop mouse drag with glide-to-nearest; `.is-live` is added by JS only, so without JS it is a plain scroll-snap row.
+
+### 19.3 Showcase reel replaces "How feteer is made" (2026-10-09, live)
+- Owner asked for finished dishes instead of process steps, one eye-catching video, and no "AI-generated" line. `index.html` `#showcase` (`.reel`): one 540x960 video `assets/video/showcase.mp4` (~2 MB, no audio, 22.8 s) built from the owner's own clips (Reels/C.mp4 feteer pull-apart, Veo clip B feteer with beef cheese pull, Flow hero tray koshary) plus slow pans over the site's tray photos (goulash, macarona, kofta, meatballs), 0.4 s crossfades. Build script kept in the scratch dir only; each dish owns 3.2 s.
+- `initReel` in `motion.js`: lazy-loads the video when near the screen, plays while visible, pauses when not (reduced-motion: stays on the poster until a dish is tapped), highlights the matching dish in the list as it plays, tapping a dish seeks to its 3.2 s slot. The "AI-generated" note and the four process videos (`assets/video/step-*`) are gone; the old `.story*` CSS and `initStory` are now dead code (no `[data-story]` on any page).
+- Versions fixed: earlier `sed` bumps silently missed; now `pages.css?v=165`, `motion.js?v=12` in all 5 pages.
