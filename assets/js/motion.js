@@ -363,12 +363,12 @@
      without JS the labels simply stay above the fields. Nothing here touches validation or sending. */
   function initFloatingLabels() {
     $$("form.form").forEach(function (form) {
-      var fields = $$(".field", form);
+      var fields = $$(".field", form).filter(function (f) { return f.tagName !== "FIELDSET" && $("input, select, textarea", f) && !$("input[type=radio], input[type=checkbox]", f); });   /* radio groups (the party size picker) keep their own look */
       if (!fields.length) return;
       function sync(field) {
         var c = $("input, select, textarea", field);
         if (!c) return;
-        field.classList.toggle("is-floated", c.tagName === "SELECT" || String(c.value || "").length > 0);
+        field.classList.toggle("is-floated", c.tagName === "SELECT" || c.type === "date" || c.type === "time" || String(c.value || "").length > 0);   /* date / time boxes always show their own mm/dd/yyyy text */
       }
       function syncAll() { fields.forEach(sync); }
       form.classList.add("js-float");

@@ -2045,13 +2045,13 @@ html.motion .line-art { --p: 0; }
 }
 
 /* Contact + catering forms: floating labels (JS adds .js-float; without JS the labels stay above the fields) */
-.form.js-float .field label {
+.form.js-float .field:not(fieldset) > label {
   position: absolute; z-index: 2; left: 1.15rem; top: 1.08rem; margin: 0; pointer-events: none;
   font-size: var(--step-0); letter-spacing: .02em; text-transform: none; color: var(--text-muted);
   transition: top var(--dur-fast) var(--ease-enter), font-size var(--dur-fast) var(--ease-enter), letter-spacing var(--dur-fast), color var(--dur-fast);
 }
 .form.js-float .field input, .form.js-float .field select, .form.js-float .field textarea { padding-top: 1.65rem; padding-bottom: .5rem; }
-.form.js-float .field.is-floated label, .form.js-float .field:focus-within label, .form.js-float .field:has(select) label {
+.form.js-float .field.is-floated > label, .form.js-float .field:not(fieldset):focus-within > label, .form.js-float .field:has(> select) > label, .form.js-float .field:has(> input[type=date]) > label, .form.js-float .field:has(> input[type=time]) > label {
   top: .5rem; font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-light);
 }
 .form.js-float .field:not(.is-floated):not(:focus-within) input::placeholder, .form.js-float .field:not(.is-floated):not(:focus-within) textarea::placeholder { color: transparent; }
