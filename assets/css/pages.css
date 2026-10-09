@@ -547,6 +547,27 @@
 .spotlight .media { min-height: 26rem; }
 .spotlight__body { padding: clamp(2rem, 4vw, 3.6rem); display: flex; flex-direction: column; justify-content: center; gap: 1.1rem; }
 
+/* Home "dishes to order" carousel: native scroll-snap (swipe works with no JS), arrows and dots are added by motion.js */
+.spot-carousel { position: relative; border: 1px solid var(--line-soft); border-radius: var(--r-xl); overflow: hidden; }
+.spot-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
+.spot-track::-webkit-scrollbar { display: none; }
+.spot-track:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
+.spot-track .spotlight { flex: 0 0 100%; min-width: 0; scroll-snap-align: start; border: 0; border-radius: 0; }
+.spot-track .spotlight h2 { text-wrap: balance; }
+.spot-arrow { position: absolute; bottom: 2.3rem; width: 3rem; height: 3rem; border-radius: 50%; border: 1px solid var(--line-soft); background: rgba(10, 10, 10, .72); color: var(--gold); font-size: 1.9rem; line-height: 1; display: grid; place-items: center; padding: 0 0 .15rem; cursor: pointer; transition: background .2s, opacity .2s; }
+.spot-arrow:hover { background: rgba(10, 10, 10, .92); }
+.spot-arrow:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.spot-arrow[hidden] { display: none; }
+.spot-arrow--prev { right: 6.2rem; }
+.spot-arrow--next { right: 2.8rem; }
+.spot-arrow[disabled] { opacity: .3; cursor: default; }
+.spot-dots { display: flex; justify-content: center; gap: .35rem; margin-top: 1rem; }
+.spot-dot { width: 2.75rem; height: 2.75rem; position: relative; background: none; border: 0; padding: 0; cursor: pointer; }
+.spot-dot::after { content: ""; position: absolute; inset: 50% auto auto 50%; width: .6rem; height: .6rem; margin: -.3rem 0 0 -.3rem; border-radius: 50%; background: var(--line-soft, rgba(255,255,255,.25)); transition: width .25s, margin .25s, background .25s; }
+.spot-dot.is-active::after { width: 1.6rem; margin-left: -.8rem; border-radius: .3rem; background: var(--gold); }
+.spot-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; border-radius: 50%; }
+@media (max-width: 560px) { .spot-arrow { display: none; } }
+
 /* 6. BAKERY -------------------------------------------------------------- */
 .oven-panel {
   position: relative;

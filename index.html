@@ -34,7 +34,7 @@
 <link rel="preload" href="assets/fonts/jost-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" as="image" imagesrcset="assets/img/brand/w/logo-header-320.webp 320w, assets/img/brand/w/logo-header-480.webp 480w, assets/img/brand/w/logo-header-640.webp 640w" imagesizes="(min-width: 700px) 400px, 230px" fetchpriority="high">
 <link rel="stylesheet" href="assets/css/main.css?v=66">
-<link rel="stylesheet" href="assets/css/pages.css?v=160">
+<link rel="stylesheet" href="assets/css/pages.css?v=162">
 <link rel="stylesheet" href="assets/css/pharaonic.css?v=62">
 
 <script type="application/ld+json">
@@ -180,29 +180,119 @@
     <span class="g-ankh"></span><span class="g-eye"></span><span class="g-scarab"></span><span class="g-pharaoh"></span><span class="g-lotus"></span><span class="g-feather"></span><span class="g-djed"></span>
   </div>
 
-  <!-- ============ SIGNATURE SPOTLIGHT ============ -->
-  <section class="section">
+  <!-- ============ SIGNATURE SPOTLIGHT (swipe carousel; behaviour in assets/js/motion.js initSpotlight) ============ -->
+  <section class="section" aria-label="Dishes to order">
     <div class="shell">
-      <div class="spotlight corner-frame" data-reveal>
-        <div class="media zoom">
-          <img data-src="assets/img/menu-real/w/feteer-meshaltet-wide-800.webp" data-srcset="assets/img/menu-real/w/feteer-meshaltet-wide-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-wide-800.webp 800w" sizes="(min-width: 981px) 50vw, 92vw" alt="A whole feteer meshaltet, golden and flaky, fresh from the kitchen" loading="lazy" decoding="async" width="800" height="598">
-        </div>
-        <div class="spotlight__body">
-          <p class="eyebrow">The One to Order</p>
-          <h2 style="font-size:var(--step-4)">Feteer Meshaltet</h2>
-          <p class="dish__ar" lang="ar" dir="rtl" style="font-size:var(--step-1)">فطير مشلتت</p>
-          <p class="lead" style="color:var(--gold)">Flaky, buttery, pull-apart layers.</p>
-          <p class="lead">
-            Layers thrown by hand and folded with homemade butter, baked until the top
-            shatters. Have it plain with white cheese and honey, or stuffed with
-            plant-based beef and melted mozzarella.
-          </p>
-          <p class="muted">Stretched after you order. It cannot be hurried, and we will not try.</p>
-          <div class="flex gap-3 wrap items-center mt-3">
-            <span class="dish__price" style="font-size:var(--step-2)">$25</span>
-            <a class="btn btn--gold" href="order.html">Order Now</a>
+      <div class="spot-carousel corner-frame" data-spot data-reveal role="region" aria-roledescription="carousel" aria-label="Dishes to order">
+        <div class="spot-track" data-spot-track tabindex="0">
+        <article class="spotlight" id="spot-1" role="group" aria-roledescription="slide" aria-label="1 of 6">
+          <div class="media zoom">
+            <img data-src="assets/img/menu-real/w/feteer-meshaltet-wide-800.webp" data-srcset="assets/img/menu-real/w/feteer-meshaltet-wide-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-wide-800.webp 800w" sizes="(min-width: 981px) 50vw, 92vw" alt="A whole feteer meshaltet, golden and flaky, fresh from the kitchen" loading="lazy" decoding="async" width="800" height="598">
           </div>
+          <div class="spotlight__body">
+            <p class="eyebrow">The One to Order</p>
+            <h2 style="font-size:var(--step-4)">Feteer Meshaltet</h2>
+            <p class="dish__ar" lang="ar" dir="rtl" style="font-size:var(--step-1)">فطير مشلتت</p>
+            <p class="lead" style="color:var(--gold)">Flaky, buttery, pull-apart layers.</p>
+            <p class="lead">Layers thrown by hand and folded with homemade butter, baked until the top shatters. Have it plain with white cheese and honey, or stuffed with plant-based beef and melted mozzarella.</p>
+            <p class="muted">Stretched after you order. It cannot be hurried, and we will not try.</p>
+            <div class="flex gap-3 wrap items-center mt-3">
+              <span class="dish__price" style="font-size:var(--step-2)">$25</span>
+              <a class="btn btn--gold" href="order.html">Order Now</a>
+            </div>
+          </div>
+        </article>
+        <article class="spotlight" id="spot-2" role="group" aria-roledescription="slide" aria-label="2 of 6">
+          <div class="media zoom">
+            <img data-src="assets/img/menu-real/w/feteer-beef-mozzarella-800.webp" data-srcset="assets/img/menu-real/w/feteer-beef-mozzarella-480.webp 480w, assets/img/menu-real/w/feteer-beef-mozzarella-800.webp 800w" sizes="(min-width: 981px) 50vw, 92vw" alt="A feteer cut open, showing plant-based beef and stretching mozzarella" loading="lazy" decoding="async" width="800" height="600">
+          </div>
+          <div class="spotlight__body">
+            <p class="eyebrow">House Special · Plant-Based</p>
+            <h2 style="font-size:var(--step-3)">Feteer with Plant-Based Beef &amp; Mozzarella</h2>
+            <p class="dish__ar" lang="ar" dir="rtl" style="font-size:var(--step-1)">فطير محشي لحمة</p>
+            <p class="lead" style="color:var(--gold)">The same hand-stretched layers, stuffed.</p>
+            <p class="lead">Seasoned plant-based ground beef, melted mozzarella, green pepper, olives and onions, sealed in the dough and returned to the oven.</p>
+            <div class="flex gap-3 wrap items-center mt-3">
+              <span class="dish__price" style="font-size:var(--step-2)">$40</span>
+              <a class="btn btn--gold" href="order.html">Order Now</a>
+            </div>
+          </div>
+        </article>
+        <article class="spotlight" id="spot-3" role="group" aria-roledescription="slide" aria-label="3 of 6">
+          <div class="media zoom">
+            <img data-src="assets/img/menu-real/w/goulash-beef-800.webp" data-srcset="assets/img/menu-real/w/goulash-beef-480.webp 480w, assets/img/menu-real/w/goulash-beef-800.webp 800w" sizes="(min-width: 981px) 50vw, 92vw" alt="A foil tray of golden goulash cut into squares, with a slice lifted to show the beef filling" loading="lazy" decoding="async" width="800" height="600">
+          </div>
+          <div class="spotlight__body">
+            <p class="eyebrow">Plant-Based · Tray</p>
+            <h2 style="font-size:var(--step-3)">Goulash Tray with Plant-Based Beef</h2>
+            <p class="dish__ar" lang="ar" dir="rtl" style="font-size:var(--step-1)">صينية جلاش باللحمة</p>
+            <p class="lead" style="color:var(--gold)">Crisp, golden layers.</p>
+            <p class="lead">Egyptian goulash filled with seasoned plant-based ground beef, green peppers, onions and olives. Cut into squares and served in a half-size foil tray.</p>
+            <div class="flex gap-3 wrap items-center mt-3">
+              <span class="dish__price" style="font-size:var(--step-2)">$35</span>
+              <a class="btn btn--gold" href="order.html">Order Now</a>
+            </div>
+          </div>
+        </article>
+        <article class="spotlight" id="spot-4" role="group" aria-roledescription="slide" aria-label="4 of 6">
+          <div class="media zoom">
+            <img data-src="assets/img/menu-real/w/macarona-bechamel-800.webp" data-srcset="assets/img/menu-real/w/macarona-bechamel-480.webp 480w, assets/img/menu-real/w/macarona-bechamel-800.webp 800w" sizes="(min-width: 981px) 50vw, 92vw" alt="A foil tray of macarona béchamel with a golden top and a square lifted out" loading="lazy" decoding="async" width="800" height="533">
+          </div>
+          <div class="spotlight__body">
+            <p class="eyebrow">Plant-Based · Tray</p>
+            <h2 style="font-size:var(--step-3)">Macarona Béchamel Tray</h2>
+            <p class="dish__ar" lang="ar" dir="rtl" style="font-size:var(--step-1)">صينية مكرونة بشاميل</p>
+            <p class="lead" style="color:var(--gold)">Baked until golden.</p>
+            <p class="lead">Tender penne layered with savory plant-based beef and creamy béchamel, served in hearty squares. Comes in a half-size foil tray.</p>
+            <div class="flex gap-3 wrap items-center mt-3">
+              <span class="dish__price" style="font-size:var(--step-2)">$35</span>
+              <a class="btn btn--gold" href="order.html">Order Now</a>
+            </div>
+          </div>
+        </article>
+        <article class="spotlight" id="spot-5" role="group" aria-roledescription="slide" aria-label="5 of 6">
+          <div class="media zoom">
+            <img data-src="assets/img/menu-real/w/kofta-tray-800.webp" data-srcset="assets/img/menu-real/w/kofta-tray-480.webp 480w, assets/img/menu-real/w/kofta-tray-800.webp 800w" sizes="(min-width: 981px) 50vw, 92vw" alt="A foil tray of plant-based kofta in tomato salsa beside a tray of rice with vermicelli" loading="lazy" decoding="async" width="800" height="533">
+          </div>
+          <div class="spotlight__body">
+            <p class="eyebrow">Vegan · Plant-Based · Tray</p>
+            <h2 style="font-size:var(--step-3)">Plant-Based Kofta Tray with Salsa &amp; Rice</h2>
+            <p class="dish__ar" lang="ar" dir="rtl" style="font-size:var(--step-1)">صينية كفتة بالصلصة والأرز</p>
+            <p class="lead" style="color:var(--gold)">Kofta in a rich tomato salsa.</p>
+            <p class="lead">Seasoned plant-based kofta baked in Egyptian tomato salsa, with a separate tray of Egyptian rice with toasted vermicelli.</p>
+            <div class="flex gap-3 wrap items-center mt-3">
+              <span class="dish__price" style="font-size:var(--step-2)">$40</span>
+              <a class="btn btn--gold" href="order.html">Order Now</a>
+            </div>
+          </div>
+        </article>
+        <article class="spotlight" id="spot-6" role="group" aria-roledescription="slide" aria-label="6 of 6">
+          <div class="media zoom">
+            <img data-src="assets/img/menu-real/w/meatballs-spaghetti-800.webp" data-srcset="assets/img/menu-real/w/meatballs-spaghetti-480.webp 480w, assets/img/menu-real/w/meatballs-spaghetti-800.webp 800w" sizes="(min-width: 981px) 50vw, 92vw" alt="A foil tray of spaghetti in tomato sauce topped with plant-based meatballs" loading="lazy" decoding="async" width="800" height="533">
+          </div>
+          <div class="spotlight__body">
+            <p class="eyebrow">Vegan · Plant-Based</p>
+            <h2 style="font-size:var(--step-3)">Plant-Based Meatballs &amp; Spaghetti</h2>
+            <p class="dish__ar" lang="ar" dir="rtl" style="font-size:var(--step-1)">كرات لحم نباتية بالمكرونة</p>
+            <p class="lead" style="color:var(--gold)">Spaghetti, tomato sauce, meatballs.</p>
+            <p class="lead">Tender spaghetti tossed in a rich tomato sauce and topped with seasoned plant-based meatballs. Served in a half-size foil tray.</p>
+            <div class="flex gap-3 wrap items-center mt-3">
+              <span class="dish__price" style="font-size:var(--step-2)">$30</span>
+              <a class="btn btn--gold" href="order.html">Order Now</a>
+            </div>
+          </div>
+        </article>
         </div>
+        <button type="button" class="spot-arrow spot-arrow--prev" data-spot-prev aria-label="Previous dish" hidden>&#8249;</button>
+        <button type="button" class="spot-arrow spot-arrow--next" data-spot-next aria-label="Next dish" hidden>&#8250;</button>
+      </div>
+      <div class="spot-dots" data-spot-dots>
+        <button type="button" class="spot-dot is-active" aria-label="Show dish 1"></button>
+        <button type="button" class="spot-dot" aria-label="Show dish 2"></button>
+        <button type="button" class="spot-dot" aria-label="Show dish 3"></button>
+        <button type="button" class="spot-dot" aria-label="Show dish 4"></button>
+        <button type="button" class="spot-dot" aria-label="Show dish 5"></button>
+        <button type="button" class="spot-dot" aria-label="Show dish 6"></button>
       </div>
     </div>
   </section>
@@ -486,6 +576,6 @@
 <script src="assets/js/config.js?v=113"></script>
 <script src="assets/js/data.js?v=116"></script>
 <script src="assets/js/main.js?v=139" defer></script>
-<script src="assets/js/motion.js?v=8" defer></script>
+<script src="assets/js/motion.js?v=9" defer></script>
 </body>
 </html>
