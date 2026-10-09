@@ -345,3 +345,15 @@ The full write-up lives in the finance repo (`pharaohs-bites-finance/docs/HANDOF
 - `assets/css/pages.css` (end of file): combo card, badge, picker and green `chip--combo` tab styles.
 - Live combos: Party Tray $89.50, Family Feast $69, Egyptian Breakfast $39.50, Meal for One $33, Sides Platter $19, Pick Any 3 Puddings $15. Feteer + Dip Trio was removed.
 - **Always bump `?v=` for pages.css, main.js and data.js in every HTML file** when editing them, or browsers keep showing the old version.
+
+
+## 15. FIRSTBITE promo banner (added 2026-10-09)
+- A slim gold bar above the header on index, order, about, catering and contact (not the `menu.html` redirect, not `qr.html`). Built by `initPromoBanner()` in `assets/js/main.js` from `promoBanner` in `assets/js/config.js`.
+- **Turn it off:** `promoBanner.enabled: false` in `config.js` (then bump `config.js?v=` in all HTML). Text, short phone text, link and `hideDays` are in the same block; `{code}` in the text becomes the tap-to-copy pill.
+- Behaviour: pill copies the code ("Copied ✓" 1.5 s, clipboard fallback, never throws); the x hides it for 7 days (`localStorage` key `pb_promo_closed`, try/catch); it hides itself (without remembering) when a promo is applied on the order page; phones under 520 px get the short text in at most 2 lines.
+- Layout: `html.has-promo` reserves the bar height (`--promo-h` 42 px, 56 px on phones) so nothing jumps; the bar is absolutely positioned and scrolls away; the fixed header uses `top: var(--promo-offset)` (set by a scroll listener) so it slides up to the top. z-index 90, below the header (100), so the mobile menu still covers it. Styles at the end of `pages.css`.
+- Link: `order.html?promo=FIRSTBITE` pre-fills the existing Promo code box and shows "press Apply". Nothing is applied automatically (applying needs phone, email and address; the server is the only judge).
+- Also fixed: the empty "Promo" row in the order totals (`.basket__row[hidden]` now hides).
+- Versions: `config.js?v=110`, `main.js?v=136`, `pages.css?v=145`, `main.css?v=64`, `data.js?v=116`.
+- Tested on a local copy: 320 px (all 5 pages), 375 px (index, about, catering, contact), 390 px (order), desktop; copy, close, reload, 7-day expiry, mobile menu full screen, no sideways scroll, hide-on-apply (server answer faked). Live check done on pharaohsbites.com after the push. Note: in the Claude browser pane, `window.scrollTo` does not fire scroll events; use real mouse scrolling to test the header offset.
+- **Open items:** a customer who arrives from the banner and never presses Apply pays the normal delivery fee. A "press Apply" reminder at checkout would fix it (not built: the brief said not to touch checkout logic). The free-delivery distance shown is 10 miles (FIRSTBITE `max_miles` in the database); change the banner text too if that number changes.
