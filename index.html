@@ -29,12 +29,12 @@
 <link rel="apple-touch-icon" href="assets/img/brand/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 
-<script>/* reserve the promo bar space before first paint (main.js builds the bar; closing it hides it for 7 days) */try{var _t=Number(localStorage.getItem("pb_promo_closed"));if(!(_t&&Date.now()-_t<6048e5))document.documentElement.classList.add("has-promo")}catch(e){document.documentElement.classList.add("has-promo")}</script>
+<script>/* reserve the promo bar space before first paint (main.js builds the bar; closing it hides it for 7 days) */try{var _t=Number(localStorage.getItem("pb_promo_closed"));if(!(_t&&Date.now()-_t<6048e5))document.documentElement.classList.add("has-promo")}catch(e){document.documentElement.classList.add("has-promo")}try{if(window.matchMedia("(prefers-reduced-motion: no-preference)").matches){var _h=document.documentElement;_h.classList.add("motion");setTimeout(function(){if(!_h.classList.contains("motion-ready"))_h.classList.remove("motion")},6000)}}catch(e){}</script>
 <link rel="preload" href="assets/fonts/cormorant-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/jost-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" as="image" imagesrcset="assets/img/brand/w/logo-header-320.webp 320w, assets/img/brand/w/logo-header-480.webp 480w, assets/img/brand/w/logo-header-640.webp 640w" imagesizes="(min-width: 700px) 400px, 230px" fetchpriority="high">
-<link rel="stylesheet" href="assets/css/main.css?v=65">
-<link rel="stylesheet" href="assets/css/pages.css?v=147">
+<link rel="stylesheet" href="assets/css/main.css?v=66">
+<link rel="stylesheet" href="assets/css/pages.css?v=148">
 <link rel="stylesheet" href="assets/css/pharaonic.css?v=62">
 
 <script type="application/ld+json">
@@ -411,8 +411,9 @@
   </div>
 </footer>
 
-<script src="assets/js/config.js?v=112"></script>
+<script src="assets/js/config.js?v=113"></script>
 <script src="assets/js/data.js?v=116"></script>
-<script src="assets/js/main.js?v=137" defer></script>
+<script src="assets/js/main.js?v=138" defer></script>
+<script src="assets/js/motion.js?v=2" defer></script>
 </body>
 </html>

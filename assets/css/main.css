@@ -974,17 +974,21 @@ img.is-loaded { animation: imgIn .9s var(--ease-out) both; }
 .form-status.is-visible { display: block; animation: fadeUp .5s var(--ease-out) both; }
 
 /* 11. ANIMATION ---------------------------------------------------------- */
-[data-reveal] {
+/* One reveal recipe for the whole site: fade + small rise + blur to sharp, same easing, staggered with --reveal-delay.
+   Hidden only while html.motion is set (head script, reduced-motion visitors never get it) so the page is readable
+   without JS or animation. will-change is dropped once the element is in. */
+html.motion [data-reveal] {
   opacity: 0;
-  transform: translateY(26px);
-  transition: opacity .9s var(--ease-out), transform .9s var(--ease-out);
+  transform: translateY(18px);
+  filter: blur(6px);
+  transition: opacity var(--dur-slow) var(--ease-enter), transform var(--dur-slow) var(--ease-enter), filter var(--dur-slow) var(--ease-enter);
   transition-delay: var(--reveal-delay, 0ms);
-  will-change: opacity, transform;
+  will-change: opacity, transform, filter;
 }
-[data-reveal="left"]  { transform: translateX(-34px); }
-[data-reveal="right"] { transform: translateX(34px); }
-[data-reveal="scale"] { transform: scale(.955); }
-[data-reveal].is-in { opacity: 1; transform: none; }
+html.motion [data-reveal="left"]  { transform: translateX(-22px); }
+html.motion [data-reveal="right"] { transform: translateX(22px); }
+html.motion [data-reveal="scale"] { transform: scale(.97); }
+html.motion [data-reveal].is-in { opacity: 1; transform: none; filter: none; will-change: auto; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-16px) rotate(2.5deg); } }

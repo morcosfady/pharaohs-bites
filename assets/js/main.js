@@ -1671,7 +1671,10 @@
           window.location.href = "order.html";
           return;
         }
+        var countBefore = basketCount();
         addToBasket(add.getAttribute("data-add"), add.getAttribute("data-name"));
+        /* A dish really went in (not a picker opening): let its photo fly to the basket (motion.js, never throws). */
+        try { if (window.NBMotion && basketCount() > countBefore) window.NBMotion.fly(add); } catch (e) { /* animation only */ }
         return;
       }
 
