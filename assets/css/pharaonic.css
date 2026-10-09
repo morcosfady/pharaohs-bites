@@ -394,7 +394,7 @@ h1, h2 { letter-spacing: .012em; }
 .glyph-strip .g-feather { background-image: url("../img/glyphs/feather.svg"); width: 20px; }
 .glyph-strip .g-lotus   { background-image: url("../img/glyphs/lotus.svg"); width: 46px; }
 .glyph-strip .g-djed    { background-image: url("../img/glyphs/djed.svg"); width: 20px; }
-.glyph-strip .g-pharaoh { background-image: url("../img/brand/mark.png"); width: 44px; height: 42px; opacity: 1; }
+.glyph-strip .g-pharaoh { background-image: url("../img/brand/w/mark-96.webp"); width: 44px; height: 42px; opacity: 1; }
 @media (max-width: 640px) {
   .glyph-strip { gap: 1rem; }
   .glyph-strip .g-feather, .glyph-strip .g-djed { display: none; }

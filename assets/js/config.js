@@ -77,6 +77,9 @@
        Leave financeOrderEndpoint empty to skip recording (WhatsApp only).
     ------------------------------------------------------------------- */
     financeOrderEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-order",
+    /* --- Motion and 3D effects (website upgrade). enabled: false turns every animation off; threeD: false keeps scroll motion but drops tilt / parallax. --- */
+    motion: { enabled: true, threeD: true },
+
     /* --- Promo banner (top of every page). enabled: false hides it everywhere, no HTML edits needed.
        {code} in the text becomes the gold tap-to-copy pill. hideDays = how long a visitor's close button keeps it hidden. --- */
     promoBanner: {

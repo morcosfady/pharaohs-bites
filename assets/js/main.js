@@ -264,6 +264,17 @@
   }
 
   /* --- Images: lazy swap, fade-in, graceful fallback ------------------- */
+  /* Small copies of the dish photos (made by tools/make-images.js): returns the data-src / data-srcset / sizes
+     attributes for an image. Phones then download 30 KB instead of 300 KB. Photos outside menu-real are used as they are. */
+  function imgAttrs(src, sizes, fallbackWidth) {
+    var m = /^assets\/img\/menu-real\/([^?\/]+)\.(?:webp|jpg)(?:\?.*)?$/.exec(String(src));
+    if (!m) return 'data-src="' + esc(src) + '"';
+    var base = "assets/img/menu-real/w/" + m[1];
+    return 'data-src="' + base + "-" + (fallbackWidth || 480) + '.webp" data-srcset="' +
+      [120, 240, 480, 800].map(function (w) { return base + "-" + w + ".webp " + w + "w"; }).join(", ") +
+      '" sizes="' + sizes + '"';
+  }
+
   function hydrateImages(root) {
     $$("img", root || document).forEach(function (img) {
       if (img.__nbBound) return;
@@ -280,6 +291,8 @@
       img.addEventListener("error", fail);
       img.addEventListener("load", done);
 
+      var srcset = img.getAttribute("data-srcset");
+      if (srcset) { img.srcset = srcset; img.removeAttribute("data-srcset"); }
       var src = img.getAttribute("data-src");
       if (src) { img.src = src; img.removeAttribute("data-src"); }
       if (img.complete) { img.naturalWidth ? done() : fail(); }
@@ -509,7 +522,7 @@
               '<button type="button" data-cp-step="' + esc(s.key + "|" + id + "|1") + '" aria-label="More ' + esc(m.name) + '">+</button></div>';
         return '<div class="addon-item' + (n ? " is-added" : "") + (s.count === 1 ? " cp-choose" : " cp-multi") + '"' +
           (s.count === 1 ? ' role="radio" tabindex="0" aria-checked="' + (n ? "true" : "false") + '" data-cp-choose="' + esc(s.key + "|" + id) + '"' : "") + ">" +
-          '<div class="media"><img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="58" height="58"></div>' +
+          '<div class="media"><img ' + imgAttrs(m.img, "58px", 120) + ' alt="" loading="lazy" decoding="async" width="58" height="58"></div>' +
           '<div><div class="addon-item__name">' + esc(m.name) + ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(m.ar) + "</span></div>" +
             '<span class="addon-item__price">Included</span></div>' +
           '<div class="addon-item__side">' + control + "</div></div>";
@@ -584,7 +597,7 @@
     var qty = basket[item.id] || 0;
     return '' +
       '<div class="addon-item' + (qty ? " is-added" : "") + '" data-addon-item="' + esc(item.id) + '">' +
-        '<div class="media"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="58" height="58"></div>' +
+        '<div class="media"><img ' + imgAttrs(item.img, "58px", 120) + ' alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="58" height="58"></div>' +
         '<div><div class="addon-item__name">' + esc(item.name) + ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></div>" +
           '<span class="addon-item__price">' + money(item.price) + "</span></div>" +
         '<div class="addon-item__side">' +
@@ -786,7 +799,7 @@
     return '' +
       '<article class="card dish" data-reveal="scale">' +
         '<div class="media media--4x3">' + tag +
-          '<img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + ' — ' + esc(item.desc.slice(0, 70)) + '" loading="lazy" decoding="async" width="900" height="675">' +
+          '<img ' + imgAttrs(item.img, "(min-width: 1100px) 360px, (min-width: 700px) 44vw, 92vw", 480) + ' alt="' + esc(item.name) + ' — ' + esc(item.desc.slice(0, 70)) + '" loading="lazy" decoding="async" width="900" height="675">' +
         "</div>" +
         '<div class="dish__body">' +
           '<div class="dish__top">' +
@@ -812,7 +825,7 @@
     var worth = item.worth != null ? item.worth : parts.reduce(function (n, m) { return n + m.price; }, 0);
     var save = worth - item.price;
     var part = function (m) {
-      return '<span class="combo__part"><img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="44" height="44"><span>' + esc(m.name) + "</span></span>";
+      return '<span class="combo__part"><img ' + imgAttrs(m.img, "44px", 120) + ' alt="" loading="lazy" decoding="async" width="44" height="44"><span>' + esc(m.name) + "</span></span>";
     };
     /* The contents as a row of groups joined by "+". Fixed items are one group each; a choice with two
        options (main, shake) stacks the options with "or" between; a bigger choice shows a small photo stack. */
@@ -827,7 +840,7 @@
         var noun = sl.label.toLowerCase();
         if (sl.count === 1) noun = noun.replace(/s$/, "");
         groups.push('<span class="combo__grp combo__grp--pick"><span class="combo__stack">' +
-          opts.slice(0, 4).map(function (m) { return '<img data-src="' + esc(m.img) + '" alt="" loading="lazy" decoding="async" width="36" height="36">'; }).join("") +
+          opts.slice(0, 4).map(function (m) { return '<img ' + imgAttrs(m.img, "36px", 120) + ' alt="" loading="lazy" decoding="async" width="36" height="36">'; }).join("") +
           "</span><span>" + sl.count + " " + esc(noun) + " of your choice</span></span>");
       }
     });
@@ -845,7 +858,7 @@
     }).join("");
     return '' +
       '<article class="order-item menu-item' + (item.includes ? " menu-item--combo" : "") + '"' + (isVegan(item) || item.veganOption ? " data-vegan" : "") + ' data-reveal>' +
-        '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
+        '<div class="media media--1x1"><img ' + imgAttrs(item.img, "100px", 240) + ' alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
         "<div><h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) + (isVegan(item) ? " " + veganBadge() : "") +
           ' <span class="dish__ar" lang="ar" dir="rtl">' + esc(item.ar) + "</span></h3>" +
           "<p>" + esc(item.desc) + "</p>" + comboExtras(item) +
@@ -958,7 +971,7 @@
           '<article class="order-item order-item--hero" data-cat="' + esc(item.cat) + '" data-reveal>' +
             '<div class="hero-item__media media media--4x3">' +
               '<span class="hero-item__ribbon">' + ankh("ankh-icon") + 'The House Signature</span>' +
-              '<img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + ' — ' + esc(item.desc.slice(0, 60)) + '" loading="lazy" decoding="async" width="1052" height="787">' +
+              '<img ' + imgAttrs(item.img, "(min-width: 981px) 50vw, 92vw", 800) + ' alt="' + esc(item.name) + ' — ' + esc(item.desc.slice(0, 60)) + '" loading="lazy" decoding="async" width="1052" height="787">' +
             "</div>" +
             '<div class="hero-item__body">' +
               '<p class="hero-item__eyebrow">Our No. 1 &middot; Made to order</p>' +
@@ -980,7 +993,7 @@
       }
       return '' +
         '<article class="order-item' + (item.signature ? " order-item--sig" : "") + (item.includes ? " menu-item--combo" : "") + '" data-cat="' + esc(item.cat) + '"' + (isVegan(item) || item.veganOption ? " data-vegan" : "") + ' data-reveal>' +
-          '<div class="media media--1x1"><img data-src="' + esc(item.img) + '" alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
+          '<div class="media media--1x1"><img ' + imgAttrs(item.img, "100px", 240) + ' alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
           "<div>" +
             (item.signature ? '<span class="sig-badge">' + ankh("ankh-icon") + 'The House Signature</span>' : "") +
             "<h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) + (isVegan(item) ? " " + veganBadge() : "") +
@@ -1325,7 +1338,7 @@
   function initPromoBanner() {
     var cfg = C.promoBanner;
     var header = $(".site-header");
-    if (!cfg || !cfg.enabled || !cfg.code || !header || promoClosedRecently(cfg.hideDays || 7)) return;
+    if (!cfg || !cfg.enabled || !cfg.code || !header || promoClosedRecently(cfg.hideDays || 7)) { document.documentElement.classList.remove("has-promo"); return; }
     var root = document.documentElement, code = String(cfg.code);
     var status = document.createElement("span");
     status.className = "promo-bar__sr"; status.setAttribute("aria-live", "polite");
@@ -2113,7 +2126,7 @@
       return '' +
         '<button class="masonry__item" type="button" data-lb="' + i + '" data-cat="' + esc(g.cat) + '" data-reveal="scale">' +
           '<span class="media" style="display:block">' +
-            '<img data-src="' + esc(g.img) + '" alt="' + esc(g.title) + " — " + esc(g.cat) + '" loading="lazy" decoding="async">' +
+            '<img ' + imgAttrs(g.img, "(min-width: 981px) 30vw, 46vw", 480) + ' alt="' + esc(g.title) + " — " + esc(g.cat) + '" loading="lazy" decoding="async">' +
           "</span>" +
           '<span class="masonry__cap"><small>' + esc(g.cat) + "</small><b>" + esc(g.title) + "</b></span>" +
         "</button>";

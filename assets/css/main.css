@@ -1,3 +1,36 @@
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: italic;
+  font-weight: 300 400;
+  font-display: swap;
+  src: url("../fonts/cormorant-garamond-italic-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 300 500;
+  font-display: swap;
+  src: url("../fonts/cormorant-garamond-normal-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Jost';
+  font-style: normal;
+  font-weight: 200 500;
+  font-display: swap;
+  src: url("../fonts/jost-normal-latin.woff2") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Noto Kufi Arabic';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../fonts/noto-kufi-arabic-normal-arabic.woff2") format('woff2');
+  unicode-range: U+0600-06FF, U+0750-077F, U+0870-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC, U+102E0-102FB, U+10E60-10E7E, U+10EC2-10EC7, U+10EC9-10EEE, U+10EF0-10EFF, U+1EE00-1EE03, U+1EE05-1EE1F, U+1EE21-1EE22, U+1EE24, U+1EE27, U+1EE29-1EE32, U+1EE34-1EE37, U+1EE39, U+1EE3B, U+1EE42, U+1EE47, U+1EE49, U+1EE4B, U+1EE4D-1EE4F, U+1EE51-1EE52, U+1EE54, U+1EE57, U+1EE59, U+1EE5B, U+1EE5D, U+1EE5F, U+1EE61-1EE62, U+1EE64, U+1EE67-1EE6A, U+1EE6C-1EE72, U+1EE74-1EE77, U+1EE79-1EE7C, U+1EE7E, U+1EE80-1EE89, U+1EE8B-1EE9B, U+1EEA1-1EEA3, U+1EEA5-1EEA9, U+1EEAB-1EEBB, U+1EEF0-1EEF1;
+}
+
 /* ==========================================================================
    PHARAOH'S BITES — Core design system
    1. Tokens
@@ -76,6 +109,39 @@
   --shell: 1280px;
   --shell-narrow: 880px;
   --header-h: 92px;
+
+  /* Phase 1 tokens (website upgrade) ------------------------------------ */
+  /* status colours */
+  --success: #5fd69a;  --success-bg: rgba(95, 214, 154, .12);
+  --error:   #ff6b5e;  --error-bg:   rgba(255, 107, 94, .12);
+  --warning: #f0b84a;
+  /* gold scale (light to deep) and dark scale */
+  --gold-300: #e3c46a;  --gold-700: #7a6120;
+  --ink-0: #0a0a0a;  --ink-1: var(--black);  --ink-2: var(--charcoal);  --ink-3: var(--charcoal-2);  --ink-4: #2b2826;
+  /* z-index layers: change here, never with a bare number */
+  --z-base: 0;  --z-raised: 2;  --z-sticky: 60;  --z-promo: 90;  --z-totop: 90;  --z-header: 100;
+  --z-progress: 120;  --z-toast: 130;  --z-modal: 150;  --z-skip: 200;  --z-top: 9999;
+  /* motion */
+  --dur-press: .14s;  --dur-fast: .24s;  --dur-base: .45s;  --dur-slow: .8s;
+  --ease-enter: cubic-bezier(.2, .8, .2, 1);  --ease-exit: cubic-bezier(.4, 0, 1, 1);
+  /* layout */
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --section-y: clamp(3.5rem, 7vw, 6.5rem);
+  --section-y-tight: clamp(2.75rem, 5.5vw, 4.5rem);
+  /* focus ring and card */
+  --focus-ring: 0 0 0 2px var(--black), 0 0 0 4px var(--gold-light);
+  --card-bg: var(--surface);  --card-bd: var(--line-soft);  --card-r: var(--r-md);  --card-shadow: var(--shadow-sm);
+}
+
+/* Subtle grain: a tiny repeating noise tile painted once, above the page, below the header. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: .045;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 .95  0 0 0 0 .85  0 0 0 1.1 -.2'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
 }
 
 /* 2. RESET & BASE -------------------------------------------------------- */
@@ -150,7 +216,7 @@ ul, ol { list-style: none; padding: 0; }
   left: 50%;
   top: -100px;
   transform: translateX(-50%);
-  z-index: 200;
+  z-index: var(--z-skip);
   background: var(--gold);
   color: var(--black);
   padding: .7rem 1.4rem;
@@ -232,8 +298,8 @@ p { text-wrap: pretty; }
 }
 .shell--narrow { width: min(100% - 2.5rem, var(--shell-narrow)); }
 
-.section { padding-block: var(--sp-7); position: relative; }
-.section--tight { padding-block: var(--sp-6); }
+.section { padding-block: var(--section-y); position: relative; }
+.section--tight { padding-block: var(--section-y-tight); }
 .section--flush-top { padding-top: 0; }
 
 .section--alt { background: linear-gradient(180deg, var(--black), var(--charcoal) 40%, var(--black)); }
@@ -363,6 +429,13 @@ p { text-wrap: pretty; }
 
 .btn--ghost { --btn-bd: rgba(231, 213, 165, .28); }
 
+/* states: focus ring, pressed, disabled and loading */
+.btn:focus-visible { outline: 0; box-shadow: var(--focus-ring), var(--glow); }
+.btn:active { transform: translateY(0) scale(.98); transition-duration: var(--dur-press); }
+.btn[disabled], .btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; pointer-events: none; box-shadow: none; transform: none; }
+.btn.is-loading { cursor: progress; pointer-events: none; opacity: .88; }
+.btn.is-loading::after { content: ""; width: 1em; height: 1em; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+.btn--outline { --btn-bd: var(--gold-deep); --btn-fg: var(--gold-light); }
 .btn--sm { padding: .68rem 1.4rem; font-size: var(--step--2); letter-spacing: .16em; }
 .btn--block { width: 100%; }
 
@@ -384,7 +457,7 @@ p { text-wrap: pretty; }
 .site-header {
   position: fixed;
   inset: 0 0 auto;
-  z-index: 100;
+  z-index: var(--z-header);
   height: var(--header-h);
   display: flex;
   align-items: center;
@@ -680,6 +753,7 @@ p { text-wrap: pretty; }
 /* Image loading / fallback states (set by JS) */
 img[data-src] { opacity: 0; }
 img.is-loaded { animation: imgIn .9s var(--ease-out) both; }
+.hero__emblem.is-loaded, .hero__bg img.is-loaded, .brand__mark.is-loaded, .footer-logo.is-loaded { animation: none; }
 .media.img-failed {
   background:
     radial-gradient(ellipse at 30% 20%, rgba(212, 175, 55, .17), transparent 55%),
@@ -940,14 +1014,14 @@ img.is-loaded { animation: imgIn .9s var(--ease-out) both; }
   transform: scaleX(0);
   transform-origin: 0 50%;
   background: linear-gradient(90deg, var(--bronze), var(--gold), var(--gold-light));
-  z-index: 120;
+  z-index: var(--z-progress);
 }
 
 /* Back to top */
 .to-top {
   position: fixed;
   right: 1.5rem; bottom: 1.5rem;
-  z-index: 90;
+  z-index: var(--z-totop);
   width: 48px; height: 48px;
   display: grid;
   place-items: center;
@@ -970,7 +1044,7 @@ img.is-loaded { animation: imgIn .9s var(--ease-out) both; }
 .toast-stack {
   position: fixed;
   right: 1.5rem; bottom: 5.5rem;
-  z-index: 130;
+  z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
   gap: .6rem;

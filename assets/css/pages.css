@@ -464,7 +464,7 @@
   left: 50%;
   bottom: 1.4rem;
   transform: translateX(-50%);
-  z-index: 60;
+  z-index: var(--z-sticky);
   display: inline-flex;
   align-items: center;
   gap: .6rem;
@@ -632,12 +632,13 @@
 .bake-time span { font-size: var(--step--1); color: var(--text-muted); }
 
 /* 7. GALLERY ------------------------------------------------------------- */
-.masonry { columns: 3 18rem; column-gap: 1.1rem; }
-@media (max-width: 620px) { .masonry { columns: 2 9rem; column-gap: .8rem; } }
+.masonry { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.1rem; }
+@media (max-width: 900px) { .masonry { grid-template-columns: repeat(2, 1fr); gap: .8rem; } }
+.masonry__item .media, .masonry__item .media img { height: 100%; }
+.masonry__item { aspect-ratio: 4 / 5; }
+.masonry__item img { object-fit: cover; }
 
 .masonry__item {
-  break-inside: avoid;
-  margin-bottom: 1.1rem;
   position: relative;
   display: block;
   width: 100%;
@@ -666,7 +667,7 @@
 .lightbox {
   position: fixed;
   inset: 0;
-  z-index: 150;
+  z-index: var(--z-modal);
   display: grid;
   place-items: center;
   padding: clamp(1rem, 4vw, 3rem);
@@ -707,7 +708,7 @@
 .addon {
   position: fixed;
   inset: 0;
-  z-index: 150;
+  z-index: var(--z-modal);
   display: grid;
   place-items: center;
   padding: clamp(.8rem, 3vw, 2rem);
@@ -1527,7 +1528,7 @@ body.nav-open .site-header.is-stuck {
 .hero-item__ribbon .ankh-icon svg { height: 24px; }
 
 /* Payment return dialog */
-.pay-return{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,10,10,.8)}
+.pay-return{position:fixed;inset:0;z-index:var(--z-top);display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(10,10,10,.8)}
 .pay-return__card{max-width:420px;width:100%;padding:28px 22px;border-radius:16px;background:#fff;color:#1a1a1a;text-align:center}
 .pay-return__card h2{margin:0 0 8px;font-size:1.4rem}
 .pay-return__card p{margin:0 0 18px}
@@ -1723,7 +1724,7 @@ html.has-promo { --promo-h: 42px; }
 html.has-promo body { padding-top: var(--promo-h); }
 html.has-promo .site-header { top: var(--promo-offset, var(--promo-h)); }
 .promo-bar {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 90;
+  position: absolute; top: 0; left: 0; right: 0; z-index: var(--z-promo);
   height: var(--promo-h, 42px);
   display: flex; align-items: center; justify-content: center; gap: .9rem;
   padding: 0 .5rem 0 1rem;
@@ -1765,3 +1766,16 @@ html.has-promo .site-header { top: var(--promo-offset, var(--promo-h)); }
 }
 /* hidden rows stay hidden (the promo discount row in the order totals) */
 .basket__row[hidden] { display: none; }
+
+/* ===== Phase 1: design system additions =================================== */
+/* Section header: eyebrow + title + subtitle + thin gold line */
+.section-head::after { content: ""; display: block; width: 4.5rem; height: 1px; margin-top: 1.5rem; background: linear-gradient(90deg, var(--gold), transparent); }
+.section-head--center::after { margin-inline: auto; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.section-head:has(.divider, [class*="divider"])::after { content: none; }
+
+/* Cards: one recipe (surface, hairline, radius, soft shadow, lift on hover for mouse users) */
+.card--surface { background: var(--card-bg); border: 1px solid var(--card-bd); border-radius: var(--card-r); box-shadow: var(--card-shadow); }
+@media (hover: hover) and (pointer: fine) {
+  .card--lift { transition: transform var(--dur-fast) var(--ease-enter), box-shadow var(--dur-fast) var(--ease-enter), border-color var(--dur-fast); }
+  .card--lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: rgba(212, 175, 55, .35); }
+}
