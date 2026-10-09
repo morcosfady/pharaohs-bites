@@ -7,8 +7,10 @@
    Visitors who ask their device for reduced motion get none of the animation (html.motion is never set).
 
    Design rules (so it stays calm and fast): CSS first, only transform / opacity / filter move, one shared easing,
-   nothing blocks a click, nothing is needed to read the page. GSAP + ScrollTrigger are NOT loaded yet:
-   they arrive in phase 3 for the pinned "how it's made" story, where CSS alone cannot do the job.
+   nothing blocks a click, nothing is needed to read the page. GSAP + ScrollTrigger are NOT used: sticky positioning
+   plus a little scroll maths does the pinned "how it's made" story, so the site ships no animation library.
+   Phase 3 adds: 3D tilt + glare and magnetic buttons (mouse only, config motion.threeD), line art that draws itself,
+   and the four-step "How feteer is made" story with lazy-loaded videos (assets/video).
    ========================================================================== */
 (function () {
   "use strict";
@@ -153,10 +155,217 @@
     window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }, { passive: true });
   }
 
+  /* ======================= Phase 3 ======================================================================== */
+  var fine = !!(window.matchMedia && window.matchMedia("(hover: hover) and (pointer: fine)").matches);
+  var threeD = enabled && M.threeD !== false && fine;
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  /* --- 3D tilt with a gold glare (mouse only). Uses the CSS "rotate" property so reveal / hover transforms are untouched.
+         The parent gets a perspective once, so the tilt has depth. ----------------------------------------------- */
+  function initTilt() {
+    if (!threeD) return;
+    root.classList.add("motion-3d");
+    var SEL = ".spotlight, .grid-4 > .card, #featured .dish, .hero-item, .masonry__item";
+    var active = null, evt = null, raf = 0;
+
+    function prepare(el) {
+      if (el.__tiltReady) return;
+      el.__tiltReady = true;
+      if (getComputedStyle(el).position === "static") el.style.position = "relative";
+      var glare = document.createElement("span");
+      glare.className = "tilt__glare";
+      glare.setAttribute("aria-hidden", "true");
+      el.appendChild(glare);
+      el.__glare = glare;
+      if (el.parentElement) el.parentElement.style.perspective = "1100px";
+      el.style.transition = (getComputedStyle(el).transition || "all 0s") + ", rotate .22s cubic-bezier(.2,.8,.2,1) 0s";
+    }
+    function reset(el) {
+      if (!el) return;
+      el.classList.remove("is-tilting");
+      el.style.rotate = "";
+    }
+    function frame() {
+      raf = 0;
+      if (!active || !evt) return;
+      var r = active.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      var nx = clamp(((evt.clientX - r.left) / r.width - 0.5) * 2, -1, 1);
+      var ny = clamp(((evt.clientY - r.top) / r.height - 0.5) * 2, -1, 1);
+      var max = active.classList.contains("spotlight") ? 3.5 : 5.5;     /* big cards tilt less */
+      var angle = Math.hypot(nx, ny) * max;
+      active.style.rotate = angle < 0.05 ? "" : (-ny * max).toFixed(3) + " " + (nx * max).toFixed(3) + " 0 " + angle.toFixed(2) + "deg";
+      active.style.setProperty("--gx", ((nx + 1) * 50).toFixed(1) + "%");
+      active.style.setProperty("--gy", ((ny + 1) * 50).toFixed(1) + "%");
+    }
+    document.addEventListener("pointermove", function (e) {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      var el = e.target && e.target.closest ? e.target.closest(SEL) : null;
+      if (el !== active) {
+        reset(active);
+        active = el;
+        if (el) { prepare(el); el.classList.add("is-tilting"); }
+      }
+      evt = e;
+      if (active && !raf) raf = requestAnimationFrame(frame);
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () { reset(active); active = null; }, true);
+    window.addEventListener("blur", function () { reset(active); active = null; });
+  }
+
+  /* --- Magnetic gold buttons: they lean a few pixels toward the cursor when it comes close (mouse only) ------------ */
+  function initMagnetic() {
+    if (!threeD) return;
+    var buttons = [];
+    function collect() {
+      buttons = $$(".btn--gold:not(.btn--sm):not(.btn--block):not(.btn--place):not([type=submit])");
+      buttons.forEach(function (b) {
+        if (b.__magnet) return;
+        b.__magnet = true;
+        b.style.transition = (getComputedStyle(b).transition || "all 0s") + ", translate .25s cubic-bezier(.2,.8,.2,1) 0s";
+      });
+    }
+    collect();
+    setTimeout(collect, 1500);
+    var evt = null, raf = 0;
+    function frame() {
+      raf = 0;
+      if (!evt) return;
+      buttons.forEach(function (b) {
+        var r = b.getBoundingClientRect();
+        if (!r.width || r.bottom < 0 || r.top > window.innerHeight) return;
+        var pad = 56;
+        var inside = evt.clientX > r.left - pad && evt.clientX < r.right + pad && evt.clientY > r.top - pad && evt.clientY < r.bottom + pad;
+        if (!inside) { if (b.style.translate) b.style.translate = ""; return; }
+        var dx = clamp((evt.clientX - (r.left + r.width / 2)) * 0.22, -9, 9);
+        var dy = clamp((evt.clientY - (r.top + r.height / 2)) * 0.22, -6, 6);
+        b.style.translate = dx.toFixed(1) + "px " + dy.toFixed(1) + "px";
+      });
+    }
+    document.addEventListener("pointermove", function (e) {
+      if (e.pointerType && e.pointerType !== "mouse") return;
+      evt = e;
+      if (!raf) raf = requestAnimationFrame(frame);
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () { buttons.forEach(function (b) { b.style.translate = ""; }); }, true);
+  }
+
+  /* --- Gold line art that draws itself as it scrolls into view (stroke-dashoffset follows --p) --------------------- */
+  function initLineDraw() {
+    var arts = $$("[data-draw]");
+    if (!arts.length || !enabled) return;
+    var ticking = false;
+    function frame() {
+      ticking = false;
+      var vh = window.innerHeight;
+      arts.forEach(function (a) {
+        var r = a.getBoundingClientRect();
+        var p = clamp((vh * 0.9 - r.top) / (vh * 0.42), 0, 1);       /* starts at 90% of the screen, done a bit above the middle */
+        a.style.setProperty("--p", p.toFixed(3));
+      });
+    }
+    function queue() { if (!ticking) { ticking = true; requestAnimationFrame(frame); } }
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    frame();
+  }
+
+  /* --- "How feteer is made": four steps, one video each ----------------------------------------------------------
+     Desktop: the stage is a tall scroll track; scroll progress picks the step. Phones: swipe the cards, the card that is
+     centred picks the step. Videos load only when the section is near, one at a time (plus the next), and only the active
+     one plays. With reduced motion, data saver or a very slow connection the posters are shown and nothing autoplays. --- */
+  function initStory() {
+    var stage = $("[data-story-stage]");
+    if (!stage) return;
+    var videos = $$(".story__video", stage), steps = $$(".story__step", stage), list = $("[data-story-steps]", stage);
+    var sticky = $(".story__sticky", stage);
+    var conn = navigator.connection || {};
+    var canPlay = enabled && !conn.saveData && !/(^|-)2g$/.test(conn.effectiveType || "");
+    var wide = window.matchMedia("(min-width: 900px)");
+    var current = -1, near = false, visible = false;
+
+    /* posters of the other steps are fetched when the section is near (a <video poster> would load straight away) */
+    function posters() { videos.forEach(function (v) { var p = v.getAttribute("data-poster"); if (p) { v.poster = p; v.removeAttribute("data-poster"); } }); }
+    function load(i) {
+      var v = videos[i];
+      if (!canPlay || !v || v.getAttribute("src") || !v.getAttribute("data-src")) return;
+      v.src = v.getAttribute("data-src");
+      v.load();
+    }
+    function playActive() {
+      videos.forEach(function (v, k) {
+        if (k === current && canPlay && visible && !document.hidden) { var p = v.play(); if (p && p.catch) p.catch(function () { /* autoplay blocked: poster stays */ }); }
+        else { try { v.pause(); } catch (e) { /* ignore */ } }
+      });
+    }
+    function setStep(i) {
+      if (i === current || i < 0 || i >= steps.length) return;
+      current = i;
+      videos.forEach(function (v, k) { v.classList.toggle("is-active", k === i); });
+      steps.forEach(function (s, k) { s.classList.toggle("is-active", k === i); });
+      stage.setAttribute("data-step", String(i + 1));
+      if (near) { load(i); setTimeout(function () { load(i + 1); }, 800); }
+      playActive();
+    }
+    setStep(0);
+
+    /* near / visible tracking */
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { if (es[0].isIntersecting && !near) { near = true; posters(); load(current); setTimeout(function () { load(current + 1); }, 800); playActive(); } }, { rootMargin: "700px 0px" }).observe(stage);
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; playActive(); }, { threshold: 0.15 }).observe(sticky || stage);
+    } else { near = visible = true; posters(); load(0); playActive(); }
+    document.addEventListener("visibilitychange", playActive);
+
+    /* desktop: scroll progress through the track picks the step */
+    function onScroll() {
+      if (!enabled || !wide.matches) return;
+      var r = stage.getBoundingClientRect();
+      var top = parseFloat(getComputedStyle(sticky).top) || 0;
+      var span = r.height - sticky.offsetHeight;
+      if (span <= 0) return;
+      var p = clamp((top - r.top) / span, 0, 0.9999);
+      setStep(Math.floor(p * steps.length));
+    }
+    var ticking = false;
+    window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; onScroll(); }); } }, { passive: true });
+    window.addEventListener("resize", onScroll);
+    onScroll();
+
+    /* phones: the centred card picks the step */
+    if (list && "IntersectionObserver" in window) {
+      var io = new IntersectionObserver(function (es) {
+        if (wide.matches) return;
+        es.forEach(function (e) { if (e.isIntersecting && e.intersectionRatio >= 0.6) setStep(steps.indexOf(e.target)); });
+      }, { root: list, threshold: [0.6, 0.8] });
+      steps.forEach(function (s) { io.observe(s); });
+    }
+
+    /* the step titles are buttons: jump to that step */
+    steps.forEach(function (s, i) {
+      var b = $(".story__btn", s);
+      if (!b) return;
+      b.addEventListener("click", function () {
+        if (enabled && wide.matches) {
+          var r = stage.getBoundingClientRect();
+          var top = parseFloat(getComputedStyle(sticky).top) || 0;
+          var span = r.height - sticky.offsetHeight;
+          window.scrollTo({ top: window.pageYOffset + r.top - top + span * ((i + 0.5) / steps.length), behavior: "smooth" });
+        } else {
+          setStep(i);
+          if (!wide.matches && s.scrollIntoView) s.scrollIntoView({ inline: "center", block: "nearest", behavior: enabled ? "smooth" : "auto" });
+        }
+      });
+    });
+  }
+
   function boot() {
     initHeadingLines();
     initMotes();
     initOrderBar();
+    initTilt();
+    initMagnetic();
+    initLineDraw();
+    initStory();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot); else boot();
 })();

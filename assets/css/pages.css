@@ -1854,3 +1854,66 @@ html.motion .section-head.is-drawn::after { transform: none; }
 }
 @keyframes vtOut { to { opacity: 0; } }
 @keyframes vtIn { from { opacity: 0; } }
+
+/* ===== Phase 3: 3D touches, line art, "How feteer is made" story ============
+   Tilt, glare and magnetic buttons only exist for mouse users (motion.js sets html.motion-3d), and never with reduced
+   motion or when config motion.threeD is false. They use the individual transform properties (rotate / translate) so they
+   do not fight the reveal and hover transforms. Behaviour: assets/js/motion.js. */
+
+/* Tilt + gold glare (the glare element is added by motion.js) */
+.tilt__glare {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none; z-index: 3; opacity: 0;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255, 236, 170, .30), rgba(212, 175, 55, .08) 36%, transparent 62%);
+  transition: opacity var(--dur-fast) var(--ease-enter);
+}
+.is-tilting > .tilt__glare { opacity: 1; }
+
+/* Drawn line art (lotus): the stroke is revealed by --p (0 to 1), set from the scroll position by motion.js */
+.line-art { display: block; width: min(100%, 15rem); height: auto; margin: 0 auto var(--sp-4); --p: 1; filter: drop-shadow(0 0 7px rgba(212, 175, 55, .3)); }
+html.motion .line-art { --p: 0; }
+.line-art path { fill: none; stroke: var(--gold); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--p)); }
+
+/* How feteer is made: sticky video + four steps. Desktop: the section is a tall scroll track and the picture
+   stays pinned while the steps change. Phones and no-motion: video on top, steps are a swipe carousel / a plain list. */
+.story__stage { margin-top: var(--sp-3); }
+.story__sticky { display: grid; gap: 1.6rem; }
+.story__media {
+  position: relative; aspect-ratio: 9 / 16; width: min(78%, 20rem); margin-inline: auto; overflow: hidden;
+  border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--charcoal);
+  box-shadow: var(--shadow-lg), 0 0 0 1px rgba(212, 175, 55, .08);
+}
+.story__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s var(--ease-enter); }
+.story__video.is-active { opacity: 1; }
+.story__note {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; margin: 0; padding: 1.4rem .9rem .6rem; text-align: center;
+  font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .72);
+  background: linear-gradient(0deg, rgba(0, 0, 0, .65), transparent);
+}
+.story__steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 1.1rem; }
+/* inactive steps are dimmed with colour (not opacity) so every text keeps AA contrast */
+.story__step { border-left: 1px solid var(--line-soft); padding-left: 1.4rem; transition: border-color var(--dur-base); }
+.story__step.is-active { border-left-color: var(--gold); }
+.story__step p { margin: .45rem 0 0; color: #8f8777; max-width: 30rem; transition: color var(--dur-base); }
+.story__step.is-active p { color: var(--text-muted); }
+.story__btn { display: flex; align-items: baseline; gap: 1rem; padding: .2rem 0; background: none; border: 0; color: var(--text-muted); font-family: var(--font-display); font-size: var(--step-2); text-align: left; cursor: pointer; transition: color var(--dur-base); }
+.story__step.is-active .story__btn { color: var(--ivory); }
+.story__btn:focus-visible { outline: 0; box-shadow: var(--focus-ring); border-radius: 4px; }
+.story__num { font-family: var(--font-body); font-size: var(--step--1); letter-spacing: .2em; color: var(--gold-deep); }
+.story__step.is-active .story__num { color: var(--gold); }
+
+@media (min-width: 900px) {
+  .story__sticky { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: var(--sp-5); align-items: center; }
+  .story__media { width: min(100%, 22rem); }
+  .story__btn { font-size: var(--step-3); }
+  html.motion .story__stage { height: 320vh; }
+  html.motion .story__sticky { position: sticky; top: calc(var(--header-h) + 1.5rem); height: calc(100vh - var(--header-h) - 3rem); min-height: 32rem; }
+  html.motion .story__media { height: min(100%, 36rem); width: auto; }
+}
+@media (max-width: 899px) {
+  .story__steps { display: flex; gap: .9rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: .2rem var(--gutter) 1rem; margin-inline: calc(var(--gutter) * -1); }
+  .story__steps::-webkit-scrollbar { display: none; }
+  .story__step { flex: 0 0 82%; scroll-snap-align: center; border: 1px solid var(--line-soft); border-radius: var(--r-md); padding: 1.1rem 1.2rem; background: var(--ink-3); }
+  .story__step.is-active { border-color: var(--gold); }
+}
+/* the corner of each clip carries a tiny generator mark: zoom in slightly so it falls outside the frame */
+.story__video { transform: scale(1.09); transform-origin: 0 0; }

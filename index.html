@@ -34,7 +34,7 @@
 <link rel="preload" href="assets/fonts/jost-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" as="image" imagesrcset="assets/img/brand/w/logo-header-320.webp 320w, assets/img/brand/w/logo-header-480.webp 480w, assets/img/brand/w/logo-header-640.webp 640w" imagesizes="(min-width: 700px) 400px, 230px" fetchpriority="high">
 <link rel="stylesheet" href="assets/css/main.css?v=66">
-<link rel="stylesheet" href="assets/css/pages.css?v=148">
+<link rel="stylesheet" href="assets/css/pages.css?v=151">
 <link rel="stylesheet" href="assets/css/pharaonic.css?v=62">
 
 <script type="application/ld+json">
@@ -204,6 +204,55 @@
             <span class="dish__price" style="font-size:var(--step-2)">$25</span>
             <a class="btn btn--gold" href="order.html">Order Now</a>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT'S MADE (scroll story; behaviour in assets/js/motion.js, styles at the end of pages.css) ============ -->
+  <section class="section story" id="how-its-made" aria-labelledby="story-title" data-story>
+    <div class="shell">
+      <div class="section-head section-head--center" data-reveal>
+        <p class="eyebrow is-centered">The Craft</p>
+        <h2 id="story-title">How feteer is made</h2>
+        <p class="lead">Four steps, all by hand. It takes patience, and you can taste it in the layers.</p>
+      </div>
+      <svg class="line-art" data-draw viewBox="0 0 240 120" role="presentation" aria-hidden="true" focusable="false">
+        <path pathLength="1" d="M8 104H64"/><path pathLength="1" d="M176 104H232"/><path pathLength="1" d="M70 104H170"/>
+        <path pathLength="1" d="M120 100C108 80 108 50 120 24C132 50 132 80 120 100Z"/>
+        <path pathLength="1" d="M120 100C96 92 82 68 84 44C104 54 116 76 120 100Z"/>
+        <path pathLength="1" d="M120 100C144 92 158 68 156 44C136 54 124 76 120 100Z"/>
+        <path pathLength="1" d="M120 100C84 100 54 84 44 58C72 62 106 78 120 100Z"/>
+        <path pathLength="1" d="M120 100C156 100 186 84 196 58C168 62 134 78 120 100Z"/>
+      </svg>
+
+      <div class="story__stage" data-story-stage>
+        <div class="story__sticky">
+          <div class="story__media" aria-hidden="true">
+            <video class="story__video is-active" muted loop playsinline preload="none" data-src="assets/video/step-1-stretch.mp4" poster="assets/video/step-1-stretch-poster.webp"></video>
+            <video class="story__video" muted loop playsinline preload="none" data-src="assets/video/step-2-ghee.mp4" data-poster="assets/video/step-2-ghee-poster.webp"></video>
+            <video class="story__video" muted loop playsinline preload="none" data-src="assets/video/step-3-fold.mp4" data-poster="assets/video/step-3-fold-poster.webp"></video>
+            <video class="story__video" muted loop playsinline preload="none" data-src="assets/video/step-4-bake.mp4" data-poster="assets/video/step-4-bake-poster.webp"></video>
+            <p class="story__note">AI-generated video illustrating the process</p>
+          </div>
+          <ol class="story__steps" data-story-steps>
+            <li class="story__step is-active">
+              <button type="button" class="story__btn"><span class="story__num">01</span><span class="story__title">Stretch</span></button>
+              <p>The dough is stretched by hand, thin enough that light comes through it.</p>
+            </li>
+            <li class="story__step">
+              <button type="button" class="story__btn"><span class="story__num">02</span><span class="story__title">Layer with butter</span></button>
+              <p>Every sheet is brushed with homemade butter before the next one goes on.</p>
+            </li>
+            <li class="story__step">
+              <button type="button" class="story__btn"><span class="story__num">03</span><span class="story__title">Fold</span></button>
+              <p>Folded over and over into thin, buttery layers. This is where the flakiness comes from.</p>
+            </li>
+            <li class="story__step">
+              <button type="button" class="story__btn"><span class="story__num">04</span><span class="story__title">Bake golden</span></button>
+              <p>Baked until the top turns deep golden and shatters, and the inside pulls apart in layers.</p>
+            </li>
+          </ol>
         </div>
       </div>
     </div>
@@ -414,6 +463,6 @@
 <script src="assets/js/config.js?v=113"></script>
 <script src="assets/js/data.js?v=116"></script>
 <script src="assets/js/main.js?v=138" defer></script>
-<script src="assets/js/motion.js?v=2" defer></script>
+<script src="assets/js/motion.js?v=4" defer></script>
 </body>
 </html>
