@@ -552,10 +552,13 @@
 .spot-track { display: flex; gap: 1rem; border-radius: var(--r-xl); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; }
 .spot-track::-webkit-scrollbar { display: none; }
 .spot-track:focus-visible { outline: 2px solid var(--gold); outline-offset: -4px; }
-.spot-track .spotlight { flex: 0 0 90%; min-width: 0; scroll-snap-align: start; opacity: .4; transition: opacity .35s; }
-.spot-track .spotlight.is-current { opacity: 1; }
+.spot-track .spotlight { flex: 0 0 90%; min-width: 0; scroll-snap-align: start; will-change: transform, opacity; }
+.spot-track .spotlight .media { overflow: hidden; }
+.spot-track.is-live .media img { scale: 1.1; will-change: translate; }
+.spot-track.is-live { cursor: grab; }
+.spot-track.is-dragging { cursor: grabbing; user-select: none; scroll-snap-type: none; }
+.spot-track img { -webkit-user-drag: none; }
 .spot-track .spotlight:last-child { margin-right: 10%; }
-@media (prefers-reduced-motion: reduce) { .spot-track .spotlight { transition: none; } }
 .spot-track .spotlight h2 { text-wrap: balance; }
 .spot-arrow { position: absolute; bottom: 2.3rem; width: 3rem; height: 3rem; border-radius: 50%; border: 1px solid var(--line-soft); background: rgba(10, 10, 10, .72); color: var(--gold); font-size: 1.9rem; line-height: 1; display: grid; place-items: center; padding: 0 0 .15rem; cursor: pointer; transition: background .2s, opacity .2s; }
 .spot-arrow:hover { background: rgba(10, 10, 10, .92); }

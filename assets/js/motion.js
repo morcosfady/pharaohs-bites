@@ -428,7 +428,40 @@
       if (e.key === "ArrowRight") { e.preventDefault(); go(current() + 1); }
       else if (e.key === "ArrowLeft") { e.preventDefault(); go(current() - 1); }
     });
-    var t; track.addEventListener("scroll", function () { clearTimeout(t); t = setTimeout(sync, 60); }, { passive: true });
+    /* Every frame of the scroll drives the look: the card leaving fades and shrinks a little, the one arriving brightens, and the photo inside slides slower than the card (parallax) */
+    var raf = 0, imgs = slides.map(function (s) { return $("img", s); });
+    track.classList.add("is-live");
+    function paint() {
+      raf = 0;
+      var st = step(), x = track.scrollLeft;
+      slides.forEach(function (s, n) {
+        var d = Math.max(-1, Math.min(1, (n * st - x) / st)), a = Math.abs(d);
+        s.style.opacity = (1 - .6 * a).toFixed(3);
+        if (!reduce) {
+          s.style.transform = "scale(" + (1 - .035 * a).toFixed(4) + ")";
+          if (imgs[n]) imgs[n].style.translate = (d * -5).toFixed(2) + "% 0";
+        }
+      });
+    }
+    var t; track.addEventListener("scroll", function () {
+      if (!raf) raf = requestAnimationFrame(paint);
+      clearTimeout(t); t = setTimeout(sync, 60);
+    }, { passive: true });
+    paint();
+
+    /* Mouse: drag the cards, then let go and they glide to the nearest one */
+    var down = false, sx = 0, sl = 0, moved = 0;
+    track.addEventListener("pointerdown", function (e) { if (e.pointerType !== "mouse" || e.button !== 0) return; down = true; moved = 0; sx = e.clientX; sl = track.scrollLeft; });
+    window.addEventListener("pointermove", function (e) {
+      if (!down) return;
+      var dx = e.clientX - sx; moved = Math.max(moved, Math.abs(dx));
+      if (moved > 5) { track.classList.add("is-dragging"); track.scrollLeft = sl - dx; }
+    });
+    window.addEventListener("pointerup", function () {
+      if (!down) return; down = false;
+      if (moved > 5) { var i = Math.round(track.scrollLeft / step()); track.classList.remove("is-dragging"); go(i); }
+    });
+    track.addEventListener("click", function (e) { if (moved > 5) { e.preventDefault(); e.stopPropagation(); moved = 0; } }, true);
     window.addEventListener("resize", function () { track.scrollLeft = idx * step(); });
     sync();
   }
