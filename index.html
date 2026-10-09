@@ -180,6 +180,35 @@
     <span class="g-ankh"></span><span class="g-eye"></span><span class="g-scarab"></span><span class="g-pharaoh"></span><span class="g-lotus"></span><span class="g-feather"></span><span class="g-djed"></span>
   </div>
 
+  <!-- ============ SHOWCASE REEL (behaviour in assets/js/motion.js initReel, styles at the end of pages.css) ============ -->
+  <section class="section reel" id="showcase" aria-labelledby="reel-title" data-reel>
+    <div class="shell">
+      <div class="reel__grid">
+        <div class="reel__media" data-reveal>
+          <video class="reel__video" muted loop playsinline preload="none" data-src="assets/video/showcase.mp4" poster="assets/video/showcase-poster.webp" aria-label="Our dishes, fresh from the kitchen"></video>
+          <span class="reel__bar" aria-hidden="true"><i data-reel-bar></i></span>
+        </div>
+        <div class="reel__body" data-reveal>
+          <p class="eyebrow">Fresh From the Kitchen</p>
+          <h2 id="reel-title">Come hungry</h2>
+          <p class="lead">Feteer, baked trays and more, made to order and delivered across the Dallas-Fort Worth area.</p>
+          <ul class="reel__list" data-reel-list>
+            <li><button type="button" class="reel__item is-active" data-reel-item="0"><span class="reel__name">Feteer Meshaltet</span><span class="reel__ar" lang="ar" dir="rtl">فطير مشلتت</span><span class="reel__price">$25</span></button></li>
+            <li><button type="button" class="reel__item" data-reel-item="1"><span class="reel__name">Feteer with Plant-Based Beef &amp; Mozzarella</span><span class="reel__ar" lang="ar" dir="rtl">فطير محشي لحمة</span><span class="reel__price">$40</span></button></li>
+            <li><button type="button" class="reel__item" data-reel-item="2"><span class="reel__name">Goulash Tray with Plant-Based Beef</span><span class="reel__ar" lang="ar" dir="rtl">صينية جلاش باللحمة</span><span class="reel__price">$35</span></button></li>
+            <li><button type="button" class="reel__item" data-reel-item="3"><span class="reel__name">Macarona Béchamel Tray</span><span class="reel__ar" lang="ar" dir="rtl">صينية مكرونة بشاميل</span><span class="reel__price">$35</span></button></li>
+            <li><button type="button" class="reel__item" data-reel-item="4"><span class="reel__name">Plant-Based Kofta Tray with Salsa &amp; Rice</span><span class="reel__ar" lang="ar" dir="rtl">صينية كفتة بالصلصة والأرز</span><span class="reel__price">$40</span></button></li>
+            <li><button type="button" class="reel__item" data-reel-item="5"><span class="reel__name">Plant-Based Meatballs &amp; Spaghetti</span><span class="reel__ar" lang="ar" dir="rtl">كرات لحم نباتية بالمكرونة</span><span class="reel__price">$30</span></button></li>
+            <li><button type="button" class="reel__item" data-reel-item="6"><span class="reel__name">Koshary Tray</span><span class="reel__ar" lang="ar" dir="rtl">كشري</span><span class="reel__price">$25</span></button></li>
+          </ul>
+          <div class="flex gap-3 wrap items-center mt-3">
+            <a class="btn btn--gold" href="order.html">Order Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============ SIGNATURE SPOTLIGHT (swipe carousel; behaviour in assets/js/motion.js initSpotlight) ============ -->
   <section class="section" aria-label="Dishes to order">
     <div class="shell">
@@ -293,35 +322,6 @@
         <button type="button" class="spot-dot" aria-label="Show dish 4"></button>
         <button type="button" class="spot-dot" aria-label="Show dish 5"></button>
         <button type="button" class="spot-dot" aria-label="Show dish 6"></button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============ SHOWCASE REEL (behaviour in assets/js/motion.js initReel, styles at the end of pages.css) ============ -->
-  <section class="section reel" id="showcase" aria-labelledby="reel-title" data-reel>
-    <div class="shell">
-      <div class="reel__grid">
-        <div class="reel__media" data-reveal>
-          <video class="reel__video" muted loop playsinline preload="none" data-src="assets/video/showcase.mp4" poster="assets/video/showcase-poster.webp" aria-label="Our dishes, fresh from the kitchen"></video>
-          <span class="reel__bar" aria-hidden="true"><i data-reel-bar></i></span>
-        </div>
-        <div class="reel__body" data-reveal>
-          <p class="eyebrow">Fresh From the Kitchen</p>
-          <h2 id="reel-title">Come hungry</h2>
-          <p class="lead">Feteer, baked trays and more, made to order and delivered across the Dallas-Fort Worth area.</p>
-          <ul class="reel__list" data-reel-list>
-            <li><button type="button" class="reel__item is-active" data-reel-item="0"><span class="reel__name">Feteer Meshaltet</span><span class="reel__ar" lang="ar" dir="rtl">فطير مشلتت</span><span class="reel__price">$25</span></button></li>
-            <li><button type="button" class="reel__item" data-reel-item="1"><span class="reel__name">Feteer with Plant-Based Beef &amp; Mozzarella</span><span class="reel__ar" lang="ar" dir="rtl">فطير محشي لحمة</span><span class="reel__price">$40</span></button></li>
-            <li><button type="button" class="reel__item" data-reel-item="2"><span class="reel__name">Goulash Tray with Plant-Based Beef</span><span class="reel__ar" lang="ar" dir="rtl">صينية جلاش باللحمة</span><span class="reel__price">$35</span></button></li>
-            <li><button type="button" class="reel__item" data-reel-item="3"><span class="reel__name">Macarona Béchamel Tray</span><span class="reel__ar" lang="ar" dir="rtl">صينية مكرونة بشاميل</span><span class="reel__price">$35</span></button></li>
-            <li><button type="button" class="reel__item" data-reel-item="4"><span class="reel__name">Plant-Based Kofta Tray with Salsa &amp; Rice</span><span class="reel__ar" lang="ar" dir="rtl">صينية كفتة بالصلصة والأرز</span><span class="reel__price">$40</span></button></li>
-            <li><button type="button" class="reel__item" data-reel-item="5"><span class="reel__name">Plant-Based Meatballs &amp; Spaghetti</span><span class="reel__ar" lang="ar" dir="rtl">كرات لحم نباتية بالمكرونة</span><span class="reel__price">$30</span></button></li>
-            <li><button type="button" class="reel__item" data-reel-item="6"><span class="reel__name">Koshary Tray</span><span class="reel__ar" lang="ar" dir="rtl">كشري</span><span class="reel__price">$25</span></button></li>
-          </ul>
-          <div class="flex gap-3 wrap items-center mt-3">
-            <a class="btn btn--gold" href="order.html">Order Now</a>
-          </div>
-        </div>
       </div>
     </div>
   </section>
