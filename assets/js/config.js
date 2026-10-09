@@ -82,7 +82,7 @@
     promoBanner: {
       enabled: true,
       code: "FIRSTBITE",
-      text: "🎁 First order? Use code {code} for FREE delivery (within 10 miles)",
+      text: "🎁 First order? Use code {code} for FREE delivery",
       shortText: "🎁 Code {code} = FREE delivery on your 1st order",
       linkLabel: "Order now",
       shortLinkLabel: "Order",

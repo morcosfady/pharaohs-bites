@@ -885,7 +885,7 @@
 .promo__row input { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: .06em; }
 .promo__row .btn { padding-inline: 1rem; }
 .promo__msg { font-size: var(--step--1); color: #5fd69a; font-weight: 500; }
-.promo__msg.is-bad { color: #ff9a8a; }
+.promo__msg.is-bad { color: #ff6b5e; font-weight: 600; }
 .basket__row s { opacity: .6; margin-right: .3rem; }
 .basket__row--total { font-family: var(--font-display); font-size: var(--step-1); color: var(--ivory); padding-top: .5rem; }
 .basket__row--total span:last-child { color: var(--gold); }
