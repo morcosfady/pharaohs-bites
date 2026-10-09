@@ -77,6 +77,19 @@
        Leave financeOrderEndpoint empty to skip recording (WhatsApp only).
     ------------------------------------------------------------------- */
     financeOrderEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-order",
+    /* --- Promo banner (top of every page). enabled: false hides it everywhere, no HTML edits needed.
+       {code} in the text becomes the gold tap-to-copy pill. hideDays = how long a visitor's close button keeps it hidden. --- */
+    promoBanner: {
+      enabled: true,
+      code: "FIRSTBITE",
+      text: "🎁 First order? Use code {code} for FREE delivery (within 10 miles)",
+      shortText: "🎁 Code {code} = FREE delivery on your 1st order",
+      linkLabel: "Order now",
+      shortLinkLabel: "Order",
+      link: "order.html?promo=FIRSTBITE",
+      hideDays: 7
+    },
+
     financeCheckoutEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/create-checkout",
     financeTrackEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/track",   /* anonymous visit log for the dashboard Website Pulse tab */
     financeQuoteEndpoint: "https://vvwunhcpxofvnjijemdb.supabase.co/functions/v1/delivery-quote",

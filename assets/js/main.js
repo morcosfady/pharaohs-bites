@@ -1265,6 +1265,7 @@
         Track.problem("address", (d && d.error) || "address could not be checked", { zip: cu.zip || "" });
       }
       if (promoCode && quote.state === "ok") {
+        if (quote.promo && quote.promo.valid) hidePromoBanner(false);   /* code applied: the banner has done its job */
         if (quote.promo && quote.promo.valid) renderPromo(quote.promo.message || (promoCode + " applied: free delivery 🎉"), false);
         else {
           renderPromo((quote.promo && quote.promo.message) || "that promo code is not valid", true);
@@ -1290,9 +1291,110 @@
     quote.key = "";
     refreshQuote();
   }
+  /* --- Promo banner (every page) ----------------------------------------
+     Built from C.promoBanner. Space is reserved by html.has-promo (see pages.css) so the page
+     does not jump; the close button hides it for hideDays days (localStorage, never fatal). */
+  var promoBar = null;
+  var PROMO_KEY = "pb_promo_closed";
+  function promoClosedRecently(days) {
+    try { var t = Number(window.localStorage.getItem(PROMO_KEY)); return !!t && Date.now() - t < days * 864e5; } catch (e) { return false; }
+  }
+  function hidePromoBanner(remember) {
+    if (!promoBar) return;
+    promoBar.remove(); promoBar = null;
+    document.documentElement.classList.remove("has-promo");
+    document.documentElement.style.removeProperty("--promo-offset");
+    if (remember) { try { window.localStorage.setItem(PROMO_KEY, String(Date.now())); } catch (e) { /* hidden for this page view only */ } }
+  }
+  function copyText(text, done) {
+    function fallback() {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0";
+        document.body.appendChild(ta); ta.select();
+        var ok = document.execCommand("copy");
+        ta.remove();
+        if (ok) done();
+      } catch (e) { /* clipboard blocked: nothing to do */ }
+    }
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+      else fallback();
+    } catch (e) { fallback(); }
+  }
+  function initPromoBanner() {
+    var cfg = C.promoBanner;
+    var header = $(".site-header");
+    if (!cfg || !cfg.enabled || !cfg.code || !header || promoClosedRecently(cfg.hideDays || 7)) return;
+    var root = document.documentElement, code = String(cfg.code);
+    var status = document.createElement("span");
+    status.className = "promo-bar__sr"; status.setAttribute("aria-live", "polite");
+    function line(cls, text) {
+      var span = document.createElement("span");
+      span.className = cls;
+      String(text || "").split("{code}").forEach(function (part, i) {
+        if (i > 0) {
+          var pill = document.createElement("button");
+          pill.type = "button"; pill.className = "promo-bar__pill"; pill.textContent = code;
+          pill.setAttribute("aria-label", "Copy code " + code);
+          pill.addEventListener("click", function () {
+            copyText(code, function () {
+              pill.textContent = "Copied ✓";
+              status.textContent = "Code " + code + " copied";
+              setTimeout(function () { pill.textContent = code; status.textContent = ""; }, 1500);
+            });
+          });
+          span.appendChild(pill);
+        }
+        span.appendChild(document.createTextNode(part));
+      });
+      return span;
+    }
+    var bar = document.createElement("div");
+    bar.className = "promo-bar"; bar.setAttribute("role", "region"); bar.setAttribute("aria-label", "Promotion");
+    var p = document.createElement("p");
+    p.className = "promo-bar__text";
+    p.appendChild(line("promo-bar__long", cfg.text));
+    p.appendChild(line("promo-bar__short", cfg.shortText || cfg.text));
+    var cta = document.createElement("a");
+    cta.className = "promo-bar__cta"; cta.href = cfg.link || "order.html";
+    var ctaLong = document.createElement("span"), ctaShort = document.createElement("span");
+    ctaLong.className = "promo-bar__long"; ctaLong.textContent = cfg.linkLabel || "Order now";
+    ctaShort.className = "promo-bar__short"; ctaShort.textContent = cfg.shortLinkLabel || cfg.linkLabel || "Order";
+    cta.appendChild(ctaLong); cta.appendChild(ctaShort);
+    var close = document.createElement("button");
+    close.type = "button"; close.className = "promo-bar__close"; close.setAttribute("aria-label", "Close promo"); close.innerHTML = "&times;";
+    close.addEventListener("click", function () { hidePromoBanner(true); });
+    bar.appendChild(p); bar.appendChild(cta); bar.appendChild(close); bar.appendChild(status);
+    header.parentNode.insertBefore(bar, header);
+    promoBar = bar;
+    root.classList.add("has-promo");
+
+    /* The bar scrolls away with the page; the fixed header follows it up to the top. */
+    var ticking = false;
+    function place() {
+      ticking = false;
+      if (!promoBar) return;
+      root.style.setProperty("--promo-offset", Math.max(0, promoBar.offsetHeight - (window.pageYOffset || 0)) + "px");
+    }
+    function queue() { if (!ticking) { ticking = true; requestAnimationFrame(place); } }
+    window.addEventListener("scroll", queue, { passive: true });
+    window.addEventListener("resize", queue);
+    place();
+  }
+
   function initPromo() {
     var btn = $("[data-promo-apply]"), input = $("[data-promo-input]");
     if (!btn || !input) return;
+    /* Arriving from the banner (order.html?promo=FIRSTBITE): fill the box, the customer presses Apply
+       once the address is in. The server is still the only judge of the code. */
+    try {
+      var fromLink = (new URLSearchParams(window.location.search).get("promo") || "").replace(/\s+/g, "").toUpperCase().slice(0, 30);
+      if (/^[A-Z0-9_-]{3,30}$/.test(fromLink)) {
+        input.value = fromLink;
+        renderPromo("Code " + fromLink + " is in the box. Fill in your details, then press Apply.", false);
+      }
+    } catch (e) { /* no query support: leave the box empty */ }
     btn.addEventListener("click", applyPromo);
     input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } });
   }
@@ -2339,6 +2441,7 @@
       Track.problem("page", "promise: " + String((e.reason && e.reason.message) || e.reason || "").slice(0, 200));
     });
 
+    initPromoBanner();
     applyStagger();
     hydrateImages();
     observeReveals();

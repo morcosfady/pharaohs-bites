@@ -1715,3 +1715,53 @@ body.nav-open .site-header.is-stuck {
 /* "Which milk?" choice buttons in the add-on dialog */
 .milk-choice { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: .6rem; padding: .9rem 1.1rem; text-align: left; }
 .milk-choice small { opacity: .75; letter-spacing: .05em; }
+
+/* Promo banner: slim bar above the header on every page (built by initPromoBanner in main.js, text from config.js promoBanner).
+   html.has-promo reserves its height up front so nothing jumps. The bar scrolls away with the page and the fixed header
+   slides up to the top (--promo-offset, kept up to date by main.js). It sits below the header's z-index so the mobile menu covers it. */
+html.has-promo { --promo-h: 42px; }
+html.has-promo body { padding-top: var(--promo-h); }
+html.has-promo .site-header { top: var(--promo-offset, var(--promo-h)); }
+.promo-bar {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 90;
+  height: var(--promo-h, 42px);
+  display: flex; align-items: center; justify-content: center; gap: .9rem;
+  padding: 0 .5rem 0 1rem;
+  background: linear-gradient(90deg, #14110a, #221b0d 50%, #14110a);
+  border-bottom: 1px solid rgba(212, 175, 55, .45);
+  color: var(--ivory);
+  font-size: .9rem; line-height: 1.25; letter-spacing: .02em;
+}
+.promo-bar[hidden] { display: none; }
+.promo-bar__text { margin: 0; min-width: 0; text-align: center; }
+.promo-bar__short { display: none; }
+.promo-bar__pill {
+  position: relative; display: inline-block; margin: 0 .15em; padding: .1em .65em;
+  border: 0; border-radius: var(--r-pill); cursor: pointer;
+  background: var(--gold); color: #111; font: inherit; font-weight: 700; letter-spacing: .1em;
+}
+.promo-bar__pill::after { content: ""; position: absolute; inset: -13px -6px; }
+.promo-bar__pill:hover { background: var(--gold-light); }
+.promo-bar__cta {
+  flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 .35rem;
+  color: var(--gold-light); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: .78rem;
+  white-space: nowrap;
+}
+.promo-bar__cta:hover, .promo-bar__cta:focus-visible { color: #fff; }
+.promo-bar__close {
+  flex: none; width: 44px; height: 44px; display: grid; place-items: center;
+  border: 0; background: transparent; color: var(--gold-light); font-size: 1.5rem; line-height: 1; cursor: pointer; border-radius: 50%;
+}
+.promo-bar__close:hover { color: #fff; background: rgba(255, 255, 255, .08); }
+.promo-bar a:focus-visible, .promo-bar button:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 2px; }
+.promo-bar__sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 520px) {
+  html.has-promo { --promo-h: 56px; }
+  .promo-bar { gap: .35rem; padding: 0 0 0 .75rem; font-size: .8rem; letter-spacing: 0; justify-content: space-between; }
+  .promo-bar__long { display: none; }
+  .promo-bar__short { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: left; }
+  .promo-bar__text { flex: 1; }
+  .promo-bar__cta { padding: 0 .2rem; font-size: .74rem; }
+}
+/* hidden rows stay hidden (the promo discount row in the order totals) */
+.basket__row[hidden] { display: none; }
