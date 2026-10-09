@@ -410,12 +410,14 @@
     var dots = $$(".spot-dot", root.parentNode), slides = $$(".spotlight", track);
     if (!track || slides.length < 2) return;
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    function current() { return Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / track.clientWidth))); }
+    function step() { return slides[1].offsetLeft - slides[0].offsetLeft; }
+    function current() { return Math.max(0, Math.min(slides.length - 1, Math.round(track.scrollLeft / step()))); }
     var idx = 0;
-    function go(i) { i = Math.max(0, Math.min(slides.length - 1, i)); track.scrollTo({ left: i * track.clientWidth, behavior: reduce ? "auto" : "smooth" }); }
+    function go(i) { i = Math.max(0, Math.min(slides.length - 1, i)); track.scrollTo({ left: i * step(), behavior: reduce ? "auto" : "smooth" }); }
     function sync() {
       var i = idx = current();
       dots.forEach(function (d, n) { d.classList.toggle("is-active", n === i); });
+      slides.forEach(function (s, n) { s.classList.toggle("is-current", n === i); });
       prev.disabled = i === 0; next.disabled = i === slides.length - 1;
     }
     prev.hidden = false; next.hidden = false;
@@ -427,7 +429,7 @@
       else if (e.key === "ArrowLeft") { e.preventDefault(); go(current() - 1); }
     });
     var t; track.addEventListener("scroll", function () { clearTimeout(t); t = setTimeout(sync, 60); }, { passive: true });
-    window.addEventListener("resize", function () { track.scrollLeft = idx * track.clientWidth; });
+    window.addEventListener("resize", function () { track.scrollLeft = idx * step(); });
     sync();
   }
 
