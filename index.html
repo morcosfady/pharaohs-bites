@@ -32,8 +32,7 @@
 <script>/* reserve the promo bar space before first paint (main.js builds the bar; closing it hides it for 7 days) */try{var _t=Number(localStorage.getItem("pb_promo_closed"));if(!(_t&&Date.now()-_t<6048e5))document.documentElement.classList.add("has-promo")}catch(e){document.documentElement.classList.add("has-promo")}try{if(window.matchMedia("(prefers-reduced-motion: no-preference)").matches){var _h=document.documentElement;_h.classList.add("motion");setTimeout(function(){if(!_h.classList.contains("motion-ready"))_h.classList.remove("motion")},6000)}}catch(e){}</script>
 <link rel="preload" href="assets/fonts/cormorant-garamond-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/jost-normal-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" as="image" media="(max-width: 899px)" imagesrcset="assets/img/menu-real/w/feteer-meshaltet-square-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-square-800.webp 800w" imagesizes="100vw" fetchpriority="high">
-<link rel="preload" as="image" media="(min-width: 900px)" imagesrcset="assets/img/menu-real/w/feteer-meshaltet-wide-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-wide-800.webp 800w, assets/img/menu-real/feteer-meshaltet-wide.jpg 1052w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" as="image" imagesrcset="assets/img/brand/w/logo-header-320.webp 320w, assets/img/brand/w/logo-header-480.webp 480w, assets/img/brand/w/logo-header-640.webp 640w" imagesizes="(min-width: 700px) 400px, 230px" fetchpriority="high">
 <link rel="stylesheet" href="assets/css/main.css?v=66">
 <link rel="stylesheet" href="assets/css/pages.css?v=160">
 <link rel="stylesheet" href="assets/css/pharaonic.css?v=62">
@@ -118,30 +117,35 @@
 
 <main id="main">
 
-  <!-- ============ HERO (food first) ============ -->
-  <section class="hero hero--food" aria-label="Welcome to Pharaoh's Bites">
+  <!-- ============ HERO ============ -->
+  <section class="hero" aria-label="Welcome to Pharaoh's Bites">
     <div class="hero__bg" data-parallax="0.14">
-      <picture>
-      <source media="(max-width: 899px)" srcset="assets/img/menu-real/w/feteer-meshaltet-square-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-square-800.webp 800w" sizes="100vw">
       <img src="assets/img/menu-real/feteer-meshaltet-wide.jpg"
-           srcset="assets/img/menu-real/w/feteer-meshaltet-wide-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-wide-800.webp 800w, assets/img/menu-real/feteer-meshaltet-wide.jpg 1052w" sizes="100vw"
+           srcset="assets/img/menu-real/w/feteer-meshaltet-wide-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-wide-800.webp 800w, assets/img/menu-real/feteer-meshaltet-wide.jpg 1052w" sizes="(min-width: 900px) 100vw, 60vw"
            alt="A whole feteer meshaltet, golden and flaky, fresh from the kitchen"
-           width="1052" height="787" fetchpriority="high" decoding="async">
-      </picture>
+           width="1052" height="787" decoding="async">
     </div>
     <div class="hero__scrim"></div>
+    <img class="hero__ornament hero__ornament--l floating" src="assets/img/brand/mark.svg" alt="" aria-hidden="true">
+    <img class="hero__ornament hero__ornament--r floating floating--slow floating--delay" src="assets/img/brand/mark.svg" alt="" aria-hidden="true">
 
-    <div class="shell hero__grid">
-      <div class="hero__copy">
-        <p class="hero__eyebrow">Authentic Egyptian Feteer <i aria-hidden="true">&middot;</i> <bdi lang="ar" class="ar">فطير مصري أصلي</bdi></p>
+    <div class="shell">
+      <div class="hero__inner">
+        <span class="winged-disk" aria-hidden="true"></span>
+        <div class="hero__wordmark">
+          <img class="hero__emblem" src="assets/img/brand/w/logo-header-480.webp" srcset="assets/img/brand/w/logo-header-320.webp 320w, assets/img/brand/w/logo-header-480.webp 480w, assets/img/brand/w/logo-header-640.webp 640w" sizes="(min-width: 700px) 400px, 230px" alt="Pharaoh&#8217;s Bites" width="640" height="437" fetchpriority="high" decoding="async">
+          <span class="hero__wordmark__sub">Authentic Egyptian Feteer <i aria-hidden="true">&middot;</i> <bdi lang="ar" class="ar">فطير مصري أصلي</bdi></span>
+        </div>
         <h1>
           <span class="line"><span style="--d:.15s">Taste the Heart</span></span>
           <span class="line"><span style="--d:.32s" class="gold-text">of Egypt</span></span>
         </h1>
-        <p class="hero__sub">Flaky, buttery feteer, stretched by hand and made to order. Delivered across Dallas&ndash;Fort Worth.</p>
+        <p class="hero__sub">
+          Feteer Meshaltet — Flaky, Buttery, Pull-Apart Layers <span class="sep">•</span> Plant-Based Meats <span class="sep">•</span> Oriental Desserts
+        </p>
         <div class="hero__cta">
           <a class="btn btn--gold" href="order.html">Order Now</a>
-          <a class="btn" href="order.html">See the Menu</a>
+          <a class="btn" href="order.html">Explore Menu</a>
         </div>
         <p class="hero__meta">
           <span>Stretched by hand, to order</span>
@@ -149,14 +153,6 @@
           <span>Delivered all over DFW</span>
         </p>
       </div>
-
-      <a class="hero__card" href="order.html" aria-label="Order the Feteer Meshaltet">
-        <img src="assets/img/menu-real/w/feteer-meshaltet-square-800.webp"
-             srcset="assets/img/menu-real/w/feteer-meshaltet-square-480.webp 480w, assets/img/menu-real/w/feteer-meshaltet-square-800.webp 800w" sizes="(min-width: 1100px) 28rem, 40vw"
-             alt="Feteer meshaltet, golden and flaky, on a wooden board" width="826" height="827" loading="lazy" decoding="async">
-        <span class="hero__card-badge">The House Signature</span>
-        <span class="hero__card-body"><b>Feteer Meshaltet</b><small>Flaky, buttery, pull-apart layers</small></span>
-      </a>
     </div>
 
     <a class="hero__scroll" href="#featured" aria-label="Scroll to content">
