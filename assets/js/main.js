@@ -1228,6 +1228,7 @@
     var pickup = getFulfillment() === "pickup";
     var label = $("[data-fee-label]"), value = $("[data-fee-value]"), total = $("[data-total]");
     if (!label || !value || !total) return;
+    value.classList.toggle("is-loading-quote", quote.state === "loading" && !pickup);
     var go = $("[data-checkout-label]");
     if (go && !submitting && C.financeCheckoutEndpoint) go.textContent = freePromo() ? "Place Order" : "Place Order & Pay";
     var prow = $("[data-promo-row]"), disc = pickup ? 0 : promoDiscount();
@@ -2363,6 +2364,7 @@
           if (firstBad) firstBad.focus();
           if (status) {
             status.textContent = "Please review the highlighted fields.";
+            status.classList.remove("is-success"); status.classList.add("is-error");
             status.classList.add("is-visible");
           }
           return;
@@ -2373,11 +2375,12 @@
         if (form.getAttribute("data-sending") === "1") return;          /* double-tap guard */
         form.setAttribute("data-sending", "1");
         if (btn) { btn.disabled = true; btn.textContent = "Sending…"; }
-        if (status) { status.textContent = "Sending your message…"; status.classList.add("is-visible"); }
+        if (status) { status.textContent = "Sending your message…"; status.classList.remove("is-success", "is-error"); status.classList.add("is-visible"); }
 
         sendEnquiry(form).then(function () {
           if (status) {
             status.textContent = form.getAttribute("data-success") || "Thank you — we have received your message.";
+            status.classList.remove("is-error"); status.classList.add("is-success");
             status.classList.add("is-visible");
           }
           toast(form.getAttribute("data-toast") || "Sent successfully");
@@ -2391,6 +2394,7 @@
             a.href = "https://wa.me/" + (C.whatsappNumber || "17879684078");
             a.target = "_blank"; a.rel = "noopener"; a.textContent = "+1 (787) 968-4078";
             status.appendChild(a);
+            status.classList.remove("is-success"); status.classList.add("is-error");
             status.classList.add("is-visible");
           }
         }).then(function () {

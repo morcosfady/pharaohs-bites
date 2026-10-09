@@ -165,7 +165,7 @@
   function initTilt() {
     if (!threeD) return;
     root.classList.add("motion-3d");
-    var SEL = ".spotlight, .grid-4 > .card, #featured .dish, .hero-item, .masonry__item";
+    var SEL = ".hero__card, .spotlight, .grid-4 > .card, #featured .dish, .hero-item, .masonry__item";
     var active = null, evt = null, raf = 0;
 
     function prepare(el) {
@@ -358,7 +358,54 @@
     });
   }
 
+  /* ======================= Phase 4 ======================================================================== */
+  /* Contact + catering forms: floating labels. JS adds .js-float and keeps .is-floated in step with the value;
+     without JS the labels simply stay above the fields. Nothing here touches validation or sending. */
+  function initFloatingLabels() {
+    $$("form.form").forEach(function (form) {
+      var fields = $$(".field", form);
+      if (!fields.length) return;
+      function sync(field) {
+        var c = $("input, select, textarea", field);
+        if (!c) return;
+        field.classList.toggle("is-floated", c.tagName === "SELECT" || String(c.value || "").length > 0);
+      }
+      function syncAll() { fields.forEach(sync); }
+      form.classList.add("js-float");
+      syncAll();
+      form.addEventListener("input", function (e) { var f = e.target.closest && e.target.closest(".field"); if (f) sync(f); });
+      form.addEventListener("change", function (e) { var f = e.target.closest && e.target.closest(".field"); if (f) sync(f); });
+      form.addEventListener("reset", function () { setTimeout(syncAll, 0); });
+      setTimeout(syncAll, 600);      /* browser autofill can fill fields without an event */
+      setTimeout(syncAll, 1800);
+    });
+  }
+
+  /* Third-party embeds (the contact map) start loading only when they are about to scroll into view */
+  function initLazyEmbeds() {
+    var frames = $$("iframe[data-embed-src]");
+    if (!frames.length) return;
+    function load(f) { var s = f.getAttribute("data-embed-src"); if (s) { f.src = s; f.removeAttribute("data-embed-src"); } }
+    if (!("IntersectionObserver" in window)) { frames.forEach(load); return; }
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { load(e.target); io.unobserve(e.target); } }); }, { rootMargin: "250px 0px" });
+    frames.forEach(function (f) { io.observe(f); });
+  }
+
+  /* Footer: the two columns are open on desktop and fold into accordions on phones */
+  function initFooterAccordion() {
+    var accs = $$(".footer-acc");
+    if (!accs.length || !window.matchMedia) return;
+    var wide = window.matchMedia("(min-width: 900px)");
+    function sync() { accs.forEach(function (a) { if (wide.matches) a.open = true; else if (!a.__userToggled) a.open = false; }); }
+    accs.forEach(function (a) { var s = $("summary", a); if (s) s.addEventListener("click", function () { a.__userToggled = true; }); });
+    if (wide.addEventListener) wide.addEventListener("change", sync); else wide.addListener(sync);
+    sync();
+  }
+
   function boot() {
+    initFloatingLabels();
+    initFooterAccordion();
+    initLazyEmbeds();
     initHeadingLines();
     initMotes();
     initOrderBar();
