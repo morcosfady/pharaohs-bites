@@ -437,3 +437,7 @@ What Phase 1 changed:
 - `initReel` in `motion.js`: lazy-loads the video when near the screen, plays while visible, pauses when not (reduced-motion: stays on the poster until a dish is tapped), highlights the matching dish in the list as it plays, tapping a dish seeks to its 3.2 s slot. The "AI-generated" note and the four process videos (`assets/video/step-*`) are gone; the old `.story*` CSS and `initStory` are now dead code (no `[data-story]` on any page).
 - Versions fixed: earlier `sed` bumps silently missed; now `pages.css?v=165`, `motion.js?v=12` in all 5 pages.
 - Home order: the "Come hungry" showcase reel now sits BEFORE the "The One to Order" carousel (owner request).
+
+### 19.4 Promo kind "flat_delivery" + code AHMAD (2026-10-11, live)
+- New promo kind `flat_delivery` (dashboard migration 0079, column `promo_codes.delivery_flat`): delivery costs that fixed price at any distance, never more than the normal fee. `delivery-quote` returns `promo.flat`; `main.js` `flatPromo()/flatFee()` show the crossed-out normal fee and the flat price (`main.js?v=140`).
+- AHMAD: delivery $10, one-time code (`single_use`, used up by the first PAID order), no mile limit. Verified live: Fort Worth 44 mi $82.35 -> $10 in create-order (fee_waived 72.35), second customer refused as "already been used", test order removed.

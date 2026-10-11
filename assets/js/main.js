@@ -1215,6 +1215,9 @@
     return Math.round(lastSubtotal * quote.promo.percent) / 100;
   }
   function promoValid() { return !!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid); }
+  /* A "flat delivery" promo (e.g. AHMAD): delivery costs a fixed price, never more than the normal fee. */
+  function flatPromo() { return promoValid() && typeof quote.promo.flat === "number"; }
+  function flatFee() { return flatPromo() ? Math.min(quote.fee, quote.promo.flat) : quote.fee; }
   function renderPromo(msg, bad) {
     var el = $("[data-promo-msg]");
     if (!el) return;
@@ -1243,6 +1246,10 @@
     } else if (quote.state === "ok" && freePromo()) {
       label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
       total.innerHTML = "<s>" + money(lastSubtotal) + "</s> $0";
+    } else if (quote.state === "ok" && flatPromo()) {
+      label.textContent = "Delivery (" + quote.miles + " mi)";
+      value.innerHTML = flatFee() < quote.fee ? '<s>' + money(quote.fee) + '</s> ' + money(flatFee()) : money(quote.fee);
+      total.textContent = money(lastSubtotal + flatFee());
     } else if (quote.state === "ok" && promoValid()) {
       label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
       total.textContent = money(lastSubtotal);
