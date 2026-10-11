@@ -1743,6 +1743,12 @@ body.nav-open .site-header.is-stuck {
 /* "Which milk?" choice buttons in the add-on dialog */
 .milk-choice { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: .6rem; padding: .9rem 1.1rem; text-align: left; }
 .milk-choice small { opacity: .75; letter-spacing: .05em; }
+.top-choice small { display: inline-flex; align-items: center; gap: .6rem; }
+.top-choice__tick { width: 1.3rem; height: 1.3rem; border: 1.5px solid currentColor; border-radius: 50%; display: inline-block; position: relative; }
+.top-choice[aria-pressed=true] { border-color: var(--gold); background: rgba(212, 175, 55, .12); }
+.top-choice[aria-pressed=true] .top-choice__tick { background: var(--gold); border-color: var(--gold); }
+.top-choice[aria-pressed=true] .top-choice__tick::after { content: ""; position: absolute; left: 6px; top: 2px; width: 5px; height: 9px; border: solid #17120a; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+.top-confirm { width: 100%; margin-top: .4rem; justify-content: center; }
 
 /* Promo banner: slim bar above the header on every page (built by initPromoBanner in main.js, text from config.js promoBanner).
    html.has-promo reserves its height up front so nothing jumps. The bar scrolls away with the page and the fixed header
@@ -2149,3 +2155,4 @@ html.has-promo .hero--food { min-height: calc(100svh - var(--promo-h, 0px)); }
 .reel__item.is-active .reel__ar { color: var(--gold); }
 .reel__price { grid-area: price; font-family: var(--font-body); font-size: var(--step-0); color: var(--gold); }
 @media (min-width: 900px) { .reel__grid { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: var(--sp-5); } .reel__media { width: min(100%, 24rem); } }
+.addon__actions[hidden] { display: none; }

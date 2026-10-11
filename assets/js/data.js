@@ -122,7 +122,8 @@
 
     { id: "rice-pudding", cat: "desserts", allergens: ["Milk", "Tree nuts"], tcs: true, signature: true, name: "Rice Pudding", ar: "رز باللبن",
       price: 6,
-      desc: "Creamy Egyptian rice pudding topped with mixed nuts (optional), served chilled in a small dessert cup.",
+      desc: "Creamy Egyptian rice pudding, served chilled in a small dessert cup. Top it with mixed nuts, cinnamon, both or neither, at no extra charge.",
+      toppings: [{ id: "nuts", label: "Mixed nuts" }, { id: "cinnamon", label: "Cinnamon" }],
       tags: ["Vegetarian"], img: "assets/img/menu-real/rice-pudding.webp" },
 
     { id: "creme-caramel", cat: "desserts", allergens: ["Milk", "Eggs"], tcs: true, name: "Crème Caramel Flan", ar: "كريم كراميل",

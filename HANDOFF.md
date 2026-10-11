@@ -441,3 +441,7 @@ What Phase 1 changed:
 ### 19.4 Promo kind "flat_delivery" + code AHMAD (2026-10-11, live)
 - New promo kind `flat_delivery` (dashboard migration 0079, column `promo_codes.delivery_flat`): delivery costs that fixed price at any distance, never more than the normal fee. `delivery-quote` returns `promo.flat`; `main.js` `flatPromo()/flatFee()` show the crossed-out normal fee and the flat price (`main.js?v=140`).
 - AHMAD: delivery $10, one-time code (`single_use`, used up by the first PAID order), no mile limit. Verified live: Fort Worth 44 mi $82.35 -> $10 in create-order (fee_waived 72.35), second customer refused as "already been used", test order removed.
+
+### 19.5 Rice pudding toppings prompt (2026-10-11, live)
+- Adding Rice Pudding opens a small dialog (the shared `[data-addon]` box): Mixed nuts $0 and Cinnamon $0 toggles, "Add to my order (plain / with toppings)". The choice lives in the basket key like combos (`rice-pudding~top=nuts,cinnamon`, `~top=plain`), so different toppings are separate basket lines. It is sent to the server as the item `options` text ("Toppings: Mixed nuts + Cinnamon" or "Plain, no toppings"), which already shows in the Telegram/email alerts and the dashboard. Data: `toppings` on the rice-pudding item in `data.js` (`main.js?v=141`, `data.js?v=117`, `pages.css?v=167`).
+- Not covered: rice pudding picked INSIDE a combo (puddings slot) has no toppings choice yet.

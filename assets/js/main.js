@@ -148,6 +148,13 @@
       }).join(", ");
     }).join(" \u00b7 ");
   }
+  /* Dishes with free toppings (rice pudding) put the choice in the basket key too:  rice-pudding~top=nuts,cinnamon  or  rice-pudding~top=plain */
+  function toppingsText(item, picks) {
+    var on = (picks.top || []).filter(function (id) { return id !== "plain"; });
+    if (!on.length) return "Plain, no toppings";
+    return "Toppings: " + on.map(function (id) { var t = (item.toppings || []).filter(function (x) { return x.id === id; })[0]; return t ? t.label : id; }).join(" + ");
+  }
+  function toppingsKey(item, ids) { return item.id + "~top=" + (ids.length ? ids.join(",") : "plain"); }
   /* A saved basket can hold a choice combo without picks (from before picks existed): drop those lines. */
   Object.keys(basket).forEach(function (k) {
     var it = menuItem(keyId(k));
@@ -381,6 +388,7 @@
   function addToBasket(id, name, skipMilk) {
     var combo = menuItem(id);
     if (combo && combo.slots) { openComboPicker(combo); return; }
+    if (combo && combo.toppings && !skipMilk) { openToppings(combo); return; }
     if (combo && combo.milkVariant && !skipMilk) { openMilkChoice(combo); return; }
     if (combo && combo.onlyWith && (basket[id] || 0) >= (basket[combo.onlyWith] || 0)) {
       toast("One " + combo.name.toLowerCase() + " per " + menuItem(combo.onlyWith).name);
@@ -655,6 +663,38 @@
     });
   }
 
+  /* "Any toppings?" prompt for rice pudding: mixed nuts and cinnamon are both free, we just need to know. */
+  function openToppings(item) {
+    var box = $("[data-addon]");
+    if (!box) { addToBasket(item.id, item.name, true); return; }
+    $("[data-addon-eyebrow]", box).textContent = "Your " + item.name.toLowerCase();
+    $("[data-addon-title]", box).textContent = "Would you like toppings?";
+    $("[data-addon-lead]", box).textContent = "Both are free. Pick what you like, or none for plain.";
+    $("[data-addon-list]", box).innerHTML =
+      item.toppings.map(function (t) {
+        return '<button class="btn btn--sm milk-choice top-choice" type="button" aria-pressed="false" data-top="' + esc(t.id) + '"><span>' + esc(t.label) + '</span><small>$0 <b class="top-choice__tick" aria-hidden="true"></b></small></button>';
+      }).join("") +
+      '<button class="btn btn--gold btn--sm top-confirm" type="button" data-top-confirm="' + esc(item.id) + '">Add to my order (plain)</button>';
+    $(".addon__actions", box).hidden = true;
+    addonContinue = null;
+    if (!box.classList.contains("is-open")) {
+      addonLastFocus = document.activeElement;
+      box.classList.add("is-open");
+      box.setAttribute("aria-hidden", "false");
+      document.body.classList.add("nav-open");
+    }
+    $(".addon__panel", box).scrollTop = 0;
+  }
+  function addWithToppings(item, ids) {
+    var key = toppingsKey(item, ids);
+    basket[key] = (basket[key] || 0) + 1;
+    Store.write("basket", basket);
+    Track.add(item);
+    toast(item.name + " added to your order");
+    renderBasket();
+    syncBasketBadge();
+  }
+
   /* "Which milk?" prompt for drinks that have an almond-milk version. */
   function openMilkChoice(item) {
     var box = $("[data-addon]");
@@ -757,6 +797,21 @@
     var box = $("[data-addon]");
     if (!box) return;
     box.addEventListener("click", function (e) {
+      var top = e.target.closest("[data-top]");
+      if (top) {
+        top.setAttribute("aria-pressed", top.getAttribute("aria-pressed") === "true" ? "false" : "true");
+        var on = $$("[data-top][aria-pressed=true]", box).length, go = $("[data-top-confirm]", box);
+        if (go) go.textContent = "Add to my order (" + (on ? "with toppings" : "plain") + ")";
+        return;
+      }
+      var topGo = e.target.closest("[data-top-confirm]");
+      if (topGo) {
+        var it = menuItem(topGo.getAttribute("data-top-confirm"));
+        var ids = $$("[data-top][aria-pressed=true]", box).map(function (b) { return b.getAttribute("data-top"); });
+        closeAddons(false);
+        if (it) addWithToppings(it, ids);
+        return;
+      }
       var milk = e.target.closest("[data-milk]");
       if (milk) {
         closeAddons(false);
@@ -1086,7 +1141,7 @@
               "</div>" +
               '<span class="basket-item__each">' + money(item.price) + "</span>" +
               '<span class="basket-item__price">' + money(line) + "</span>" +
-              (item.slots ? '<small class="basket-item__picks">' + esc(picksText(item, keyPicks(id))) + "</small>" : "") +
+              (item.slots ? '<small class="basket-item__picks">' + esc(picksText(item, keyPicks(id))) + "</small>" : item.toppings ? '<small class="basket-item__picks">' + esc(toppingsText(item, keyPicks(id))) + "</small>" : "") +
               '<button type="button" class="remove" data-remove="' + esc(id) + '">Remove</button>' +
             "</div>";
         }).join("");
@@ -1717,7 +1772,8 @@
       var item = menuItem(keyId(id));
       if (!item) return null;
       var picks = item.slots ? keyPicks(id) : null;
-      return { id: item.id, name: item.name, ar: item.ar || "", qty: basket[id], options: picks ? picksText(item, picks) : "", choices: picks, unitPrice: item.price, lineTotal: item.price * basket[id] };
+      var topOpt = item.toppings ? toppingsText(item, keyPicks(id)) : "";
+      return { id: item.id, name: item.name, ar: item.ar || "", qty: basket[id], options: picks ? picksText(item, picks) : topOpt, choices: picks, unitPrice: item.price, lineTotal: item.price * basket[id] };
     }).filter(Boolean);
 
     var subtotal = lines.reduce(function (sum, l) { return sum + l.lineTotal; }, 0);
