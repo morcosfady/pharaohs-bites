@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#04301f">
+<meta name="robots" content="noindex">
+<title>Blackjack Night ♠</title>
+<style>
+:root{--felt:#0b5d3b;--felt2:#04301f;--gold:#f6c453;--gold2:#ffe9a8;--red:#ff4d5e;--green:#3ddc84;--blue:#5cc8ff;--card:#fff;--ink:#0a1f16}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%}
+body{font-family:ui-rounded,"Segoe UI",system-ui,sans-serif;color:#fff;background:radial-gradient(ellipse at 50% 0%,var(--felt) 0%,var(--felt2) 70%) fixed;overflow-x:hidden}
+#bg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.fc{position:absolute;font-size:44px;opacity:.07;animation:float linear infinite;will-change:transform}
+@keyframes float{from{transform:translateY(110vh) rotate(0)}to{transform:translateY(-20vh) rotate(360deg)}}
+main{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:14px 14px 120px}
+header{text-align:center;padding:10px 0 4px}
+h1{margin:0;font-size:clamp(28px,7vw,44px);letter-spacing:1px;background:linear-gradient(90deg,var(--gold2),var(--gold),var(--gold2));background-size:200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
+@keyframes shine{to{background-position:200% 0}}
+.sub{opacity:.8;font-size:14px;margin-top:2px}
+.round{display:inline-block;margin-top:8px;padding:4px 14px;border-radius:99px;background:#0006;border:1px solid #f6c45366;font-weight:700;color:var(--gold)}
+.chipbar{display:flex;gap:8px;justify-content:center;align-items:center;margin:14px 0;flex-wrap:wrap}
+.chipbar span{font-size:13px;opacity:.8}
+.chip{width:46px;height:46px;border-radius:50%;border:4px dashed #fff9;font-weight:800;color:#fff;cursor:pointer;font-size:15px;box-shadow:0 4px 0 #0007,inset 0 0 0 3px #0003;transition:transform .15s}
+.chip:active{transform:translateY(3px) scale(.95)}
+.chip.on{transform:scale(1.18);box-shadow:0 0 0 3px var(--gold),0 0 22px var(--gold)}
+.c1{background:#4a6cf7}.c2{background:#e0453a}.c5{background:#1fa56b}.c10{background:#222}
+#list{display:flex;flex-direction:column;gap:12px;position:relative}
+.p{position:relative;background:linear-gradient(160deg,#0f7a4c,#0a4d31);border:2px solid #f6c45344;border-radius:20px;padding:12px 14px;box-shadow:0 8px 24px #0006;transition:transform .5s cubic-bezier(.2,.9,.3,1.2),box-shadow .3s,opacity .3s;animation:deal .6s backwards}
+@keyframes deal{from{opacity:0;transform:translateY(40px) rotate(-4deg) scale(.9)}}
+.p.lead{border-color:var(--gold);box-shadow:0 0 0 2px #f6c45355,0 0 28px #f6c45366}
+.p.broke{opacity:.55;filter:grayscale(.7)}
+.p.pop{animation:pop .7s}
+@keyframes pop{30%{transform:scale(1.04)}}
+.p.shake{animation:shake .5s}
+@keyframes shake{20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-5px)}80%{transform:translateX(5px)}}
+.top{display:flex;align-items:center;gap:10px}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:20px;color:#0a1f16;box-shadow:inset 0 -4px 0 #0003;flex:none}
+.nm{font-size:20px;font-weight:800;flex:1;min-width:0}
+.nm small{display:block;font-size:12px;font-weight:600;opacity:.75}
+.bal{font-size:30px;font-weight:900;color:var(--gold);text-shadow:0 2px 0 #0006;font-variant-numeric:tabular-nums}
+.bal.up{animation:up .8s}.bal.down{animation:down .8s}
+@keyframes up{30%{color:var(--green);transform:scale(1.35)}}
+@keyframes down{30%{color:var(--red);transform:scale(.85)}}
+.crown{position:absolute;top:-14px;left:10px;font-size:26px;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-5px) rotate(8deg)}}
+.row{display:flex;gap:8px;margin-top:10px;align-items:center}
+.bet{display:flex;align-items:center;gap:6px;background:#0005;border-radius:99px;padding:3px}
+.bet button{width:30px;height:30px;border-radius:50%;border:0;background:var(--gold);color:#222;font-weight:900;font-size:18px;cursor:pointer}
+.bet b{min-width:46px;text-align:center;font-size:15px}
+.res{display:flex;gap:6px;flex:1;justify-content:flex-end}
+.res button{flex:1;max-width:84px;padding:9px 0;border-radius:12px;border:2px solid #fff3;background:#0004;color:#fff;font-weight:800;font-size:13px;cursor:pointer;transition:all .15s}
+.res button:active{transform:scale(.93)}
+.res .w.on{background:var(--green);color:#052;border-color:#fff;box-shadow:0 0 16px var(--green)}
+.res .l.on{background:var(--red);color:#fff;border-color:#fff;box-shadow:0 0 16px var(--red)}
+.res .b.on{background:var(--gold);color:#432;border-color:#fff;box-shadow:0 0 16px var(--gold)}
+.res .d.on{background:var(--blue);color:#024;border-color:#fff;box-shadow:0 0 16px var(--blue)}
+.float{position:absolute;right:16px;top:8px;font-weight:900;font-size:22px;pointer-events:none;animation:fl 1.5s forwards}
+@keyframes fl{to{transform:translateY(-46px);opacity:0}}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:5;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(0deg,#021a11 60%,#021a1100);display:flex;gap:8px;justify-content:center}
+.dock button{border:0;border-radius:16px;padding:14px 18px;font-weight:900;font-size:16px;cursor:pointer;transition:transform .15s}
+.dock button:active{transform:scale(.94)}
+#go{flex:1;max-width:340px;background:linear-gradient(180deg,#ffe28a,#f0b429);color:#3a2800;box-shadow:0 5px 0 #a8780b,0 0 24px #f6c45377;animation:pulse 2s infinite}
+@keyframes pulse{50%{box-shadow:0 5px 0 #a8780b,0 0 36px #f6c453cc}}
+.sec{background:#0007;color:#fff;border:1px solid #fff3!important}
+h2{font-size:16px;margin:26px 0 8px;color:var(--gold)}
+#hist{display:flex;flex-direction:column;gap:6px;font-size:13px}
+.h{background:#0004;border-radius:10px;padding:8px 10px;animation:deal .4s backwards}
+.h b{color:var(--gold)}
+.pill{display:inline-block;margin:2px 3px 0 0;padding:1px 8px;border-radius:99px;font-weight:700;font-size:12px}
+.pill.w{background:#3ddc8433;color:var(--green)}.pill.l{background:#ff4d5e33;color:var(--red)}.pill.b{background:#f6c45333;color:var(--gold)}.pill.d{background:#5cc8ff33;color:var(--blue)}
+canvas{position:fixed;inset:0;z-index:10;pointer-events:none}
+#toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-120px);z-index:20;background:var(--gold);color:#3a2800;font-weight:900;padding:10px 20px;border-radius:99px;transition:transform .5s cubic-bezier(.2,1.4,.4,1);box-shadow:0 8px 24px #0008}
+#toast.show{transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<div id="bg"></div>
+<canvas id="fx"></canvas>
+<div id="toast"></div>
+<main>
+  <header>
+    <h1>♠ BLACKJACK NIGHT ♥</h1>
+    <div class="sub">5 players · $20 each · tap who won 🏆</div>
+    <div class="round" id="round">Round 1</div>
+  </header>
+  <div class="chipbar"><span>Default bet 🪙</span>
+    <button class="chip c1" data-v="1">$1</button><button class="chip c2 on" data-v="2">$2</button><button class="chip c5" data-v="5">$5</button><button class="chip c10" data-v="10">$10</button>
+  </div>
+  <div id="list"></div>
+  <h2>📜 History</h2>
+  <div id="hist"></div>
+</main>
+<div class="dock">
+  <button class="sec" id="undo">↩️ Undo</button>
+  <button id="go">✅ Apply Round</button>
+  <button class="sec" id="reset">🔄</button>
+</div>
+<script>
+const NAMES=["Fady","Faltas","Rimon","Peter","Michael"];
+const COLORS=["#f6c453","#5cc8ff","#ff8fa3","#8affc1","#c9a0ff"];
+const START=20,KEY="bj-night-v1";
+let S;
+const fresh=()=>({round:1,defBet:2,players:NAMES.map((n,i)=>({n,i,bal:START,bet:2,res:null})),hist:[]});
+try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!S||!S.players||S.players.length!==5)S=fresh();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const $=s=>document.querySelector(s);
+const money=v=>(v<0?"-":"")+"$"+Math.abs(v).toFixed(v%1?2:0);
+const list=$("#list");
+const cards={};
+
+// floating suits background
+const bg=$("#bg");
+["♠","♥","♦","♣","♠","♥","♦","♣","♠","♥","♦","♣"].forEach((s,i)=>{
+  const e=document.createElement("div");e.className="fc";e.textContent=s;
+  e.style.left=(i*8.5+Math.random()*4)+"%";e.style.animationDuration=(14+Math.random()*16)+"s";
+  e.style.animationDelay=(-Math.random()*20)+"s";e.style.color=i%4==1||i%4==2?"#ff6b7a":"#fff";bg.appendChild(e);
+});
+
+// build cards once
+S.players.forEach((p,i)=>{
+  const d=document.createElement("div");d.className="p";d.style.animationDelay=i*90+"ms";
+  d.innerHTML=`<div class="crown" hidden>👑</div>
+  <div class="top"><div class="av" style="background:${COLORS[i]}">${p.n[0]}</div>
+  <div class="nm">${p.n}<small></small></div><div class="bal"></div></div>
+  <div class="row"><div class="bet"><button data-a="-">−</button><b></b><button data-a="+">+</button></div>
+  <div class="res"><button class="w" data-r="w">🏆 Win</button><button class="b" data-r="b">🃏 BJ</button><button class="d" data-r="d">🤝 Push</button><button class="l" data-r="l">💀 Lose</button></div></div>`;
+  d.onclick=ev=>{
+    const b=ev.target.closest("button");if(!b)return;
+    if(b.dataset.a){const step=S.defBet>=5?1:1;p.bet=Math.max(1,Math.min(p.bal,p.bet+(b.dataset.a=="+"?step:-step)));}
+    if(b.dataset.r){p.res=p.res===b.dataset.r?null:b.dataset.r;}
+    save();render();
+  };
+  list.appendChild(d);cards[i]=d;
+});
+
+let shown={};
+function render(first){
+  const order=[...S.players].sort((a,b)=>b.bal-a.bal||a.i-b.i);
+  const top=order[0].bal;
+  $("#round").textContent="Round "+S.round;
+  S.players.forEach(p=>{
+    const d=cards[p.i];
+    p.bet=Math.max(0,Math.min(p.bet,p.bal));if(p.bal>0&&p.bet<1)p.bet=1;
+    const broke=p.bal<=0;
+    d.classList.toggle("broke",broke);
+    d.classList.toggle("lead",p.bal===top&&S.hist.length>0&&order.filter(o=>o.bal===top).length===1);
+    d.querySelector(".crown").hidden=!d.classList.contains("lead");
+    d.querySelector(".nm small").textContent=broke?"💸 Out of money!":"#"+(order.indexOf(p)+1)+" · "+(p.bal>START?"📈 +":p.bal<START?"📉 ":"➖ ")+money(p.bal-START);
+    d.querySelector(".bet b").textContent="🪙 "+money(p.bet);
+    d.querySelectorAll(".res button").forEach(b=>{b.classList.toggle("on",b.dataset.r===p.res);b.disabled=broke});
+    const be=d.querySelector(".bal");
+    if(shown[p.i]===undefined){be.textContent=money(p.bal);shown[p.i]=p.bal}
+    else if(shown[p.i]!==p.bal)countTo(be,p.i,p.bal);
+  });
+  // reorder via FLIP
+  const first_=S.players.map(p=>cards[p.i].getBoundingClientRect().top);
+  order.forEach(p=>list.appendChild(cards[p.i]));
+  S.players.forEach((p,k)=>{
+    const dy=first_[k]-cards[p.i].getBoundingClientRect().top;
+    if(dy&&!first){const el=cards[p.i];el.style.transition="none";el.style.transform=`translateY(${dy}px)`;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.transition="";el.style.transform=""}))}
+  });
+  // history
+  $("#hist").innerHTML=S.hist.length?S.hist.slice().reverse().map(h=>`<div class="h"><b>Round ${h.round}</b> ${h.items.map(x=>`<span class="pill ${x.r}">${x.n} ${x.d>0?"+":""}${x.d?money(x.d):"±0"}</span>`).join("")}</div>`).join(""):`<div class="h" style="opacity:.7">No rounds yet — pick results then hit Apply 🎲</div>`;
+}
+function countTo(el,id,to){
+  const from=shown[id];shown[id]=to;const t0=performance.now();
+  el.classList.remove("up","down");void el.offsetWidth;el.classList.add(to>from?"up":"down");
+  (function f(t){const k=Math.min(1,(t-t0)/800),e=1-Math.pow(1-k,3);el.textContent=money(Math.round((from+(to-from)*e)*100)/100);if(k<1)requestAnimationFrame(f)})(t0);
+}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2200)}
+
+// default bet chips
+document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+  document.querySelectorAll(".chip").forEach(x=>x.classList.remove("on"));c.classList.add("on");
+  S.defBet=+c.dataset.v;S.players.forEach(p=>p.bet=Math.min(S.defBet,p.bal));save();render();
+});
+document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",+c.dataset.v===S.defBet));
+
+// apply round
+$("#go").onclick=()=>{
+  const picked=S.players.filter(p=>p.res);
+  if(!picked.length){toast("Pick at least one result 👆");return}
+  const items=[];let big=false,lose=false;
+  S.players.forEach(p=>{
+    if(!p.res)return;
+    const d={w:p.bet,b:p.bet*1.5,l:-p.bet,d:0}[p.res];
+    p.bal=Math.round((p.bal+d)*100)/100;
+    items.push({n:p.n,r:p.res,d});
+    const el=cards[p.i];el.classList.remove("pop","shake");void el.offsetWidth;
+    el.classList.add(d>0?"pop":d<0?"shake":"pop");
+    if(d>0){burst(el,p.res==="b");big=big||p.res==="b"}
+    if(d!==0){const f=document.createElement("div");f.className="float";f.style.color=d>0?"#3ddc84":"#ff4d5e";f.textContent=(d>0?"+":"")+money(d);el.appendChild(f);setTimeout(()=>f.remove(),1500)}
+    if(d<0)lose=true;
+  });
+  S.hist.push({round:S.round,items,snap:S.players.map(p=>p.bal-(items.find(x=>x.n===p.n)?.d||0))});
+  S.round++;
+  S.players.forEach(p=>{p.res=null;p.bet=Math.min(S.defBet,p.bal)});
+  toast(big?"🃏 BLACKJACK! 3:2 payout!":"Round applied ✅");
+  save();render();
+  const busted=S.players.filter(p=>p.bal<=0);if(busted.length)setTimeout(()=>toast("💸 "+busted.map(b=>b.n).join(", ")+" is broke!"),2400);
+};
+$("#undo").onclick=()=>{
+  const h=S.hist.pop();if(!h){toast("Nothing to undo");return}
+  S.players.forEach((p,i)=>p.bal=h.snap[i]);S.round=h.round;
+  S.players.forEach(p=>{p.res=null;p.bet=Math.min(S.defBet,p.bal)});
+  toast("↩️ Round "+h.round+" undone");save();render();
+};
+$("#reset").onclick=()=>{
+  if(!confirm("Reset everyone to $20 and clear history? 🔄"))return;
+  S=fresh();shown={};save();
+  location.reload();
+};
+// rebind player objects after JSON-load is fine because cards closures use S.players[i] original refs
+// (undo/reset mutate in place or reload)
+
+// confetti
+const cv=$("#fx"),cx=cv.getContext("2d");let parts=[];
+function size(){cv.width=innerWidth;cv.height=innerHeight}size();addEventListener("resize",size);
+function burst(el,big){
+  const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+  const n=big?140:60,cols=["#f6c453","#3ddc84","#5cc8ff","#ff8fa3","#fff"],suits=["♠","♥","♦","♣"];
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(big?9:6)*Math.random()+2;
+    parts.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-4,g:.22,life:1,rot:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[i%5],t:big&&i%3==0?suits[i%4]:null,sz:big?16:10})}
+  if(parts.length===n)loop();
+}
+function loop(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  parts=parts.filter(p=>p.life>0);
+  parts.forEach(p=>{p.vy+=p.g;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.life-=.012;
+    cx.save();cx.globalAlpha=Math.max(0,p.life);cx.translate(p.x,p.y);cx.rotate(p.rot);cx.fillStyle=p.c;
+    if(p.t){cx.font=p.sz+"px serif";cx.fillText(p.t,0,0)}else cx.fillRect(-4,-3,p.sz*.7,p.sz*.4);cx.restore()});
+  if(parts.length)requestAnimationFrame(loop);else cx.clearRect(0,0,cv.width,cv.height);
+}
+render(true);
+</script>
+</body>
+</html>
