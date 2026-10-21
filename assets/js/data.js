@@ -264,5 +264,12 @@
       text: "Easy to order, they confirmed everything on WhatsApp, and it arrived exactly when they said. The reheating notes in the box were a nice touch." }
   ];
 
-  global.NB_DATA = { CATEGORIES: CATEGORIES, MENU: MENU, GALLERY: GALLERY, REVIEWS: REVIEWS };
+  /* Combos are switched off for now (owner, 2026-10-21): the Combos tab disappears and every combo is hidden from
+     the menu and the order page. Flip to true to bring them back (the dashboard products must be set active again too). */
+  var COMBOS_ENABLED = false;
+  if (!COMBOS_ENABLED) {
+    CATEGORIES = CATEGORIES.filter(function (c) { return c.id !== "combos"; });
+    MENU.forEach(function (i) { if (i.cat === "combos") i.hidden = true; });
+  }
+  global.NB_DATA = { CATEGORIES: CATEGORIES, MENU: MENU, GALLERY: GALLERY, REVIEWS: REVIEWS, COMBOS_ENABLED: COMBOS_ENABLED };
 })(window);

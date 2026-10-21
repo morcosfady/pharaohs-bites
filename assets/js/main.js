@@ -161,6 +161,8 @@
   Object.keys(basket).forEach(function (k) {
     var it = menuItem(keyId(k));
     if (it && it.slots && !picksValid(it, keyPicks(k))) delete basket[k];
+    /* combos switched off (data.js COMBOS_ENABLED): a saved basket line with a combo is dropped too */
+    if (it && it.cat === "combos" && it.hidden) delete basket[k];
   });
 
   /* --- Toasts --------------------------------------------------------- */
