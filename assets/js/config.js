@@ -45,9 +45,12 @@
     currencySymbol: "$",
     // Percentages applied in the basket. Set to 0 to hide the line.
     servicePercent: 0,
-    deliveryFee: 5,
-    freeDeliveryOver: 60,
     minimumOrder: 20,
+    /* Delivery zones, the sales tax rate and the tip options are NOT kept here: the order page asks the
+       server (delivery-quote, action "config") so the website can never drift from what is charged.
+       There is no "free delivery over $X" rule and there never should be one. */
+    /* Driver tip chip selected when the order page opens: "none" | 10 | 15 | 20. Nothing that adds money by default. */
+    tipDefault: "none",
 
     /* --- Social — leave blank to disable the icon --- */
     instagramUrl: "",

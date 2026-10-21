@@ -19,6 +19,8 @@
                              : n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     return sym + body;
   };
+  /* The checkout summary always shows cents ("Sales tax: $0.00"), unlike the menu. */
+  var usd = function (n) { return (C.currencySymbol || "$") + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
   var esc = function (s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
@@ -1147,11 +1149,12 @@
         }).join("");
     }
 
-    var set = function (sel, val) { var el = $(sel); if (el) el.textContent = money(val); };
+    var set = function (sel, val) { var el = $(sel); if (el) el.textContent = usd(val); };
     set("[data-subtotal]", subtotal);
     lastSubtotal = subtotal;
+    renderTip();
     renderTotals();
-    if (promoCode) scheduleQuote();   /* some codes depend on what is in the basket */
+    scheduleQuote();   /* tax, tip and some promo codes depend on what is in the basket */
 
     updateCheckoutState(subtotal);
     syncAddons();
@@ -1258,10 +1261,163 @@
   /* --- Delivery / pickup choice, live delivery fee and total ---------------- */
   var lastSubtotal = 0;
   var rerenderSchedule = null;   /* set by initSchedule: swaps the time windows when Delivery/Pickup changes */
-  var quote = { key: "", state: "idle", fee: 0, miles: 0, promo: null };
+  /* quote.pricing = the server's own numbers for this basket + address + tip (subtotal, discount, delivery,
+     sales tax, tip, total, all in cents). The page shows them as they are; the server recomputes everything
+     again when the order is placed and refuses a total that no longer matches. */
+  var quote = { key: "", state: "idle", fee: 0, miles: 0, zone: -1, promo: null, pricing: null };
+  /* Delivery zones, tax rate and tip options come from the server (delivery-quote "config") so the page
+     never carries a second copy that could drift from what is charged. */
+  var quoteCfg = null;
+  var TIP_PERCENTS_FALLBACK = [10, 15, 20];
   /* Promo code the customer typed. The server is the judge: it checks the code and that this
      phone / email has not used it before. "promo" in a quote reply says whether it counts. */
   var promoCode = "";
+
+  /* --- Driver tip (delivery only, before payment) --------------------------------
+     tip = { type: "none" | "percent" | "custom", percent: 10|15|20, cents: n }. Remembered in this browser only.
+     Percent tips are a share of the food subtotal (before tax, before delivery). The server recomputes them. */
+  function defaultTip() {
+    var d = C.tipDefault;
+    if (d === 10 || d === 15 || d === 20) return { type: "percent", percent: d, cents: 0 };
+    return { type: "none", percent: null, cents: 0 };
+  }
+  function cleanTip(t) {
+    if (!t || typeof t !== "object") return defaultTip();
+    if (t.type === "percent" && (t.percent === 10 || t.percent === 15 || t.percent === 20)) return { type: "percent", percent: t.percent, cents: 0 };
+    if (t.type === "custom" && typeof t.cents === "number" && t.cents >= 0 && t.cents === Math.floor(t.cents)) return { type: "custom", percent: null, cents: t.cents };
+    return defaultTip();
+  }
+  var tip = cleanTip(Store.read("tip", null));
+  function subtotalCents() { return Math.round(lastSubtotal * 100); }
+  function tipPercents() { return (quoteCfg && quoteCfg.tip_percents && quoteCfg.tip_percents.length) ? quoteCfg.tip_percents : TIP_PERCENTS_FALLBACK; }
+  /* smaller of $100 and 100% of the food subtotal */
+  function tipCapCents() { var max = (quoteCfg && quoteCfg.tip_max_cents) || 10000; return Math.max(0, Math.min(max, subtotalCents())); }
+  function percentTipCents(pct) { return Math.floor((subtotalCents() * pct * 2 + 100) / 200); }
+  /* the tip the page shows and sends: percent tips follow the basket, custom tips are capped */
+  function tipCents() {
+    if (tip.type === "percent") return percentTipCents(tip.percent);
+    if (tip.type === "custom") return Math.min(tip.cents, tipCapCents());
+    return 0;
+  }
+  function tipActive() { return getFulfillment() !== "pickup" && !freePromo() && lastSubtotal > 0; }
+  /* what the server receives */
+  function tipRequest() {
+    if (!tipActive() || tip.type === "none") return { type: "none" };
+    if (tip.type === "percent") return { type: "percent", percent: tip.percent };
+    return { type: "custom", amount_cents: Math.min(tip.cents, tipCapCents()) };
+  }
+  function tipLabel() { return tip.type === "percent" ? "Driver tip (" + tip.percent + "%)" : "Driver tip"; }
+  function setTip(next, fromUser) {
+    tip = cleanTip(next);
+    Store.write("tip", tip);
+    renderTip();
+    renderTotals();
+    if (fromUser) scheduleQuote(120);
+  }
+  function renderTip() {
+    var box = $("[data-tip]");
+    if (!box) return;
+    var show = tipActive();
+    box.hidden = !show;
+    var chips = $("[data-tip-chips]", box);
+    if (chips && !chips.children.length) {
+      var opts = [{ v: "none", label: "No tip", sub: "" }].concat(tipPercents().map(function (p) { return { v: String(p), label: p + "%", sub: "" }; })).concat([{ v: "custom", label: "Custom", sub: "" }]);
+      chips.innerHTML = opts.map(function (o, i) {
+        return '<label class="tipchip"><input type="radio" name="tip" value="' + o.v + '" id="co-tip-' + i + '"><span class="tipchip__box"><b>' + esc(o.label) + '</b><small data-tip-sub="' + o.v + '"></small></span></label>';
+      }).join("");
+    }
+    var current = tip.type === "percent" ? String(tip.percent) : tip.type;
+    $$('input[name="tip"]', box).forEach(function (r) { r.checked = r.value === current; });
+    tipPercents().forEach(function (p) {
+      var sub = $('[data-tip-sub="' + p + '"]', box);
+      if (sub) sub.textContent = lastSubtotal > 0 ? usd(percentTipCents(p) / 100) : "";
+    });
+    var noneSub = $('[data-tip-sub="none"]', box); if (noneSub) noneSub.textContent = "$0.00";
+    var customSub = $('[data-tip-sub="custom"]', box); if (customSub) customSub.textContent = tip.type === "custom" ? usd(tipCents() / 100) : "";
+    var custom = $("[data-tip-custom]", box);
+    if (custom) custom.hidden = tip.type !== "custom";
+  }
+  function parseTipInput(raw) {
+    var s = String(raw || "").trim().replace(/^\$/, "");
+    if (!/^\d{1,4}(\.\d{0,2})?$/.test(s)) return { error: "Enter a number like 5 or 7.50." };
+    var cents = Math.round(parseFloat(s) * 100);
+    if (!isFinite(cents) || cents < 0) return { error: "Enter a number like 5 or 7.50." };
+    if (cents > tipCapCents()) return { error: "The most you can tip on this order is " + usd(tipCapCents() / 100) + "." };
+    return { cents: cents };
+  }
+  function initTip() {
+    var box = $("[data-tip]");
+    if (!box) return;
+    renderTip();
+    box.addEventListener("change", function (e) {
+      if (!e.target || e.target.name !== "tip") return;
+      var v = e.target.value;
+      if (v === "none") setTip({ type: "none" }, true);
+      else if (v === "custom") {
+        setTip({ type: "custom", cents: tip.type === "custom" ? tip.cents : 0 }, true);
+        var input = $("[data-tip-input]", box); if (input) { input.value = tip.cents ? (tip.cents / 100).toFixed(2) : ""; input.focus(); }
+      }
+      else setTip({ type: "percent", percent: parseInt(v, 10) }, true);
+    });
+    var input = $("[data-tip-input]", box), err = $("[data-tip-err]", box);
+    if (!input) return;
+    if (tip.type === "custom" && tip.cents) input.value = (tip.cents / 100).toFixed(2);
+    function check(commit) {
+      var r = parseTipInput(input.value);
+      var bad = !!r.error && input.value.trim() !== "";
+      input.setAttribute("aria-invalid", bad ? "true" : "false");
+      if (err) { err.textContent = bad ? r.error : ""; err.hidden = !bad; }
+      if (!r.error && commit) setTip({ type: "custom", cents: r.cents }, true);
+      else if (!r.error) { tip = { type: "custom", percent: null, cents: r.cents }; renderTotals(); }
+    }
+    input.addEventListener("input", function () { input.value = input.value.replace(/[^\d.]/g, ""); check(false); });
+    input.addEventListener("change", function () { check(true); });
+    input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); check(true); } });
+  }
+
+  /* --- Delivery zones table (from the server's config) ------------------------------- */
+  function renderZones() {
+    var box = $("[data-zones]"), list = $("[data-zones-list]");
+    if (!box || !list) return;
+    if (!quoteCfg || !quoteCfg.zones || !quoteCfg.zones.length) { box.hidden = true; return; }
+    var zones = quoteCfg.zones, extra = quoteCfg.beyond_per_mile_cents || 0;
+    var cards = zones.map(function (z, i) {
+      var from = i === 0 ? "Up to" : zones[i - 1].up_to_miles + " to";
+      return '<div class="zone" data-zone="' + i + '"><small>' + esc(from + " " + z.up_to_miles + " mi") + '</small><b>' + usd(z.fee_cents / 100) + "</b></div>";
+    });
+    cards.push('<div class="zone" data-zone="' + zones.length + '"><small>' + esc("Beyond " + zones[zones.length - 1].up_to_miles + " mi") + '</small><b>+' + usd(extra / 100) + "/mi</b></div>");
+    list.innerHTML = cards.join("");
+    box.hidden = getFulfillment() === "pickup";
+    highlightZone();
+  }
+  function highlightZone() {
+    var box = $("[data-zones]"), you = $("[data-zones-you]");
+    if (!box) return;
+    var ok = quote.state === "ok" && quote.zone >= 0;
+    $$("[data-zone]", box).forEach(function (el) { el.classList.toggle("is-you", ok && parseInt(el.getAttribute("data-zone"), 10) === quote.zone); });
+    if (you) {
+      you.hidden = !ok;
+      if (ok) you.innerHTML = "Your delivery: <b>" + esc(quote.miles + " mi") + "</b>, <b>" + esc(usd(quote.fee)) + "</b>";
+    }
+  }
+  function initQuoteConfig() {
+    if (!$("[data-checkout-form]") || !C.financeQuoteEndpoint) return;
+    fetch(C.financeQuoteEndpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") },
+      body: JSON.stringify({ action: "config" })
+    }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
+      if (!d || !d.ok) return;
+      quoteCfg = d;
+      var tl = $("[data-tax-label]");
+      if (tl) tl.textContent = d.tax_enabled && d.tax_rate > 0 ? "Sales tax (" + pctLabel(d.tax_rate) + ")" : "Sales tax";
+      var chips = $("[data-tip-chips]"); if (chips) chips.innerHTML = "";
+      renderZones(); renderTip(); renderTotals();
+    }).catch(function () { /* the page still works: zones stay hidden, the quote still prices everything */ });
+    var info = $("[data-tax-info]"), tipEl = $("[data-tax-tip]");
+    if (info && tipEl) info.addEventListener("click", function () { var open = tipEl.hidden; tipEl.hidden = !open; info.setAttribute("aria-expanded", open ? "true" : "false"); });
+  }
+  function pctLabel(rate) { return String(Math.round(rate * 10000) / 100).replace(/\.?0+$/, "") + "%"; }
   /* A "free order" promo (whole order free): no card step, total shows $0. */
   function freePromo() { return !!(promoCode && quote.state === "ok" && quote.promo && quote.promo.valid && quote.promo.free); }
   /* Percent-off code (e.g. 50% off the dishes): the amount taken off the dishes. */
@@ -1282,65 +1438,97 @@
   }
   var quoteTimer = null;
 
+  /* writes a value and makes it glow briefly when it changed (no layout jump) */
+  function setLine(el, html) {
+    if (!el) return;
+    if (el.innerHTML === html) return;
+    el.innerHTML = html;
+    el.classList.remove("is-bump"); void el.offsetWidth; el.classList.add("is-bump");
+  }
+  /* The summary, in this order: Subtotal, Promo, Delivery, Sales tax, Driver tip, Total.
+     With a server quote every number is the server's. Before the address is known only the subtotal
+     and the tip (a share of the subtotal) are shown; tax and total wait for the address. */
   function renderTotals() {
     var pickup = getFulfillment() === "pickup";
     var label = $("[data-fee-label]"), value = $("[data-fee-value]"), total = $("[data-total]");
     if (!label || !value || !total) return;
-    value.classList.toggle("is-loading-quote", quote.state === "loading" && !pickup);
+    var p = quote.state === "ok" && quote.pricing ? quote.pricing : null;
+    var loading = quote.state === "loading";
+    value.classList.toggle("is-loading-quote", loading && !pickup);
+    $("[data-tax-value]") && $("[data-tax-value]").classList.toggle("is-loading-quote", loading);
     var go = $("[data-checkout-label]");
     if (go && !submitting && C.financeCheckoutEndpoint) go.textContent = freePromo() ? "Place Order" : "Place Order & Pay";
-    var prow = $("[data-promo-row]"), disc = pickup ? 0 : promoDiscount();
+    /* promo line */
+    var prow = $("[data-promo-row]"), disc = p ? p.discount_cents / 100 : (pickup ? 0 : promoDiscount());
     if (prow) {
-      prow.hidden = !disc;
-      if (disc) { $("[data-promo-label]", prow).textContent = promoCode + " (" + quote.promo.percent + "% off dishes)"; $("[data-promo-value]", prow).textContent = "-" + money(disc); }
+      prow.hidden = !(disc && promoValid() && quote.promo.percent);
+      if (!prow.hidden) { $("[data-promo-label]", prow).textContent = promoCode + " (" + quote.promo.percent + "% off dishes)"; setLine($("[data-promo-value]", prow), "-" + usd(disc)); }
     }
-    if (pickup) { label.textContent = "Pickup"; value.textContent = "Free"; total.textContent = money(lastSubtotal); return; }
-    if (quote.state === "ok" && disc) {
-      label.textContent = "Delivery (" + quote.miles + " mi)"; value.textContent = money(quote.fee);
-      total.innerHTML = "<s>" + money(lastSubtotal + quote.fee) + "</s> " + money(lastSubtotal - disc + quote.fee);
-    } else if (quote.state === "ok" && freePromo()) {
-      label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
-      total.innerHTML = "<s>" + money(lastSubtotal) + "</s> $0";
-    } else if (quote.state === "ok" && flatPromo()) {
+    /* delivery line */
+    if (pickup) { label.textContent = "Pickup"; setLine(value, "Free"); }
+    else if (quote.state === "ok") {
       label.textContent = "Delivery (" + quote.miles + " mi)";
-      value.innerHTML = flatFee() < quote.fee ? '<s>' + money(quote.fee) + '</s> ' + money(flatFee()) : money(quote.fee);
-      total.textContent = money(lastSubtotal + flatFee());
-    } else if (quote.state === "ok" && promoValid()) {
-      label.textContent = "Delivery (" + quote.miles + " mi)"; value.innerHTML = '<s>' + money(quote.fee) + '</s> Free';
-      total.textContent = money(lastSubtotal);
-    } else if (quote.state === "ok") {
-      label.textContent = "Delivery (" + quote.miles + " mi)"; value.textContent = money(quote.fee);
-      total.textContent = money(lastSubtotal + quote.fee);
+      var charged = p ? p.delivery_cents / 100 : (freePromo() || (promoValid() && !quote.promo.percent && !flatPromo()) ? 0 : flatFee());
+      setLine(value, charged < quote.fee ? "<s>" + usd(quote.fee) + "</s> " + (charged === 0 ? "Free" : usd(charged)) : usd(quote.fee));
     } else {
       label.textContent = "Delivery";
-      value.textContent = quote.state === "loading" ? "calculating…" : quote.state === "err" ? "check your address" : "enter your address";
-      total.textContent = lastSubtotal > 0 ? money(lastSubtotal) + " + delivery" : money(0);
+      setLine(value, loading ? "calculating…" : quote.state === "err" ? "check your address" : "enter your address");
     }
+    /* sales tax line: always shown, $0.00 when nothing is taxed */
+    var taxEl = $("[data-tax-value]");
+    if (taxEl) setLine(taxEl, p ? usd(p.tax_cents / 100) : lastSubtotal > 0 ? (pickup ? (loading ? "calculating…" : "calculating…") : "with your address") : usd(0));
+    /* driver tip line */
+    var trow = $("[data-tip-row]");
+    if (trow) {
+      var tc = p ? p.tip.cents : (tipActive() ? tipCents() : 0);
+      trow.hidden = !(tc > 0);
+      if (tc > 0) { $("[data-tip-label]", trow).textContent = p && p.tip.percent ? "Driver tip (" + p.tip.percent + "%)" : tipLabel(); setLine($("[data-tip-value]", trow), usd(tc / 100)); }
+    }
+    /* total */
+    if (p) {
+      var before = p.subtotal_cents + p.delivery_cents + p.tax_cents + p.tip.cents;
+      setLine(total, (p.discount_cents > 0 && freePromo()) ? "<s>" + usd(lastSubtotal) + "</s> $0" : p.discount_cents > 0 ? "<s>" + usd(before / 100) + "</s> " + usd(p.total_cents / 100) : usd(p.total_cents / 100));
+    } else if (lastSubtotal > 0) {
+      setLine(total, loading ? "calculating…" : usd(lastSubtotal + (tipActive() ? tipCents() / 100 : 0)) + (pickup ? " + tax" : " + delivery + tax"));
+    } else setLine(total, usd(0));
+    highlightZone();
   }
 
   function refreshQuote() {
     var form = $("[data-checkout-form]");
-    if (!form || getFulfillment() === "pickup" || !C.financeQuoteEndpoint) return;
+    if (!form || !C.financeQuoteEndpoint) return;
+    var pickup = getFulfillment() === "pickup";
     var cu = readCustomer();
-    var ok = ["street", "city", "state", "zip"].every(function (k) { return FIELD_RULES[k].ok(cu[k] || ""); });
-    if (!ok) { quote = { key: "", state: "idle", fee: 0, miles: 0 }; renderTotals(); return; }
     var quoteItems = Object.keys(basket).map(function (k) { return { slug: keyId(k), quantity: basket[k] }; });
-    var key = [cu.street, cu.city, cu.state, cu.zip, promoCode, promoCode ? cu.phone + "|" + cu.email + "|" + cu.apt + "|" + JSON.stringify(quoteItems) : ""].join("|").toLowerCase();
+    var tipReq = tipRequest();
+    var key, body;
+    if (pickup) {
+      /* no address needed: the server prices the dishes, the tax and (never) a tip */
+      if (!quoteItems.length) { quote = { key: "", state: "idle", fee: 0, miles: 0, zone: -1, promo: null, pricing: null }; renderTotals(); return; }
+      key = ["pickup", JSON.stringify(quoteItems)].join("|");
+      body = { fulfillment: "pickup", items: quoteItems };
+    } else {
+      var ok = ["street", "city", "state", "zip"].every(function (k) { return FIELD_RULES[k].ok(cu[k] || ""); });
+      if (!ok) { quote = { key: "", state: "idle", fee: 0, miles: 0, zone: -1, promo: null, pricing: null }; renderTotals(); return; }
+      key = [cu.street, cu.city, cu.state, cu.zip, promoCode, promoCode ? cu.phone + "|" + cu.email + "|" + cu.apt : "", JSON.stringify(quoteItems), JSON.stringify(tipReq)].join("|").toLowerCase();
+      body = { street: cu.street, city: cu.city, state: cu.state, zip: cu.zip, apt: cu.apt, promo: promoCode || undefined, phone: cu.phone, email: cu.email, items: quoteItems, tip: tipReq };
+    }
     if (key === quote.key && quote.state !== "err") return;
-    quote = { key: key, state: "loading", fee: 0, miles: 0, promo: null };
+    var keep = quote.key && quote.state === "ok" ? quote : null;   /* keep the old numbers on screen while the new ones load */
+    quote = { key: key, state: "loading", fee: keep ? keep.fee : 0, miles: keep ? keep.miles : 0, zone: keep ? keep.zone : -1, promo: keep ? keep.promo : null, pricing: keep ? keep.pricing : null };
     renderTotals();
     fetch(C.financeQuoteEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json", "apikey": C.financeAnonKey || "", "Authorization": "Bearer " + (C.financeAnonKey || "") },
-      body: JSON.stringify({ street: cu.street, city: cu.city, state: cu.state, zip: cu.zip, apt: cu.apt, promo: promoCode || undefined, phone: cu.phone, email: cu.email, items: promoCode ? quoteItems : undefined })
+      body: JSON.stringify(body)
     }).then(function (r) { return r.json().catch(function () { return {}; }); }).then(function (d) {
       if (quote.key !== key) return;                      /* address changed meanwhile */
-      if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles, promo: d.promo || null };
+      if (d && d.ok) quote = { key: key, state: "ok", fee: d.delivery_fee, miles: d.miles, zone: typeof d.zone === "number" ? d.zone : -1, promo: d.promo || null, pricing: d.pricing || null };
       else {
-        quote = { key: key, state: "err", fee: 0, miles: 0, promo: null };
-        Track.problem("address", (d && d.error) || "address could not be checked", { zip: cu.zip || "" });
+        quote = { key: key, state: "err", fee: 0, miles: 0, zone: -1, promo: null, pricing: null };
+        Track.problem(pickup ? "quote" : "address", (d && d.error) || "address could not be checked", { zip: cu.zip || "" });
       }
-      if (promoCode && quote.state === "ok") {
+      if (promoCode && quote.state === "ok" && !pickup) {
         if (quote.promo && quote.promo.valid) hidePromoBanner(false);   /* code applied: the banner has done its job */
         if (quote.promo && quote.promo.valid) renderPromo(quote.promo.message || (promoCode + " applied: free delivery 🎉"), false);
         else {
@@ -1348,8 +1536,9 @@
           Track.problem("promo", (quote.promo && quote.promo.message) || "promo code not valid", { code: promoCode });
         }
       }
+      renderTip();
       renderTotals();
-    }).catch(function () { if (quote.key === key) { quote = { key: key, state: "err", fee: 0, miles: 0 }; renderTotals(); } });
+    }).catch(function () { if (quote.key === key) { quote = { key: key, state: "err", fee: 0, miles: 0, zone: -1, promo: null, pricing: null }; renderTotals(); } });
   }
   /* Apply button: needs the address, phone and email so the server can check "once per customer". */
   function applyPromo() {
@@ -1474,7 +1663,8 @@
     btn.addEventListener("click", applyPromo);
     input.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } });
   }
-  function scheduleQuote() { clearTimeout(quoteTimer); quoteTimer = setTimeout(refreshQuote, 500); }
+  /* debounced so typing is never blocked; a tip tap re-prices faster than typing an address */
+  function scheduleQuote(ms) { clearTimeout(quoteTimer); quoteTimer = setTimeout(refreshQuote, ms || 500); }
 
   function applyFulfillment() {
     var fu = $("[data-fulfil]");
@@ -1489,10 +1679,13 @@
     if (pa) { pa.hidden = !pickup || !C.pickupAddress; pa.innerHTML = '<b>Pickup address</b>' + esc(C.pickupAddress || ""); }
     var il = $("[data-instr-label]"); if (il) il.textContent = pickup ? "Notes" : "Delivery instructions";
     var bn = $("[data-basket-notice]");
-    if (bn) bn.textContent = pickup ? "Pickup is free. Pick up at the address shown above. It is also in your receipt email." : "Delivery is $5 + $1.75 per mile from our kitchen. Enter your address to see your exact delivery fee before you pay.";
+    if (bn) bn.textContent = pickup ? "Pickup is free. Pick up at the address shown above. It is also in your receipt email. Texas sales tax is added where it applies." : "Delivery is priced by distance from our kitchen (zones below) and Texas sales tax is added where it applies. Enter your address to see your exact total before you pay.";
+    var zb = $("[data-zones]"); if (zb && quoteCfg) zb.hidden = pickup;
+    quote.key = "";   /* delivery and pickup are priced differently: ask again */
+    renderTip();
     renderTotals();
     if (rerenderSchedule) rerenderSchedule();
-    if (!pickup) refreshQuote();
+    refreshQuote();
     updateCheckoutState();
   }
 
@@ -1523,7 +1716,7 @@
       else if (!detailsFilled(customer)) note.textContent = "Almost there. " + firstProblem(customer).msg;
       else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
       else if (min > 0 && subtotal < min) note.textContent = "Heads up: our usual minimum is " + money(min) + ". Send it anyway and we will confirm.";
-      else note.textContent = C.financeCheckoutEndpoint ? "Next you pay securely by card. Your receipt is emailed after payment. The delivery fee ($5 + $1.75 per mile) is added to your total." : "We save your order right away and email your receipt. The delivery fee ($5 + $1.75 per mile) is added to your total.";
+      else note.textContent = C.financeCheckoutEndpoint ? "Next you pay securely by card. Your receipt is emailed after payment. Delivery (by distance) and Texas sales tax are in your total above." : "We save your order right away and email your receipt. Delivery (by distance) and Texas sales tax are in your total above.";
     }
   }
 
@@ -1715,6 +1908,8 @@
     initSchedule(form);
     initFieldValidation(form);
     initPromo();
+    initTip();
+    initQuoteConfig();
     applyFulfillment();
   }
 
@@ -1835,6 +2030,7 @@
       return rows.join(nl);
     });
 
+    var m = order.money || null;   /* the server's final numbers (tax, tip, total) once the order is saved */
     var totals = [
       waSection("💰", "ORDER SUMMARY  |  ملخص الطلب"), "",
       "🧺 Dishes: *" + order.items.length + "*   🔢 Total Qty: *" + count + "*",
@@ -1842,8 +2038,9 @@
       order.discount ? "🏷️ Promo: *-" + money(order.discount) + "* 💚" : null,
       "🗓️ Delivery: *" + formatDeliveryDate(c.requested_date) + " · " + (win ? win.label : "") + "*",
       (order.customer && order.customer.fulfillment === "pickup") ? "🛍️ Pickup: *free*" : (order.deliveryFee != null ? "🚗 Delivery Fee: *" + money(order.deliveryFee) + "* 💵" : "🚗 Delivery Fee: _To be determined_ ⏳"),
-      "🏛️ Tax: _To be confirmed_ ⏳",
-      order.deliveryFee != null ? "✅ *TOTAL (dishes + delivery):* *" + money(order.subtotal - (order.discount || 0) + order.deliveryFee) + "* 💰" : "✅ *FINAL TOTAL:* _To be confirmed_ 🔜"
+      m ? "🏛️ Sales tax" + (m.tax_rate > 0 ? " (" + pctLabel(m.tax_rate) + ")" : "") + ": *" + money(m.tax_cents / 100) + "*" : "🏛️ Sales tax: _To be confirmed_ ⏳",
+      m && m.tip && m.tip.cents > 0 ? "🛵 Driver tip" + (m.tip.percent ? " (" + m.tip.percent + "%)" : "") + ": *" + money(m.tip.cents / 100) + "* 💚" : null,
+      m ? "✅ *TOTAL:* *" + money(m.total_cents / 100) + "* 💰" : (order.deliveryFee != null ? "✅ *TOTAL (dishes + delivery):* *" + money(order.subtotal - (order.discount || 0) + order.deliveryFee) + "* 💰" : "✅ *FINAL TOTAL:* _To be confirmed_ 🔜")
     ].filter(function (x) { return x !== null; });
 
     return [
@@ -1870,8 +2067,10 @@
     if (validDeliveryDate(c.requested_date) && win) out.push("*Delivery:* " + formatDeliveryDate(c.requested_date, true) + ", " + win.label);
     out.push("", "*Items*");
     order.items.forEach(function (l) { out.push(l.qty + " x " + l.name + " - " + money(l.lineTotal)); });
-    out.push("", "*Subtotal:* " + money(order.subtotal), "Delivery fee, tax and final total: to be confirmed");
-    return out.join("\n");
+    out.push("", "*Subtotal:* " + money(order.subtotal));
+    if (order.money) out.push("*Sales tax:* " + money(order.money.tax_cents / 100), order.money.tip && order.money.tip.cents > 0 ? "*Driver tip:* " + money(order.money.tip.cents / 100) : "", "*Total:* " + money(order.money.total_cents / 100));
+    else out.push("Delivery fee, tax and final total: to be confirmed");
+    return out.filter(Boolean).join("\n");
   }
 
   function formatRequested(v) {
@@ -1907,6 +2106,7 @@
   }
 
   var lastDeliveryFee = null;
+  var lastPricing = null;   /* the server's final numbers for the order just saved (tax, tip, total) */
   function recordOrder(order, token) {
     var payload = {
       checkout_token: token,
@@ -1920,6 +2120,10 @@
         requested_at: order.customer.requested_at ? new Date(order.customer.requested_at).toISOString() : ""
       },
       promo: promoCode && promoValid() ? promoCode : undefined,
+      /* the tip choice (the server recomputes the amount) and the total shown on the page: a different
+         server total means something changed and the order is refused before it is saved */
+      tip: tipRequest(),
+      expected_total_cents: quote.state === "ok" && quote.pricing ? quote.pricing.total_cents : undefined,
       items: order.items.map(function (l) { return { slug: l.id, quantity: l.qty, options: l.options || "", choices: l.choices || undefined }; })
     };
     var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
@@ -1932,8 +2136,14 @@
     }).then(function (res) {
       if (timer) clearTimeout(timer);
       return res.json().catch(function () { return {}; }).then(function (data) {
+        if (res.status === 409 && data && data.pricing) {
+          /* the server's total moved (price, tax or fee changed): show the new numbers, let the customer look again */
+          quote.pricing = data.pricing; quote.key = ""; renderTotals(); scheduleQuote(50);
+          var e409 = new Error(data.error || "Your total was updated. Please check it and press the button again."); e409.totalChanged = true; throw e409;
+        }
         if (!res.ok || !data.ok) throw new Error(data.error || ("Server error " + res.status));
         lastDeliveryFee = typeof data.delivery_fee === "number" ? data.delivery_fee : null;
+        lastPricing = typeof data.total_cents === "number" ? data : null;
         return data.order_number;
       });
     }, function (err) {
@@ -2061,6 +2271,7 @@
     if (state.orderNumber) {
       order.orderNumber = state.orderNumber;
       order.deliveryFee = typeof state.deliveryFee === "number" ? state.deliveryFee : null;
+      if (state.money) order.money = state.money;
       if (payFirst) { startPayment(btn, order, state); return; }
       openWhatsApp(order, number);
       return;
@@ -2075,6 +2286,7 @@
       order.orderNumber = orderNumber;
       order.deliveryFee = lastDeliveryFee;
       state.deliveryFee = lastDeliveryFee;
+      if (lastPricing) { order.money = lastPricing; state.money = lastPricing; }
       Store.write("checkout", state);
       submitting = false;
       setCheckoutBusy(btn, false);
@@ -2085,6 +2297,7 @@
     }).catch(function (err) {
       submitting = false;
       setCheckoutBusy(btn, false);
+      if (err.totalChanged) { showCheckoutError(err.message); return; }
       showCheckoutError("We could not save your order (" + err.message + "). Nothing was lost — your basket and details are still here. Please try again, or message us on WhatsApp directly.");
     });
   }
