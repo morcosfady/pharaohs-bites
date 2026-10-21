@@ -465,3 +465,7 @@ Live after the push: the order page loads, `delivery-quote` config returns the z
 1. Confirm the product tax list in the dashboard handoff (section 18.4), especially feteer meshaltet / round cake / goulash with nuts as exempt, with the Texas Comptroller (800-252-5555).
 2. Place one real small order to see the Stripe page with its four lines (food, delivery, sales tax, driver tip), the Telegram alert and the receipt.
 3. Flyers, captions and `qr.html` that mention delivery pricing should say "from $5 by distance" (nothing on the site says $1.75 any more).
+
+### 20.4 Combos switched off (2026-10-21, owner request)
+- `data.js`: `COMBOS_ENABLED = false` removes the Combos tab and hides the six combos (Party Tray, Family Feast, Egyptian Breakfast, Meal for One, Sides Platter, Pick Any 3 Puddings) from the menu and the order page; individual dishes unchanged. `main.js` drops a saved basket line that holds a combo. Versions `data.js?v=118`, `main.js?v=143`.
+- Server: dashboard migration 0081 set the six combo products inactive, so `create-order` refuses them even from an old page. The combo picker code, `combo_slots` and the CSS are untouched. To bring combos back: flip `COMBOS_ENABLED` and set the products active on the dashboard Products page.
