@@ -2013,8 +2013,9 @@
     if (c.instructions) cust.push("4️⃣ 📝 *Instructions:* _" + c.instructions + "_");
     var win = windowById(c.requested_window);
     if (validDeliveryDate(c.requested_date) && win) {
-      cust.push("5️⃣ 🗓️ *Delivery Date:* " + formatDeliveryDate(c.requested_date, true));
-      cust.push("6️⃣ ⏰ *Delivery Window:* " + win.label);
+      var kind = c.fulfillment === "pickup" ? "Pickup" : "Delivery";
+      cust.push("5️⃣ 🗓️ *" + kind + " Date:* " + formatDeliveryDate(c.requested_date, true));
+      cust.push("6️⃣ ⏰ *" + kind + " Window:* " + win.label);
     }
 
     var items = order.items.map(function (l, i) {
@@ -2103,7 +2104,7 @@
      also written into the delivery instructions where the kitchen will see it. */
   function deliveryInstructions(c) {
     var win = windowById(c.requested_window);
-    var tag = win ? "Delivery window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
+    var tag = win ? (c.fulfillment === "pickup" ? "Pickup" : "Delivery") + " window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
     return [tag, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
   }
 
