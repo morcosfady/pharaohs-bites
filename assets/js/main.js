@@ -1717,7 +1717,7 @@
       if (!hasItems) note.textContent = "Add a dish and fill in your details to continue.";
       else if (!detailsFilled(customer)) note.textContent = "Almost there. " + firstProblem(customer).msg;
       else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
-      else if (min > 0 && subtotal < min) note.textContent = "Heads up: our usual minimum is " + money(min) + ". Send it anyway and we will confirm.";
+      else if (min > 0 && subtotal < min) note.textContent = "Minimum order is " + money(min) + ". Add " + money(min - subtotal) + " more to continue.";
       else note.textContent = C.financeCheckoutEndpoint ? "Next you pay securely by card. Your receipt is emailed after payment. Delivery (by distance) and Texas sales tax are in your total above." : "We save your order right away and email your receipt. Delivery (by distance) and Texas sales tax are in your total above.";
     }
   }
@@ -2013,8 +2013,9 @@
     if (c.instructions) cust.push("4️⃣ 📝 *Instructions:* _" + c.instructions + "_");
     var win = windowById(c.requested_window);
     if (validDeliveryDate(c.requested_date) && win) {
-      cust.push("5️⃣ 🗓️ *Delivery Date:* " + formatDeliveryDate(c.requested_date, true));
-      cust.push("6️⃣ ⏰ *Delivery Window:* " + win.label);
+      var kind = c.fulfillment === "pickup" ? "Pickup" : "Delivery";
+      cust.push("5️⃣ 🗓️ *" + kind + " Date:* " + formatDeliveryDate(c.requested_date, true));
+      cust.push("6️⃣ ⏰ *" + kind + " Window:* " + win.label);
     }
 
     var items = order.items.map(function (l, i) {
@@ -2103,7 +2104,7 @@
      also written into the delivery instructions where the kitchen will see it. */
   function deliveryInstructions(c) {
     var win = windowById(c.requested_window);
-    var tag = win ? "Delivery window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
+    var tag = win ? (c.fulfillment === "pickup" ? "Pickup" : "Delivery") + " window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
     return [tag, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
   }
 
@@ -2254,6 +2255,8 @@
     if (submitting) return;                    /* double-click guard */
     if (!Object.keys(basket).length) { toast("Add a dish to your order first."); return; }
     if (!customerComplete(readCustomer())) { reportMissing(); updateCheckoutState(); return; }
+    var minOrder = C.minimumOrder || 0;
+    if (minOrder > 0 && lastSubtotal < minOrder) { showCheckoutError("Minimum order is " + money(minOrder) + ". Please add " + money(minOrder - lastSubtotal) + " more to continue."); return; }
     var number = C.orderWhatsappNumber || C.whatsappNumber;
     if (!number) { toast("Ordering is not connected yet — please call us."); return; }
     showCheckoutError("");
