@@ -45,7 +45,7 @@
     currencySymbol: "$",
     // Percentages applied in the basket. Set to 0 to hide the line.
     servicePercent: 0,
-    minimumOrder: 20,
+    minimumOrder: 25,
     /* Delivery zones, the sales tax rate and the tip options are NOT kept here: the order page asks the
        server (delivery-quote, action "config") so the website can never drift from what is charged.
        There is no "free delivery over $X" rule and there never should be one. */
