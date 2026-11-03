@@ -1176,7 +1176,7 @@
     var form = $("[data-checkout-form]");
     if (!form) return null;
     var c = {};
-    ["first_name", "last_name", "phone", "email", "street", "apt", "city", "state", "zip", "instructions", "requested_date", "requested_window", "requested_at"].forEach(function (k) {
+    ["first_name", "last_name", "phone", "email", "street", "apt", "city", "state", "zip", "instructions", "heard_from", "requested_date", "requested_window", "requested_at"].forEach(function (k) {
       var el = form.elements[k];
       c[k] = el ? el.value.trim() : "";
     });
@@ -1245,7 +1245,8 @@
     street:     { ok: function (v) { return v.length > 0; }, msg: "Enter your street address." },
     city:       { ok: function (v) { return v.length > 0; }, msg: "Enter your city." },
     state:      { ok: function (v) { return /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX." },
-    zip:        { ok: function (v) { return /^\d{5}(-\d{4})?$/.test(v); }, msg: "Enter a 5-digit ZIP code." }
+    zip:        { ok: function (v) { return /^\d{5}(-\d{4})?$/.test(v); }, msg: "Enter a 5-digit ZIP code." },
+    heard_from: { ok: function (v) { return v.length > 0; }, msg: "Please tell us how you heard about us." }
   };
   function firstProblem(c) {
     if (!c) return null;
@@ -2017,6 +2018,7 @@
       cust.push("5️⃣ 🗓️ *" + kind + " Date:* " + formatDeliveryDate(c.requested_date, true));
       cust.push("6️⃣ ⏰ *" + kind + " Window:* " + win.label);
     }
+    if (c.heard_from) cust.push("7️⃣ 📣 *Heard about us:* " + c.heard_from);
 
     var items = order.items.map(function (l, i) {
       var dot = WA_DOTS[i % WA_DOTS.length];
@@ -2105,7 +2107,8 @@
   function deliveryInstructions(c) {
     var win = windowById(c.requested_window);
     var tag = win ? (c.fulfillment === "pickup" ? "Pickup" : "Delivery") + " window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
-    return [tag, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
+    var heard = c.heard_from ? "Heard about us: " + c.heard_from : "";
+    return [tag, heard, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
   }
 
   var lastDeliveryFee = null;
@@ -2198,7 +2201,7 @@
 
   /* Tapping the button while something is missing: say exactly what, and jump to it. */
   var missingShown = false;
-  var FIELD_LABELS = { first_name: "first name", last_name: "last name", phone: "phone number", email: "email", street: "street address", city: "city", state: "state", zip: "ZIP code" };
+  var FIELD_LABELS = { first_name: "first name", last_name: "last name", phone: "phone number", email: "email", street: "street address", city: "city", state: "state", zip: "ZIP code", heard_from: "how you heard about us" };
   function reportMissing() {
     var form = $("[data-checkout-form]");
     var cust = readCustomer() || {};
