@@ -1163,7 +1163,7 @@
   }
 
   /* --- Customer details ------------------------------------------------ */
-  var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "email", "street", "city", "state", "zip"];
+  var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "email", "street", "city", "zip"];
 
   function getFulfillment() {
     if (!C.enablePickup) return "delivery";
@@ -1182,6 +1182,8 @@
     });
     /* Everything downstream (WhatsApp message, finance system) takes one name. */
     c.name = [c.first_name, c.last_name].filter(Boolean).join(" ");
+    /* State is optional on the page; the server needs one, and we deliver in Texas, so a blank means TX. */
+    if (!c.state) c.state = "TX";
     c.fulfillment = getFulfillment();
     return c;
   }
@@ -1244,7 +1246,7 @@
     email:      { ok: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }, msg: "Enter your email, like name@example.com. We send your receipt there." },
     street:     { ok: function (v) { return v.length > 0; }, msg: "Enter your street address." },
     city:       { ok: function (v) { return v.length > 0; }, msg: "Enter your city." },
-    state:      { ok: function (v) { return /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX." },
+    state:      { ok: function (v) { return v === "" || /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX, or leave it empty." },
     zip:        { ok: function (v) { return /^\d{5}(-\d{4})?$/.test(v); }, msg: "Enter a 5-digit ZIP code." },
     heard_from: { ok: function (v) { return v.length > 0; }, msg: "Please tell us how you heard about us." }
   };
