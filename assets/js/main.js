@@ -1219,7 +1219,18 @@
     var d = new Date(+m[1], +m[2] - 1, +m[3]);
     return (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) ? d : null;
   }
-  function earliestDate() { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1); }
+  /* Ordering for tomorrow closes at 10 PM Dallas time (the kitchen's clock), so after 10 PM the earliest date is the day after.
+     The server checks the day again in Dallas time. */
+  var ORDER_CUTOFF_HOUR = 22;
+  function kitchenNow() {
+    try {
+      var p = {};
+      new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", hour12: false }).formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+      return { y: +p.year, m: +p.month, d: +p.day, h: (+p.hour) % 24 };
+    } catch (e) { var t = new Date(); return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate(), h: t.getHours() }; }
+  }
+  function kitchenToday() { var k = kitchenNow(); return new Date(k.y, k.m - 1, k.d); }
+  function earliestDate() { var k = kitchenNow(); return new Date(k.y, k.m - 1, k.d + (k.h >= ORDER_CUTOFF_HOUR ? 2 : 1)); }
   /* Days the owner switched off in the dashboard (Kitchen Calendar). Filled in by initSchedule; the server checks again. */
   var closedDays = {};
   function validDeliveryDate(v) { var d = parseYmd(v); return !!d && d.getTime() >= earliestDate().getTime() && !closedDays[v] && !(getFulfillment() === "pickup" && isWeekend(v)); }
@@ -1719,7 +1730,7 @@
       var min = C.minimumOrder || 0;
       if (!hasItems) note.textContent = "Add a dish and fill in your details to continue.";
       else if (!detailsFilled(customer)) note.textContent = "Almost there. " + firstProblem(customer).msg;
-      else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
+      else if (!scheduleOk) note.textContent = "Pick a delivery date and one time window to continue.";
       else if (min > 0 && subtotal < min) note.textContent = "Minimum order is " + money(min) + ". Add " + money(min - subtotal) + " more to continue.";
       else note.textContent = C.financeCheckoutEndpoint ? "Next you pay securely by card. Your receipt is emailed after payment. Delivery (by distance) and Texas sales tax are in your total above." : "We save your order right away and email your receipt. Delivery (by distance) and Texas sales tax are in your total above.";
     }
@@ -1787,11 +1798,11 @@
     function renderCalendar() {
       var min = earliestDate(), first = view, y = first.getFullYear(), m = first.getMonth();
       title.textContent = first.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-      var offset = first.getDay(), days = new Date(y, m + 1, 0).getDate(), html = "", todayKey = toYmd(new Date());
-      var today0 = new Date(min.getFullYear(), min.getMonth(), min.getDate() - 1);   /* today shows red "Fully booked": the earliest booking is tomorrow */
+      var offset = first.getDay(), days = new Date(y, m + 1, 0).getDate(), html = "", todayKey = toYmd(kitchenToday());
+      var today0 = kitchenToday();   /* days before today are greyed out; today (and tomorrow after the 10 PM cutoff) show red "Fully booked" */
       for (var i = 0; i < offset; i++) html += '<span class="cal-blank"></span>';
       for (var day = 1; day <= days; day++) {
-        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < today0.getTime(), shut = !off && (key === todayKey || !!closedDays[key]), sel = key === fDate.value;
+        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < today0.getTime(), shut = !off && (d.getTime() < min.getTime() || !!closedDays[key]), sel = key === fDate.value;
         if (!off && !shut && getFulfillment() === "pickup" && isWeekend(key)) { off = true; }
         html += '<button type="button" class="cal-day' + (off ? " is-off" : "") + (shut ? " is-closed" : "") + (sel ? " is-selected" : "") + (key === todayKey ? " is-today" : "") +
           '" data-date="' + key + '"' + (off ? " disabled" : "") + (shut ? ' aria-disabled="true" data-tip="Fully booked" title="Fully booked"' : "") + ' aria-label="' + formatDeliveryDate(key, true) + (off ? " (unavailable)" : shut ? " (fully booked)" : "") +
@@ -1829,8 +1840,8 @@
       trigger.classList.toggle("is-set", okDate);
       winBox.hidden = !okDate;
       var wkndNote = getFulfillment() === "pickup" ? " Pickup is available Monday to Friday; on Saturday and Sunday we deliver only." : " On Saturday and Sunday we deliver in four windows, from 8 AM to 8 PM.";
-      note.textContent = "Earliest " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + ": " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable." + wkndNote;
-      if (!okDate) hint.textContent = "Pick a " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " date, from tomorrow onward.";
+      note.textContent = "Earliest " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + ": " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable. Orders for tomorrow close at 10 PM." + wkndNote;
+      if (!okDate) hint.textContent = "Pick a " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " date, from " + formatDeliveryDate(toYmd(earliestDate()), true) + " onward.";
       else if (!win) hint.textContent = "Now choose one " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " window.";
       else hint.textContent = "";
       if (summary) {
