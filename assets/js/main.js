@@ -1163,7 +1163,7 @@
   }
 
   /* --- Customer details ------------------------------------------------ */
-  var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "email", "street", "city", "state", "zip"];
+  var REQUIRED_FIELDS = ["first_name", "last_name", "phone", "email", "street", "city", "zip"];
 
   function getFulfillment() {
     if (!C.enablePickup) return "delivery";
@@ -1176,12 +1176,14 @@
     var form = $("[data-checkout-form]");
     if (!form) return null;
     var c = {};
-    ["first_name", "last_name", "phone", "email", "street", "apt", "city", "state", "zip", "instructions", "requested_date", "requested_window", "requested_at"].forEach(function (k) {
+    ["first_name", "last_name", "phone", "email", "street", "apt", "city", "state", "zip", "instructions", "heard_from", "requested_date", "requested_window", "requested_at"].forEach(function (k) {
       var el = form.elements[k];
       c[k] = el ? el.value.trim() : "";
     });
     /* Everything downstream (WhatsApp message, finance system) takes one name. */
     c.name = [c.first_name, c.last_name].filter(Boolean).join(" ");
+    /* State is optional on the page; the server needs one, and we deliver in Texas, so a blank means TX. */
+    if (!c.state) c.state = "TX";
     c.fulfillment = getFulfillment();
     return c;
   }
@@ -1217,7 +1219,18 @@
     var d = new Date(+m[1], +m[2] - 1, +m[3]);
     return (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) ? d : null;
   }
-  function earliestDate() { var t = new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate() + 1); }
+  /* Ordering for tomorrow closes at 10 PM Dallas time (the kitchen's clock), so after 10 PM the earliest date is the day after.
+     The server checks the day again in Dallas time. */
+  var ORDER_CUTOFF_HOUR = 22;
+  function kitchenNow() {
+    try {
+      var p = {};
+      new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", year: "numeric", month: "numeric", day: "numeric", hour: "numeric", hour12: false }).formatToParts(new Date()).forEach(function (x) { p[x.type] = x.value; });
+      return { y: +p.year, m: +p.month, d: +p.day, h: (+p.hour) % 24 };
+    } catch (e) { var t = new Date(); return { y: t.getFullYear(), m: t.getMonth() + 1, d: t.getDate(), h: t.getHours() }; }
+  }
+  function kitchenToday() { var k = kitchenNow(); return new Date(k.y, k.m - 1, k.d); }
+  function earliestDate() { var k = kitchenNow(); return new Date(k.y, k.m - 1, k.d + (k.h >= ORDER_CUTOFF_HOUR ? 2 : 1)); }
   /* Days the owner switched off in the dashboard (Kitchen Calendar). Filled in by initSchedule; the server checks again. */
   var closedDays = {};
   function validDeliveryDate(v) { var d = parseYmd(v); return !!d && d.getTime() >= earliestDate().getTime() && !closedDays[v] && !(getFulfillment() === "pickup" && isWeekend(v)); }
@@ -1244,8 +1257,9 @@
     email:      { ok: function (v) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v); }, msg: "Enter your email, like name@example.com. We send your receipt there." },
     street:     { ok: function (v) { return v.length > 0; }, msg: "Enter your street address." },
     city:       { ok: function (v) { return v.length > 0; }, msg: "Enter your city." },
-    state:      { ok: function (v) { return /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX." },
-    zip:        { ok: function (v) { return /^\d{5}(-\d{4})?$/.test(v); }, msg: "Enter a 5-digit ZIP code." }
+    state:      { ok: function (v) { return v === "" || /^[A-Za-z]{2}$/.test(v); }, msg: "Use the 2-letter state, like TX, or leave it empty." },
+    zip:        { ok: function (v) { return /^\d{5}(-\d{4})?$/.test(v); }, msg: "Enter a 5-digit ZIP code." },
+    heard_from: { ok: function (v) { return v.length > 0; }, msg: "Please tell us how you heard about us." }
   };
   function firstProblem(c) {
     if (!c) return null;
@@ -1716,8 +1730,8 @@
       var min = C.minimumOrder || 0;
       if (!hasItems) note.textContent = "Add a dish and fill in your details to continue.";
       else if (!detailsFilled(customer)) note.textContent = "Almost there. " + firstProblem(customer).msg;
-      else if (!scheduleOk) note.textContent = "Pick a delivery date (from tomorrow) and one time window to continue.";
-      else if (min > 0 && subtotal < min) note.textContent = "Heads up: our usual minimum is " + money(min) + ". Send it anyway and we will confirm.";
+      else if (!scheduleOk) note.textContent = "Pick a delivery date and one time window to continue.";
+      else if (min > 0 && subtotal < min) note.textContent = "Minimum order is " + money(min) + ". Add " + money(min - subtotal) + " more to continue.";
       else note.textContent = C.financeCheckoutEndpoint ? "Next you pay securely by card. Your receipt is emailed after payment. Delivery (by distance) and Texas sales tax are in your total above." : "We save your order right away and email your receipt. Delivery (by distance) and Texas sales tax are in your total above.";
     }
   }
@@ -1784,11 +1798,11 @@
     function renderCalendar() {
       var min = earliestDate(), first = view, y = first.getFullYear(), m = first.getMonth();
       title.textContent = first.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-      var offset = first.getDay(), days = new Date(y, m + 1, 0).getDate(), html = "", todayKey = toYmd(new Date());
-      var today0 = new Date(min.getFullYear(), min.getMonth(), min.getDate() - 1);   /* today shows red "Fully booked": the earliest booking is tomorrow */
+      var offset = first.getDay(), days = new Date(y, m + 1, 0).getDate(), html = "", todayKey = toYmd(kitchenToday());
+      var today0 = kitchenToday();   /* days before today are greyed out; today (and tomorrow after the 10 PM cutoff) show red "Fully booked" */
       for (var i = 0; i < offset; i++) html += '<span class="cal-blank"></span>';
       for (var day = 1; day <= days; day++) {
-        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < today0.getTime(), shut = !off && (key === todayKey || !!closedDays[key]), sel = key === fDate.value;
+        var d = new Date(y, m, day), key = toYmd(d), off = d.getTime() < today0.getTime(), shut = !off && (d.getTime() < min.getTime() || !!closedDays[key]), sel = key === fDate.value;
         if (!off && !shut && getFulfillment() === "pickup" && isWeekend(key)) { off = true; }
         html += '<button type="button" class="cal-day' + (off ? " is-off" : "") + (shut ? " is-closed" : "") + (sel ? " is-selected" : "") + (key === todayKey ? " is-today" : "") +
           '" data-date="' + key + '"' + (off ? " disabled" : "") + (shut ? ' aria-disabled="true" data-tip="Fully booked" title="Fully booked"' : "") + ' aria-label="' + formatDeliveryDate(key, true) + (off ? " (unavailable)" : shut ? " (fully booked)" : "") +
@@ -1826,8 +1840,8 @@
       trigger.classList.toggle("is-set", okDate);
       winBox.hidden = !okDate;
       var wkndNote = getFulfillment() === "pickup" ? " Pickup is available Monday to Friday; on Saturday and Sunday we deliver only." : " On Saturday and Sunday we deliver in four windows, from 8 AM to 8 PM.";
-      note.textContent = "Earliest " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + ": " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable." + wkndNote;
-      if (!okDate) hint.textContent = "Pick a " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " date, from tomorrow onward.";
+      note.textContent = "Earliest " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + ": " + formatDeliveryDate(toYmd(earliestDate()), true) + ". Today and past dates are unavailable. Orders for tomorrow close at 10 PM." + wkndNote;
+      if (!okDate) hint.textContent = "Pick a " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " date, from " + formatDeliveryDate(toYmd(earliestDate()), true) + " onward.";
       else if (!win) hint.textContent = "Now choose one " + (getFulfillment() === "pickup" ? "pickup" : "delivery") + " window.";
       else hint.textContent = "";
       if (summary) {
@@ -2013,9 +2027,11 @@
     if (c.instructions) cust.push("4️⃣ 📝 *Instructions:* _" + c.instructions + "_");
     var win = windowById(c.requested_window);
     if (validDeliveryDate(c.requested_date) && win) {
-      cust.push("5️⃣ 🗓️ *Delivery Date:* " + formatDeliveryDate(c.requested_date, true));
-      cust.push("6️⃣ ⏰ *Delivery Window:* " + win.label);
+      var kind = c.fulfillment === "pickup" ? "Pickup" : "Delivery";
+      cust.push("5️⃣ 🗓️ *" + kind + " Date:* " + formatDeliveryDate(c.requested_date, true));
+      cust.push("6️⃣ ⏰ *" + kind + " Window:* " + win.label);
     }
+    if (c.heard_from) cust.push("7️⃣ 📣 *Heard about us:* " + c.heard_from);
 
     var items = order.items.map(function (l, i) {
       var dot = WA_DOTS[i % WA_DOTS.length];
@@ -2103,8 +2119,9 @@
      also written into the delivery instructions where the kitchen will see it. */
   function deliveryInstructions(c) {
     var win = windowById(c.requested_window);
-    var tag = win ? "Delivery window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
-    return [tag, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
+    var tag = win ? (c.fulfillment === "pickup" ? "Pickup" : "Delivery") + " window: " + win.label + " on " + formatDeliveryDate(c.requested_date) : "";
+    var heard = c.heard_from ? "Heard about us: " + c.heard_from : "";
+    return [tag, heard, c.instructions].filter(Boolean).join(" | ").slice(0, 500);
   }
 
   var lastDeliveryFee = null;
@@ -2197,7 +2214,7 @@
 
   /* Tapping the button while something is missing: say exactly what, and jump to it. */
   var missingShown = false;
-  var FIELD_LABELS = { first_name: "first name", last_name: "last name", phone: "phone number", email: "email", street: "street address", city: "city", state: "state", zip: "ZIP code" };
+  var FIELD_LABELS = { first_name: "first name", last_name: "last name", phone: "phone number", email: "email", street: "street address", city: "city", state: "state", zip: "ZIP code", heard_from: "how you heard about us" };
   function reportMissing() {
     var form = $("[data-checkout-form]");
     var cust = readCustomer() || {};
@@ -2254,6 +2271,8 @@
     if (submitting) return;                    /* double-click guard */
     if (!Object.keys(basket).length) { toast("Add a dish to your order first."); return; }
     if (!customerComplete(readCustomer())) { reportMissing(); updateCheckoutState(); return; }
+    var minOrder = C.minimumOrder || 0;
+    if (minOrder > 0 && lastSubtotal < minOrder) { showCheckoutError("Minimum order is " + money(minOrder) + ". Please add " + money(minOrder - lastSubtotal) + " more to continue."); return; }
     var number = C.orderWhatsappNumber || C.whatsappNumber;
     if (!number) { toast("Ordering is not connected yet — please call us."); return; }
     showCheckoutError("");

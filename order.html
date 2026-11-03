@@ -152,8 +152,8 @@
                 <input id="co-city" name="city" type="text" autocomplete="address-level2" required>
               </div>
               <div class="field field--sm">
-                <label for="co-state">State <span aria-hidden="true">*</span></label>
-                <input id="co-state" name="state" type="text" autocomplete="address-level1" maxlength="2" placeholder="TX" required>
+                <label for="co-state">State</label>
+                <input id="co-state" name="state" type="text" autocomplete="address-level1" maxlength="2" placeholder="TX" value="TX">
               </div>
               <div class="field field--zip">
                 <label for="co-zip">ZIP code <span aria-hidden="true">*</span></label>
@@ -199,6 +199,21 @@
               </div>
               <p class="schedule__hint" data-schedule-hint role="status"></p>
             </fieldset>
+            <div class="field">
+              <label for="co-heard">How did you hear about us? <span aria-hidden="true">*</span></label>
+              <select id="co-heard" name="heard_from" required>
+                <option value="">Choose one…</option>
+                <option>Instagram</option>
+                <option>Facebook</option>
+                <option>TikTok</option>
+                <option>Svati</option>
+                <option>Hamdya</option>
+                <option>Friend or family</option>
+                <option>Flyer or QR code</option>
+                <option>Google search</option>
+                <option>Other</option>
+              </select>
+            </div>
           </form>
           </div>
 
@@ -290,7 +305,7 @@
       <div class="stats mt-5" data-stagger="90">
         <div class="stat" data-reveal><span class="stat__num">Fresh</span><span class="stat__label">Cooked to order</span></div>
         <div class="stat" data-reveal><span class="stat__num">Zelle</span><span class="stat__label">or Venmo, once confirmed</span></div>
-        <div class="stat" data-reveal><span class="stat__num" data-count="20" data-prefix="$">0</span><span class="stat__label">Minimum order</span></div>
+        <div class="stat" data-reveal><span class="stat__num" data-count="25" data-prefix="$">0</span><span class="stat__label">Minimum order</span></div>
         <div class="stat" data-reveal><span class="stat__num">All DFW</span><span class="stat__label">Delivery area</span></div>
       </div>
     </div>
@@ -380,9 +395,9 @@
   </div>
 </footer>
 
-<script src="assets/js/config.js?v=115"></script>
+<script src="assets/js/config.js?v=116"></script>
 <script src="assets/js/data.js?v=118"></script>
-<script src="assets/js/main.js?v=143" defer></script>
+<script src="assets/js/main.js?v=148" defer></script>
 <script src="assets/js/motion.js?v=12" defer></script>
 </body>
 </html>
