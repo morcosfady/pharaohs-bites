@@ -1682,6 +1682,25 @@
   /* debounced so typing is never blocked; a tip tap re-prices faster than typing an address */
   function scheduleQuote(ms) { clearTimeout(quoteTimer); quoteTimer = setTimeout(refreshQuote, ms || 500); }
 
+  /* "How did you hear about us?": tap-to-choose chips. The hidden field heard_from carries the answer, and stays
+     empty (so checkout stays blocked) until a choice is made, and for "Friend or family" until a name is typed. */
+  function initHeard(form) {
+    var box = $("[data-heard]", form), hidden = form.elements.heard_from, who = $("[data-heard-who]", form), nameIn = $("[data-heard-name]", form);
+    if (!box || !hidden) return;
+    function sync() {
+      var r = box.querySelector('input[name="heard_choice"]:checked'), choice = r ? r.value : "", friend = choice === "Friend or family";
+      who.hidden = !friend;
+      var name = nameIn.value.trim().replace(/\s+/g, " ");
+      hidden.value = !choice ? "" : friend ? (name ? "Friend or family: " + name : "") : choice;
+      hidden.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+    box.addEventListener("change", function (e) {
+      sync();
+      if (e.target && e.target.value === "Friend or family") { try { nameIn.focus({ preventScroll: false }); } catch (x) {} }
+    });
+    nameIn.addEventListener("input", function (e) { e.stopPropagation(); sync(); });
+  }
+
   function applyFulfillment() {
     var fu = $("[data-fulfil]");
     if (fu) fu.hidden = !C.enablePickup;
@@ -1924,6 +1943,7 @@
     initSchedule(form);
     initFieldValidation(form);
     initPromo();
+    initHeard(form);
     initTip();
     initQuoteConfig();
     applyFulfillment();
@@ -2223,7 +2243,7 @@
       if (cust.fulfillment === "pickup" && ADDRESS_KEYS[k]) return;
       if (!FIELD_RULES[k].ok(cust[k] || "")) {
         missing.push(FIELD_LABELS[k] || k);
-        var el = form && form.elements[k];
+        var el = form && (k === "heard_from" ? $("[data-heard]", form) : form.elements[k]);
         if (el) { if (!first) first = el; el.dispatchEvent(new Event("focusout", { bubbles: true })); }
       }
     });
