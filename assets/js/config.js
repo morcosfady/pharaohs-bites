@@ -89,7 +89,7 @@
     /* --- Promo banner (top of every page). enabled: false hides it everywhere, no HTML edits needed.
        {code} in the text becomes the gold tap-to-copy pill. hideDays = how long a visitor's close button keeps it hidden. --- */
     promoBanner: {
-      enabled: true,
+      enabled: false,   /* hidden on purpose: the FIRSTBITE code still works at checkout, it is just not advertised */
       code: "FIRSTBITE",
       text: "🎁 First order? Use code {code} for FREE delivery",
       shortText: "🎁 Code {code} = FREE delivery on your 1st order",
