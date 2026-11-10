@@ -1051,8 +1051,8 @@
           "</article>";
       }
       return '' +
-        '<article class="order-item' + (item.signature ? " order-item--sig" : "") + (item.includes ? " menu-item--combo" : "") + '" data-cat="' + esc(item.cat) + '"' + (isVegan(item) || item.veganOption ? " data-vegan" : "") + ' data-reveal>' +
-          '<div class="media media--1x1"><img ' + imgAttrs(item.img, "100px", 240) + ' alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
+        '<article class="order-item' + (item.signature ? " order-item--sig" : "") + (item.bigPhoto ? " order-item--bigphoto" : "") + (item.includes ? " menu-item--combo" : "") + '" data-cat="' + esc(item.cat) + '"' + (isVegan(item) || item.veganOption ? " data-vegan" : "") + ' data-reveal>' +
+          '<div class="media media--1x1"><img ' + imgAttrs(item.img, item.bigPhoto ? "172px" : "100px", 240) + ' alt="' + esc(item.name) + '" loading="lazy" decoding="async" width="200" height="200"></div>' +
           "<div>" +
             (item.signature ? '<span class="sig-badge">' + ankh("ankh-icon") + 'The House Signature</span>' : "") +
             "<h3>" + (item.special ? pharaoh(true) : "") + esc(item.name) + (isVegan(item) ? " " + veganBadge() : "") +

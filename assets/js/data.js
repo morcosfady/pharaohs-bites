@@ -52,9 +52,9 @@
       tags: ["House Special", "Plant-Based"], img: "assets/img/menu-real/feteer-beef-mozzarella.webp" },
 
     { id: "pharaohs-rolls", cat: "mains", allergens: ["Milk", "Eggs", "Wheat", "Soy"], tcs: true, name: "Pharaoh's Rolls (2 for $30)", ar: "رول الفراعنة",
-      price: 30, featured: true,
+      price: 30, featured: true, bigPhoto: true,
       desc: "Two golden, flaky feteer rolls stuffed with seasoned plant-based ground beef, mixed vegetables and melted mozzarella, baked until the top turns crisp and bubbly. 2 rolls for $30.",
-      tags: ["Plant-Based", "2 for $30"], img: "assets/img/menu-real/pharaohs-rolls.webp" },
+      tags: ["Plant-Based", "2 for $30"], img: "assets/img/menu-real/pharaohs-rolls-full.webp" },
 
     { id: "macarona-bechamel", cat: "mains", allergens: ["Milk", "Wheat", "Soy"], tcs: true, signature: true, name: "Macarona Béchamel Tray", ar: "صينية مكرونة بشاميل",
       price: 35, featured: true,
