@@ -2237,3 +2237,8 @@ html.has-promo .hero--food { min-height: calc(100svh - var(--promo-h, 0px)); }
 .heard__who[hidden] { display: none; }
 .heard__who label { display: block; margin-bottom: .4rem; font-size: var(--step--1); letter-spacing: .08em; color: var(--text-muted); }
 .heard__who input { width: 100%; }
+
+/* A dish whose photo gets a bigger thumbnail (data.js bigPhoto: true) */
+.order-item--bigphoto { grid-template-columns: 172px 1fr auto; }
+@media (max-width: 980px) { .order-item--bigphoto { grid-template-columns: 150px 1fr; } }
+@media (max-width: 480px) { .order-item--bigphoto { grid-template-columns: 126px 1fr; } }
