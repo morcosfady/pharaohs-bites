@@ -1195,7 +1195,7 @@
   /* Delivery and Pickup have their own time windows. */
   /* Weekdays: 2 delivery windows + 3 pickup windows. Saturday and Sunday: delivery only, 4 windows. */
   var WINDOWS = [
-    { id: "d1", mode: "delivery", days: "weekday", label: "8:00 AM–11:00 AM", sub: "Morning",   hour: 8 },
+    { id: "d1", mode: "delivery", days: "weekday", label: "10:00 AM–11:00 AM", sub: "Morning",  hour: 10 },
     { id: "d2", mode: "delivery", days: "weekday", label: "8:00 PM–11:00 PM", sub: "Night",     hour: 20 },
     { id: "p1", mode: "pickup",   days: "weekday", label: "2:00 PM–4:00 PM",  sub: "Afternoon", hour: 14 },
     { id: "p2", mode: "pickup",   days: "weekday", label: "4:00 PM–6:00 PM",  sub: "Late afternoon", hour: 16 },
